@@ -9,18 +9,20 @@ import type { ProviderId } from '@/lib/ai/providers';
 import type { ProvidersConfig } from '@/lib/types/settings';
 import { PROVIDERS } from '@/lib/ai/providers';
 import type { TTSProviderId, ASRProviderId } from '@/lib/audio/types';
-import { ASR_PROVIDERS, DEFAULT_TTS_VOICES } from '@/lib/audio/constants';
+import { ASR_PROVIDERS, DEFAULT_TTS_VOICES, TTS_PROVIDERS } from '@/lib/audio/constants';
+import { PDF_PROVIDERS } from '@/lib/pdf/constants';
 import type { PDFProviderId } from '@/lib/pdf/types';
 import type { ImageProviderId, VideoProviderId } from '@/lib/media/types';
 import { IMAGE_PROVIDERS } from '@/lib/media/image-providers';
 import { VIDEO_PROVIDERS } from '@/lib/media/video-providers';
+import { WEB_SEARCH_PROVIDERS } from '@/lib/web-search/constants';
 import type { WebSearchProviderId } from '@/lib/web-search/types';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('Settings');
 
-/** 可用的播放速度档位 */
-export const PLAYBACK_SPEEDS = [1, 1.5, 2] as const;
+/** Available playback speed tiers */
+export const PLAYBACK_SPEEDS = [1, 1.25, 1.5, 2] as const;
 export type PlaybackSpeed = (typeof PLAYBACK_SPEEDS)[number];
 
 export interface SettingsState {
@@ -264,6 +266,7 @@ const getDefaultAudioConfig = () => ({
     'azure-tts': { apiKey: '', baseUrl: '', enabled: false },
     'glm-tts': { apiKey: '', baseUrl: '', enabled: false },
     'qwen-tts': { apiKey: '', baseUrl: '', enabled: false },
+    'elevenlabs-tts': { apiKey: '', baseUrl: '', enabled: false },
     'browser-native-tts': { apiKey: '', baseUrl: '', enabled: true },
   } as Record<TTSProviderId, { apiKey: string; baseUrl: string; enabled: boolean }>,
   asrProvidersConfig: {
@@ -290,6 +293,7 @@ const getDefaultImageConfig = () => ({
     seedream: { apiKey: '', baseUrl: '', enabled: false },
     'qwen-image': { apiKey: '', baseUrl: '', enabled: false },
     'nano-banana': { apiKey: '', baseUrl: '', enabled: false },
+    'grok-image': { apiKey: '', baseUrl: '', enabled: false },
   } as Record<ImageProviderId, { apiKey: string; baseUrl: string; enabled: boolean }>,
 });
 
@@ -302,6 +306,7 @@ const getDefaultVideoConfig = () => ({
     kling: { apiKey: '', baseUrl: '', enabled: false },
     veo: { apiKey: '', baseUrl: '', enabled: false },
     sora: { apiKey: '', baseUrl: '', enabled: false },
+    'grok-video': { apiKey: '', baseUrl: '', enabled: false },
   } as Record<VideoProviderId, { apiKey: string; baseUrl: string; enabled: boolean }>,
 });
 
@@ -314,9 +319,53 @@ const getDefaultWebSearchConfig = () => ({
 });
 
 /**
- * 确保 providersConfig 包含所有内置服务提供者及其最新模型。
- * 在每次 rehydrate 时调用（不仅仅是版本迁移），以便新添加的服务提供者
- * 总是被自动识别，无需清除缓存。
+ * Check whether a provider ID exists in the given provider registry.
+ */
+function hasProviderId(providerMap: Record<string, unknown>, providerId?: string): boolean {
+  return typeof providerId === 'string' && providerId in providerMap;
+}
+
+/**
+ * Validate all persisted provider IDs against their registries.
+ * Reset any stale / removed ID back to its default value.
+ * Called during both migrate and merge to cover all rehydration paths.
+ */
+function ensureValidProviderSelections(state: Partial<SettingsState>): void {
+  const defaultAudioConfig = getDefaultAudioConfig();
+  const defaultPdfConfig = getDefaultPDFConfig();
+  const defaultImageConfig = getDefaultImageConfig();
+  const defaultVideoConfig = getDefaultVideoConfig();
+  const defaultWebSearchConfig = getDefaultWebSearchConfig();
+
+  if (!hasProviderId(PDF_PROVIDERS, state.pdfProviderId)) {
+    state.pdfProviderId = defaultPdfConfig.pdfProviderId;
+  }
+
+  if (!hasProviderId(WEB_SEARCH_PROVIDERS, state.webSearchProviderId)) {
+    state.webSearchProviderId = defaultWebSearchConfig.webSearchProviderId;
+  }
+
+  if (!hasProviderId(IMAGE_PROVIDERS, state.imageProviderId)) {
+    state.imageProviderId = defaultImageConfig.imageProviderId;
+  }
+
+  if (!hasProviderId(VIDEO_PROVIDERS, state.videoProviderId)) {
+    state.videoProviderId = defaultVideoConfig.videoProviderId;
+  }
+
+  if (!hasProviderId(TTS_PROVIDERS, state.ttsProviderId)) {
+    state.ttsProviderId = defaultAudioConfig.ttsProviderId;
+  }
+
+  if (!hasProviderId(ASR_PROVIDERS, state.asrProviderId)) {
+    state.asrProviderId = defaultAudioConfig.asrProviderId;
+  }
+}
+
+/**
+ * Ensure providersConfig includes all built-in providers and their latest models.
+ * Called on every rehydrate (not just version migrations) so new providers
+ * added in code are always picked up without clearing cache.
  */
 function ensureBuiltInProviders(state: Partial<SettingsState>): void {
   if (!state.providersConfig) return;
@@ -350,7 +399,37 @@ function ensureBuiltInProviders(state: Partial<SettingsState>): void {
   });
 }
 
-// 从旧的 localStorage 格式迁移
+/**
+ * Ensure imageProvidersConfig includes all built-in image providers.
+ * Called on every rehydrate so newly added image providers appear automatically.
+ */
+function ensureBuiltInImageProviders(state: Partial<SettingsState>): void {
+  if (!state.imageProvidersConfig) return;
+  const defaultConfig = getDefaultImageConfig().imageProvidersConfig;
+  Object.keys(IMAGE_PROVIDERS).forEach((pid) => {
+    const providerId = pid as ImageProviderId;
+    if (!state.imageProvidersConfig![providerId]) {
+      state.imageProvidersConfig![providerId] = defaultConfig[providerId];
+    }
+  });
+}
+
+/**
+ * Ensure videoProvidersConfig includes all built-in video providers.
+ * Called on every rehydrate so newly added video providers appear automatically.
+ */
+function ensureBuiltInVideoProviders(state: Partial<SettingsState>): void {
+  if (!state.videoProvidersConfig) return;
+  const defaultConfig = getDefaultVideoConfig().videoProvidersConfig;
+  Object.keys(VIDEO_PROVIDERS).forEach((pid) => {
+    const providerId = pid as VideoProviderId;
+    if (!state.videoProvidersConfig![providerId]) {
+      state.videoProvidersConfig![providerId] = defaultConfig[providerId];
+    }
+  });
+}
+
+// Migrate from old localStorage format
 const migrateFromOldStorage = () => {
   if (typeof window === 'undefined') return null;
 
@@ -958,7 +1037,11 @@ export const useSettingsStore = create<SettingsState>()(
         // 确保 providersConfig 包含所有内置服务提供者（在下面的 merge 中也会执行）
         ensureBuiltInProviders(state);
 
-        // 从旧的 ttsModel 迁移到新的 ttsProviderId
+        // Ensure image/video configs have all built-in providers
+        ensureBuiltInImageProviders(state);
+        ensureBuiltInVideoProviders(state);
+
+        // Migrate from old ttsModel to new ttsProviderId
         if (state.ttsModel && !state.ttsProviderId) {
           // 将旧的 ttsModel 值映射到新的 ttsProviderId
           if (state.ttsModel === 'openai-tts') {
@@ -1048,6 +1131,8 @@ export const useSettingsStore = create<SettingsState>()(
           delete stateRecord.webSearchIsServerConfigured;
         }
 
+        ensureValidProviderSelections(state);
+
         return state;
       },
       // 自定义合并：每次 rehydrate 时始终同步内置服务提供者，
@@ -1055,6 +1140,9 @@ export const useSettingsStore = create<SettingsState>()(
       merge: (persistedState, currentState) => {
         const merged = { ...currentState, ...(persistedState as object) };
         ensureBuiltInProviders(merged as Partial<SettingsState>);
+        ensureBuiltInImageProviders(merged as Partial<SettingsState>);
+        ensureBuiltInVideoProviders(merged as Partial<SettingsState>);
+        ensureValidProviderSelections(merged as Partial<SettingsState>);
         return merged as SettingsState;
       },
     },

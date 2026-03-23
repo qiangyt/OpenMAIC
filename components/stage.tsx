@@ -136,6 +136,8 @@ export function Stage({
   const sceneEpochRef = useRef(0);
   // 当为 true 时，下次引擎初始化将自动开始播放（用于自动播放场景切换）
   const autoStartRef = useRef(false);
+  // Discussion buffer-level pause state (distinct from soft-pause which aborts SSE)
+  const [isDiscussionPaused, setIsDiscussionPaused] = useState(false);
 
   /**
    * 软暂停：中断当前智能体流但保持会话活跃。
@@ -155,9 +157,10 @@ export function Stage({
     setThinkingState(null);
     setChatIsStreaming(false);
     setIsTopicPending(true);
-    // 不清除 chatSessionType、speakingAgentId 或 liveSpeech
-    // 不显示结束闪烁
-    // 不调用 handleEndDiscussion — 引擎保持当前状态
+    setIsDiscussionPaused(false);
+    // Don't clear chatSessionType, speakingAgentId, or liveSpeech
+    // Don't show end flash
+    // Don't call handleEndDiscussion — engine stays in current state
   }, []);
 
   /**
@@ -185,6 +188,7 @@ export function Stage({
     setIsTopicPending(false);
     setChatIsStreaming(false);
     setChatSessionType(null);
+    setIsDiscussionPaused(false);
   }, []);
 
   /** 完整场景重置（场景切换）— resetLiveState + 讲课/视觉状态 */
@@ -807,9 +811,17 @@ export function Stage({
                 engineRef.current.pause();
               }
             }}
-            onSoftPause={doSoftPause}
             onResumeTopic={doResumeTopic}
             onPlayPause={handlePlayPause}
+            isDiscussionPaused={isDiscussionPaused}
+            onDiscussionPause={() => {
+              chatAreaRef.current?.pauseActiveLiveBuffer();
+              setIsDiscussionPaused(true);
+            }}
+            onDiscussionResume={() => {
+              chatAreaRef.current?.resumeActiveLiveBuffer();
+              setIsDiscussionPaused(false);
+            }}
             totalActions={totalActions}
             currentActionIndex={0}
             currentSceneIndex={currentSceneIndex}

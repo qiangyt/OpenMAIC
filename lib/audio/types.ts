@@ -82,9 +82,9 @@ export type TTSProviderId =
   | 'azure-tts'
   | 'glm-tts'
   | 'qwen-tts'
+  | 'elevenlabs-tts'
   | 'browser-native-tts';
-// 在下方添加新的 TTS 提供商（取消注释并修改）：
-// | 'elevenlabs-tts'
+// Add new TTS providers below (uncomment and modify):
 // | 'fish-audio-tts'
 // | 'cartesia-tts'
 // | 'playht-tts'

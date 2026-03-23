@@ -69,8 +69,8 @@
  * 在此处将新的图像提供商添加为联合成员。
  * 与 constants.ts 中的 IMAGE_PROVIDERS 注册表保持同步
  */
-export type ImageProviderId = 'seedream' | 'qwen-image' | 'nano-banana';
-// 在下方添加新的图像提供商（取消注释并修改）：
+export type ImageProviderId = 'seedream' | 'qwen-image' | 'nano-banana' | 'grok-image';
+// Add new image providers below (uncomment and modify):
 // | 'dall-e'
 // | 'midjourney'
 // | 'stable-diffusion'
@@ -178,8 +178,8 @@ export interface ImageGenerationResult {
  * 在此处将新的视频提供商添加为联合成员。
  * 与 constants.ts 中的 VIDEO_PROVIDERS 注册表保持同步
  */
-export type VideoProviderId = 'seedance' | 'kling' | 'veo' | 'sora';
-// 在下方添加新的视频提供商（取消注释并修改）：
+export type VideoProviderId = 'seedance' | 'kling' | 'veo' | 'sora' | 'grok-video';
+// Add new video providers below (uncomment and modify):
 // | 'runway'
 // | 'pika'
 

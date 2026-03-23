@@ -32,7 +32,7 @@ export function BaseVideoElement({ elementInfo }: BaseVideoElementProps) {
 
   // 仅在课堂内部订阅媒体 store（通过 context 提供 stageId）
   const stageId = useMediaStageId();
-  const isPlaceholder = !!stageId && isMediaPlaceholder(elementInfo.src);
+  const isPlaceholder = isMediaPlaceholder(elementInfo.src);
   const task = useMediaGenerationStore((s) => {
     if (!isPlaceholder) return undefined;
     const t = s.tasks[elementInfo.src];

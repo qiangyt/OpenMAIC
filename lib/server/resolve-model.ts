@@ -13,6 +13,8 @@ import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 export interface ResolvedModel extends ModelWithInfo {
   /** 原始模型字符串（例如 "openai/gpt-4o-mini"） */
   modelString: string;
+  /** Effective API key after server-side fallback resolution */
+  apiKey: string;
 }
 
 /**
@@ -53,7 +55,7 @@ export function resolveModel(params: {
     requiresApiKey: params.requiresApiKey,
   });
 
-  return { model, modelInfo, modelString };
+  return { model, modelInfo, modelString, apiKey };
 }
 
 /**

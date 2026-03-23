@@ -656,6 +656,9 @@ export class PlaybackEngine {
       // 对于 'canceled'：什么也不做 — 暂停处理器已保存状态
     };
 
+    // Chrome bug workaround: cancel() before speak() to clear stale synthesis
+    // state that can produce garbled/broken audio output.
+    window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
   }
 

@@ -14,13 +14,11 @@
 
 import { NextRequest } from 'next/server';
 import { statelessGenerate } from '@/lib/orchestration/stateless-generate';
-import { getModel, parseModelString } from '@/lib/ai/providers';
-import { resolveApiKey, resolveBaseUrl, resolveProxy } from '@/lib/server/provider-config';
 import type { StatelessChatRequest, StatelessEvent } from '@/lib/types/chat';
 import type { ThinkingConfig } from '@/lib/types/provider';
 import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
-import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import { resolveModel } from '@/lib/server/resolve-model';
 const log = createLogger('Chat API');
 
 // 允许流式响应最长 60 秒
@@ -61,27 +59,15 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: config.agentIds');
     }
 
-    // 解析 API key：客户端 > 服务器 > 空
-    const modelString = body.model || 'gpt-4o-mini';
-    const { providerId, modelId } = parseModelString(modelString);
+    const { model: languageModel, apiKey: resolvedApiKey } = resolveModel({
+      modelString: body.model,
+      apiKey: body.apiKey,
+      baseUrl: body.baseUrl,
+      providerType: body.providerType,
+      requiresApiKey: body.requiresApiKey,
+    });
 
-    const clientBaseUrl = body.baseUrl || undefined;
-    if (clientBaseUrl && process.env.NODE_ENV === 'production') {
-      const ssrfError = validateUrlForSSRF(clientBaseUrl);
-      if (ssrfError) {
-        return apiError('INVALID_URL', 403, ssrfError);
-      }
-    }
-
-    const effectiveApiKey = clientBaseUrl
-      ? body.apiKey || ''
-      : resolveApiKey(providerId, body.apiKey);
-    const effectiveBaseUrl = clientBaseUrl
-      ? clientBaseUrl
-      : resolveBaseUrl(providerId, body.baseUrl);
-    const proxy = resolveProxy(providerId);
-
-    if (!effectiveApiKey) {
+    if (!resolvedApiKey && body.requiresApiKey !== false) {
       return apiError('MISSING_API_KEY', 401, 'API Key is required');
     }
 
@@ -90,16 +76,7 @@ export async function POST(req: NextRequest) {
       `Agents: ${body.config.agentIds.join(', ')}, Messages: ${body.messages.length}, Turn: ${body.directorState?.turnCount ?? 0}`,
     );
 
-    // 通过统一提供商系统创建 LanguageModel
-    const { model: languageModel } = getModel({
-      providerId,
-      modelId,
-      apiKey: effectiveApiKey,
-      baseUrl: effectiveBaseUrl,
-      proxy,
-    });
-
-    // 使用原生请求信号进行中止传播
+    // Use the native request signal for abort propagation
     const signal = req.signal;
 
     // 创建 SSE 流
@@ -135,7 +112,7 @@ export async function POST(req: NextRequest) {
         const generator = statelessGenerate(
           {
             ...body,
-            apiKey: effectiveApiKey,
+            apiKey: resolvedApiKey,
           },
           signal,
           languageModel,
