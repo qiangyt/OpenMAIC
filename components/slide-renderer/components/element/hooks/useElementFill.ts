@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 import type { PPTShapeElement } from '@/lib/types/slides';
 
 /**
- * Calculate element fill style
- * Returns pattern/gradient URL or solid color fill
- * @param element Shape element
- * @param source Source identifier for pattern/gradient IDs
+ * 计算元素填充样式
+ * 返回图案/渐变 URL 或纯色填充
+ * @param element 形状元素
+ * @param source 图案/渐变 ID 的来源标识符
  */
 export function useElementFill(element: PPTShapeElement, source: string) {
   const fill = useMemo(() => {

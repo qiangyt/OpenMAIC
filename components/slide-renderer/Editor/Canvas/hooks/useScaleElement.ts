@@ -26,9 +26,9 @@ interface RotateElementData {
 }
 
 /**
- * Calculate the positions of the eight scale points of a rotated element
- * @param element Original position and size of the element
- * @param angle Rotation angle
+ * 计算旋转元素的八个缩放点位置
+ * @param element 元素的原始位置和尺寸
+ * @param angle 旋转角度
  */
 const getRotateElementPoints = (element: RotateElementData, angle: number) => {
   const { left, top, width, height } = element;
@@ -93,9 +93,9 @@ const getRotateElementPoints = (element: RotateElementData, angle: number) => {
 };
 
 /**
- * Get the opposite point of a given scale point, e.g. [top] corresponds to [bottom], [left-top] corresponds to [right-bottom]
- * @param direction The current scale point being operated
- * @param points Positions of the eight scale points of the rotated element
+ * 获取给定缩放点的对角点，例如 [top] 对应 [bottom]，[left-top] 对应 [right-bottom]
+ * @param direction 当前操作的缩放点
+ * @param points 旋转元素的八个缩放点位置
  */
 const getOppositePoint = (
   direction: OperateResizeHandlers,
@@ -115,11 +115,11 @@ const getOppositePoint = (
 };
 
 /**
- * Scale element Hook
+ * 缩放元素 Hook
  *
- * @param elementListRef - Element list ref (stores the latest value)
- * @param setElementList - Element list setter (used to trigger re-render)
- * @param setAlignmentLines - Alignment lines setter
+ * @param elementListRef - 元素列表 ref（存储最新值）
+ * @param setElementList - 元素列表 setter（用于触发重新渲染）
+ * @param setAlignmentLines - 对齐线 setter
  */
 export function useScaleElement(
   elementListRef: React.RefObject<PPTElement[]>,
@@ -140,7 +140,7 @@ export function useScaleElement(
 
   const { addHistorySnapshot } = useHistorySnapshot();
 
-  // Scale element
+  // 缩放元素
   const scaleElement = useCallback(
     (
       e: React.MouseEvent | React.TouchEvent,
@@ -170,7 +170,7 @@ export function useScaleElement(
       const startPageX = isTouchEvent ? native.changedTouches[0].pageX : native.pageX;
       const startPageY = isTouchEvent ? native.changedTouches[0].pageY : native.pageY;
 
-      // Minimum scale size limit for element
+      // 元素最小缩放尺寸限制
       const minSize = MIN_SIZE[element.type] || 20;
       const getSizeWithinRange = (size: number, type: 'width' | 'height') => {
         if (!fixedRatio) return size < minSize ? minSize : size;
@@ -191,8 +191,8 @@ export function useScaleElement(
       let horizontalLines: AlignLine[] = [];
       let verticalLines: AlignLine[] = [];
 
-      // When scaling a rotated element, introduce a base point concept: the point opposite to the current scale handle
-      // For example, when dragging the bottom-right corner, the top-left corner is the base point that stays fixed while other points move to achieve scaling
+      // 缩放旋转元素时，引入基点概念：当前缩放手柄的对角点
+      // 例如拖拽右下角时，左上角是基点，保持固定而其他点移动以实现缩放
       if ('rotate' in element && element.rotate) {
         const { left, top, width, height } = element;
         points = getRotateElementPoints({ left, top, width, height }, elRotate);
@@ -201,9 +201,9 @@ export function useScaleElement(
         baseLeft = oppositePoint.left;
         baseTop = oppositePoint.top;
       }
-      // Non-rotated elements support alignment snapping during scaling; collect alignment snap lines here
-      // Includes snappable alignment positions (top, bottom, left, right edges) of all elements on the canvas except the target element
-      // Line elements and rotated elements are excluded from alignment snapping
+      // 非旋转元素在缩放时支持对齐吸附；在此收集对齐吸附线
+      // 包括画布上除目标元素外所有元素的可吸附对齐位置（上、下、左、右边缘）
+      // 线条元素和旋转元素不参与对齐吸附
       else {
         const edgeWidth = viewportSize;
         const edgeHeight = viewportSize * viewportRatio;
@@ -231,7 +231,7 @@ export function useScaleElement(
           verticalLines.push(leftLine, rightLine);
         }
 
-        // Four edges of the visible canvas area, horizontal center, and vertical center
+        // 可视画布区域的四条边界、水平中心和垂直中心
         const edgeTopLine: AlignLine = { value: 0, range: [0, edgeWidth] };
         const edgeBottomLine: AlignLine = {
           value: edgeHeight,
@@ -258,9 +258,9 @@ export function useScaleElement(
         verticalLines = uniqAlignLines(verticalLines);
       }
 
-      // Alignment snapping method
-      // Compare collected alignment snap lines with the target element's current position/size data; auto-correct when the difference is within threshold
-      // Horizontal and vertical directions are calculated separately
+      // 对齐吸附方法
+      // 将收集的对齐吸附线与目标元素当前位置/尺寸数据进行比较；当差值在阈值内时自动校正
+      // 水平和垂直方向分别计算
       const alignedAdsorption = (currentX: number | null, currentY: number | null) => {
         const sorptionRange = 5;
 
@@ -321,13 +321,13 @@ export function useScaleElement(
         let left = elOriginLeft;
         let top = elOriginTop;
 
-        // For rotated elements, recalculate the scaling distance based on the rotation angle (distance moved after mouse down)
+        // 对于旋转元素，根据旋转角度重新计算缩放距离（鼠标按下后移动的距离）
         if (elRotate) {
           const revisedX = (Math.cos(rotateRadian) * x + Math.sin(rotateRadian) * y) / canvasScale;
           let revisedY = (Math.cos(rotateRadian) * y - Math.sin(rotateRadian) * x) / canvasScale;
 
-          // Lock aspect ratio (only triggered by four corners, not edges)
-          // Use horizontal scaling distance as the basis to calculate vertical scaling distance, maintaining the same ratio
+          // 锁定宽高比（仅由四个角触发，不包括边缘）
+          // 以水平缩放距离为基准计算垂直缩放距离，保持相同比例
           if (fixedRatio) {
             if (
               command === OperateResizeHandlers.RIGHT_BOTTOM ||
@@ -341,10 +341,10 @@ export function useScaleElement(
               revisedY = -revisedX / aspectRatio;
           }
 
-          // Calculate element size and position after scaling based on the operation point
-          // Note:
-          // The position calculated here needs correction later, because scaling a rotated element changes the base point position (visually the base point stays fixed, but that's the combined result of rotation + translation)
-          // However, the size does not need correction since the scaling distance was already recalculated above
+          // 根据操作点计算缩放后的元素尺寸和位置
+          // 注意：
+          // 这里计算的位置需要后续校正，因为缩放旋转元素会改变基点位置（视觉上基点保持固定，但那是旋转+平移的组合结果）
+          // 但尺寸不需要校正，因为缩放距离已在上面重新计算过
           if (command === OperateResizeHandlers.RIGHT_BOTTOM) {
             width = getSizeWithinRange(elOriginWidth + revisedX, 'width');
             height = getSizeWithinRange(elOriginHeight + revisedY, 'height');
@@ -373,7 +373,7 @@ export function useScaleElement(
             width = getSizeWithinRange(elOriginWidth + revisedX, 'width');
           }
 
-          // Get current base point coordinates, compare with initial base point, and correct element position by the difference
+          // 获取当前基点坐标，与初始基点比较，通过差值校正元素位置
           const currentPoints = getRotateElementPoints({ width, height, left, top }, elRotate);
           const currentOppositePoint = getOppositePoint(command, currentPoints);
           const currentBaseLeft = currentOppositePoint.left;
@@ -385,9 +385,9 @@ export function useScaleElement(
           left = left - offsetX;
           top = top - offsetY;
         }
-        // For non-rotated elements, simply calculate the new position and size without complex corrections
-        // Additionally handle alignment snapping operations
-        // Aspect ratio locking logic is the same as above
+        // 对于非旋转元素，简单计算新位置和尺寸，无需复杂校正
+        // 额外处理对齐吸附操作
+        // 宽高比锁定逻辑同上
         else {
           let moveX = x / canvasScale;
           let moveY = y / canvasScale;
@@ -482,7 +482,7 @@ export function useScaleElement(
           }
         }
 
-        // Update local element list during mousemove
+        // 在 mousemove 期间更新本地元素列表
         const newElements = elementListRef.current.map((el) => {
           if (element.id !== el.id) return el;
           if (el.type === 'shape' && 'pathFormula' in el && el.pathFormula) {
@@ -520,7 +520,7 @@ export function useScaleElement(
           return { ...el, left, top, width, height };
         });
 
-        // Update both ref and state
+        // 同时更新 ref 和 state
         elementListRef.current = newElements;
         setElementList(newElements);
       };
@@ -570,7 +570,7 @@ export function useScaleElement(
     ],
   );
 
-  // Scale multiple selected elements
+  // 缩放多个选中元素
   const scaleMultiElement = useCallback(
     (e: React.MouseEvent, range: MultiSelectRange, command: OperateResizeHandlers) => {
       let isMouseDown = true;
@@ -594,7 +594,7 @@ export function useScaleElement(
         const x = (currentPageX - startPageX) / canvasScale;
         let y = (currentPageY - startPageY) / canvasScale;
 
-        // Lock aspect ratio, same logic as above
+        // 锁定宽高比，逻辑同上
         if (ctrlOrShiftKeyActive) {
           if (
             command === OperateResizeHandlers.RIGHT_BOTTOM ||
@@ -608,7 +608,7 @@ export function useScaleElement(
             y = -x / aspectRatio;
         }
 
-        // Overall range of all selected elements
+        // 所有选中元素的整体范围
         let currentMinX = minX;
         let currentMaxX = maxX;
         let currentMinY = minY;
@@ -636,18 +636,18 @@ export function useScaleElement(
           currentMaxX = maxX + x;
         }
 
-        // Overall width and height of all selected elements
+        // 所有选中元素的整体宽度和高度
         const currentOppositeWidth = currentMaxX - currentMinX;
         const currentOppositeHeight = currentMaxY - currentMinY;
 
-        // Ratio of the currently operated element's width/height to the overall width/height of all selected elements
+        // 当前操作元素的宽度/高度与所有选中元素整体宽度/高度的比率
         let widthScale = currentOppositeWidth / operateWidth;
         let heightScale = currentOppositeHeight / operateHeight;
 
         if (widthScale <= 0) widthScale = 0;
         if (heightScale <= 0) heightScale = 0;
 
-        // Calculate and update the position and size of all selected elements based on the computed ratio
+        // 根据计算的比率更新所有选中元素的位置和尺寸
         const newElements = elementListRef.current.map((el) => {
           if ((el.type === 'image' || el.type === 'shape') && activeElementIdList.includes(el.id)) {
             const originElement = originElementList.find((originEl) => originEl.id === el.id) as

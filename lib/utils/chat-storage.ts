@@ -1,26 +1,26 @@
 /**
- * Chat Storage - Persist chat sessions to IndexedDB
+ * 聊天存储 - 将聊天会话持久化到 IndexedDB
  *
- * Independent from stage/scene storage cycle.
- * Handles serialization, truncation, and batch writes.
+ * 独立于课程/场景存储周期。
+ * 处理序列化、截断和批量写入。
  */
 
 import type { ChatSession, ChatMessageMetadata, SessionStatus } from '@/lib/types/chat';
 import type { UIMessage } from 'ai';
 import { db, type ChatSessionRecord } from './database';
 
-/** Maximum messages per session to avoid IndexedDB bloat */
+/** 每个会话的最大消息数，避免 IndexedDB 膨胀 */
 const MAX_MESSAGES_PER_SESSION = 200;
 
 /**
- * Save chat sessions for a stage to IndexedDB.
- * - Active sessions are saved as 'interrupted' (streaming context lost on refresh)
- * - pendingToolCalls are cleared (runtime-only state)
- * - Messages are truncated to MAX_MESSAGES_PER_SESSION
+ * 将课程的聊天会话保存到 IndexedDB。
+ * - 活动会话保存为 'interrupted' 状态（刷新后流式上下文丢失）
+ * - pendingToolCalls 被清除（仅运行时状态）
+ * - 消息截断到 MAX_MESSAGES_PER_SESSION
  */
 export async function saveChatSessions(stageId: string, sessions: ChatSession[]): Promise<void> {
   if (!sessions || sessions.length === 0) {
-    // Delete all sessions for this stage if empty
+    // 如果为空，删除此课程的所有会话
     await db.chatSessions.where('stageId').equals(stageId).delete();
     return;
   }
@@ -30,13 +30,13 @@ export async function saveChatSessions(stageId: string, sessions: ChatSession[])
     stageId,
     type: session.type,
     title: session.title,
-    // Mark active sessions as interrupted (streaming context lost on refresh)
+    // 将活动会话标记为 interrupted（刷新后流式上下文丢失）
     status: (session.status === 'active' ? 'interrupted' : session.status) as SessionStatus,
-    // Truncate messages and strip non-serializable data
+    // 截断消息并移除不可序列化的数据
     messages: session.messages.slice(-MAX_MESSAGES_PER_SESSION),
     config: session.config,
     toolCalls: session.toolCalls,
-    pendingToolCalls: [], // Clear runtime state
+    pendingToolCalls: [], // 清除运行时状态
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
     sceneId: session.sceneId,
@@ -44,15 +44,15 @@ export async function saveChatSessions(stageId: string, sessions: ChatSession[])
   }));
 
   await db.transaction('rw', db.chatSessions, async () => {
-    // Delete old sessions for this stage, then bulk insert new ones
+    // 删除此课程的旧会话，然后批量插入新会话
     await db.chatSessions.where('stageId').equals(stageId).delete();
     await db.chatSessions.bulkPut(records);
   });
 }
 
 /**
- * Load chat sessions for a stage from IndexedDB.
- * Returns sessions sorted by createdAt.
+ * 从 IndexedDB 加载课程的聊天会话。
+ * 返回按 createdAt 排序的会话。
  */
 export async function loadChatSessions(stageId: string): Promise<ChatSession[]> {
   const records = await db.chatSessions.where('stageId').equals(stageId).sortBy('createdAt');
@@ -74,7 +74,7 @@ export async function loadChatSessions(stageId: string): Promise<ChatSession[]> 
 }
 
 /**
- * Delete all chat sessions for a stage.
+ * 删除课程的所有聊天会话。
  */
 export async function deleteChatSessions(stageId: string): Promise<void> {
   await db.chatSessions.where('stageId').equals(stageId).delete();

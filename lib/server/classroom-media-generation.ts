@@ -1,8 +1,8 @@
 /**
- * Server-side media and TTS generation for classrooms.
+ * 课堂的服务端媒体和 TTS 生成。
  *
- * Generates image/video files and TTS audio for a classroom,
- * writes them to disk, and returns serving URL mappings.
+ * 为课堂生成图片/视频文件和 TTS 音频，
+ * 写入磁盘，并返回服务 URL 映射。
  */
 
 import { promises as fs } from 'fs';
@@ -38,14 +38,14 @@ import { splitLongSpeechActions } from '@/lib/audio/tts-utils';
 const log = createLogger('ClassroomMedia');
 
 // ---------------------------------------------------------------------------
-// Helpers
+// 辅助函数
 // ---------------------------------------------------------------------------
 
 async function ensureDir(dir: string) {
   await fs.mkdir(dir, { recursive: true });
 }
 
-const DOWNLOAD_TIMEOUT_MS = 120_000; // 2 minutes
+const DOWNLOAD_TIMEOUT_MS = 120_000; // 2 分钟
 const DOWNLOAD_MAX_SIZE = 100 * 1024 * 1024; // 100 MB
 
 async function downloadToBuffer(url: string): Promise<Buffer> {
@@ -63,7 +63,7 @@ function mediaServingUrl(baseUrl: string, classroomId: string, subPath: string):
 }
 
 // ---------------------------------------------------------------------------
-// Image / Video generation
+// 图片 / 视频生成
 // ---------------------------------------------------------------------------
 
 export async function generateMediaForClassroom(
@@ -74,18 +74,18 @@ export async function generateMediaForClassroom(
   const mediaDir = path.join(CLASSROOMS_DIR, classroomId, 'media');
   await ensureDir(mediaDir);
 
-  // Collect all media generation requests from outlines
+  // 从大纲中收集所有媒体生成请求
   const requests = outlines.flatMap((o) => o.mediaGenerations ?? []);
   if (requests.length === 0) return {};
 
-  // Resolve providers
+  // 解析提供商
   const imageProviderIds = Object.keys(getServerImageProviders());
   const videoProviderIds = Object.keys(getServerVideoProviders());
 
   const mediaMap: Record<string, string> = {};
 
-  // Separate image and video requests, generate each type sequentially
-  // but run the two types in parallel (providers often have limited concurrency).
+  // 分离图片和视频请求，每种类型顺序生成
+  // 但两种类型并行执行（提供商通常并发限制有限）。
   const imageRequests = requests.filter((r) => r.type === 'image' && imageProviderIds.length > 0);
   const videoRequests = requests.filter((r) => r.type === 'video' && videoProviderIds.length > 0);
 
@@ -169,7 +169,7 @@ export async function generateMediaForClassroom(
 }
 
 // ---------------------------------------------------------------------------
-// Placeholder replacement in scene content
+// 场景内容中的占位符替换
 // ---------------------------------------------------------------------------
 
 export function replaceMediaPlaceholders(scenes: Scene[], mediaMap: Record<string, string>): void {
@@ -198,7 +198,7 @@ export function replaceMediaPlaceholders(scenes: Scene[], mediaMap: Record<strin
 }
 
 // ---------------------------------------------------------------------------
-// TTS generation
+// TTS 生成
 // ---------------------------------------------------------------------------
 
 export async function generateTTSForClassroom(
@@ -209,7 +209,7 @@ export async function generateTTSForClassroom(
   const audioDir = path.join(CLASSROOMS_DIR, classroomId, 'audio');
   await ensureDir(audioDir);
 
-  // Resolve TTS provider (exclude browser-native-tts)
+  // 解析 TTS 提供商（排除 browser-native-tts）
   const ttsProviderIds = Object.keys(getServerTTSProviders()).filter(
     (id) => id !== 'browser-native-tts',
   );
@@ -231,8 +231,8 @@ export async function generateTTSForClassroom(
   for (const scene of scenes) {
     if (!scene.actions) continue;
 
-    // Split long speech actions into multiple shorter ones before TTS generation,
-    // mirroring the client-side approach. Each sub-action gets its own audio file.
+    // 在 TTS 生成前将长语音动作拆分为多个较短的，
+    // 与客户端方式保持一致。每个子动作获得自己的音频文件。
     scene.actions = splitLongSpeechActions(scene.actions, providerId);
 
     for (const action of scene.actions) {

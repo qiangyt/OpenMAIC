@@ -10,7 +10,7 @@ import { CircleStop } from 'lucide-react';
 import { InlineActionTag } from './inline-action-tag';
 import { useUserProfileStore } from '@/lib/store/user-profile';
 
-/** Extended message part type covering standard + custom action parts */
+/** 扩展的消息部分类型，包含标准类型和自定义动作类型 */
 interface MessagePart {
   type: string;
   text?: string;
@@ -32,7 +32,7 @@ const AVATARS = {
   user: '/avatars/user.png',
 };
 
-/** Render avatar as <img> for URLs or as emoji text span */
+/** 将头像渲染为 <img>（URL形式）或 emoji 文本 span */
 function AvatarDisplay({ src, alt, className }: { src: string; alt?: string; className?: string }) {
   const isUrl = src.startsWith('http') || src.startsWith('data:') || src.startsWith('/');
   if (isUrl) {
@@ -53,12 +53,11 @@ function AvatarDisplay({ src, alt, className }: { src: string; alt?: string; cla
 }
 
 /**
- * MessageBubble — renders one message as a single chat bubble.
+ * MessageBubble — 将单条消息渲染为一个聊天气泡。
  *
- * Text is already paced by the StreamBuffer (30ms / 1 char) before it reaches
- * React state. No UI-layer animation is needed — we render parts directly.
- * Action badges only appear once the buffer's tick loop reaches them (after
- * all preceding text is fully revealed).
+ * 文本在到达 React 状态之前已由 StreamBuffer 控制节奏（30ms / 1字符）。
+ * 无需 UI 层动画 —— 我们直接渲染各个部分。
+ * 动作标签仅在缓冲区的 tick 循环到达它们时才会出现（在所有前置文本完全显示之后）。
  */
 const MessageBubble = memo(function MessageBubble({
   message,
@@ -78,12 +77,12 @@ const MessageBubble = memo(function MessageBubble({
   const parts: MessagePart[] = (message.parts || []) as MessagePart[];
   const isLive = !!(isStreaming && isLastMessage);
 
-  // ── Determine renderable content ──
+  // ── 确定可渲染内容 ──
   const hasContent = parts.some(
     (p: MessagePart) => (p.type === 'text' && p.text) || p.type?.startsWith('action-'),
   );
 
-  // Loading dots (between agent_start and first text_delta)
+  // 加载动画点（在 agent_start 和第一个 text_delta 之间）
   if (!hasContent && isActive && message.role === 'assistant') {
     return (
       <div className="flex gap-1.5 items-center py-1.5 px-1">
@@ -190,8 +189,8 @@ export function ChatSessionComponent({
   const canEnd = (isDiscussion || isQA) && session.status === 'active';
   const isEnded = session.status === 'completed' && (isDiscussion || isQA);
 
-  // Track whether user is at the bottom of the scroll container.
-  // When user scrolls up to read history, auto-scroll is suppressed.
+  // 追踪用户是否位于滚动容器底部。
+  // 当用户向上滚动查看历史记录时，禁用自动滚动。
   const isAtBottomRef = useRef(true);
   const handleScroll = useCallback(() => {
     const el = scrollContainerRef.current;
@@ -199,7 +198,7 @@ export function ChatSessionComponent({
     isAtBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
   }, []);
 
-  // Auto-scroll: smooth scroll when a NEW message arrives — always (new agent bubble should be visible)
+  // 自动滚动：当新消息到达时平滑滚动 —— 始终执行（新智能体气泡应该可见）
   const msgCount = session.messages.length;
   useEffect(() => {
     if (bottomRef.current) {
@@ -208,7 +207,7 @@ export function ChatSessionComponent({
     }
   }, [msgCount]);
 
-  // Auto-scroll: rAF-throttled instant scroll as text grows — only when user is at bottom
+  // 自动滚动：文本增长时使用 rAF 节流的即时滚动 —— 仅当用户位于底部时
   const scrollRaf = useRef(0);
   useEffect(() => {
     if (!isAtBottomRef.current) return;
@@ -219,7 +218,7 @@ export function ChatSessionComponent({
     });
   }, [session.messages]);
 
-  // Scroll to active bubble when it changes
+  // 当活动气泡变化时滚动到该气泡
   useEffect(() => {
     if (activeBubbleId && activeBubbleRef.current) {
       activeBubbleRef.current.scrollIntoView({
@@ -238,12 +237,12 @@ export function ChatSessionComponent({
     );
   }
 
-  // Button text based on session type
+  // 根据会话类型确定按钮文本
   const endButtonText = isDiscussion ? t('chat.stopDiscussion') : t('chat.endQA');
 
   return (
     <div className="flex flex-col">
-      {/* Messages */}
+      {/* 消息列表 */}
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
@@ -299,12 +298,12 @@ export function ChatSessionComponent({
                   'border-l-violet-500 dark:border-l-violet-400 bg-violet-50/50 dark:bg-violet-900/20',
               )}
             >
-              {/* Mini Avatar */}
+              {/* 迷你头像 */}
               <div className="w-5 h-5 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 mt-0.5 ring-1 ring-gray-200/50 dark:ring-gray-700/50">
                 <AvatarDisplay src={avatar} alt="avatar" />
               </div>
 
-              {/* Content */}
+              {/* 内容 */}
               <div className={cn('flex-1 min-w-0', isUser && 'text-right')}>
                 <span
                   className={cn(
@@ -339,7 +338,7 @@ export function ChatSessionComponent({
           );
         })}
 
-        {/* Session ended indicator */}
+        {/* 会话结束指示器 */}
         <AnimatePresence>
           {isEnded && (
             <motion.div
@@ -362,7 +361,7 @@ export function ChatSessionComponent({
         <div ref={bottomRef} />
       </div>
 
-      {/* End Session Button (for Q&A and Discussion) */}
+      {/* 结束会话按钮（用于问答和讨论） */}
       <AnimatePresence>
         {canEnd && onEndSession && (
           <motion.button

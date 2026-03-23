@@ -4,8 +4,8 @@ import { useEffect } from 'react';
 import { useSettingsStore } from '@/lib/store/settings';
 
 /**
- * Fetches server-configured providers on mount and merges into settings store.
- * Renders nothing — purely a side-effect component.
+ * 在挂载时获取服务器配置的提供商并合并到设置存储。
+ * 不渲染任何内容 — 纯副作用组件。
  */
 export function ServerProvidersInit() {
   const fetchServerProviders = useSettingsStore((state) => state.fetchServerProviders);

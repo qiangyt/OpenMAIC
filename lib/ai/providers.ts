@@ -1,14 +1,14 @@
 /**
- * Unified AI Provider Configuration
+ * 统一 AI 提供者配置
  *
- * Supports multiple AI providers through Vercel AI SDK:
- * - OpenAI (native)
- * - Anthropic Claude (native)
- * - Google Gemini (native)
- * - MiniMax (Anthropic-compatible, recommended by official)
- * - OpenAI-compatible providers (DeepSeek, Kimi, GLM, SiliconFlow, Doubao, etc.)
+ * 通过 Vercel AI SDK 支持多种 AI 提供者：
+ * - OpenAI（原生）
+ * - Anthropic Claude（原生）
+ * - Google Gemini（原生）
+ * - MiniMax（Anthropic 兼容，官方推荐）
+ * - OpenAI 兼容的提供者（DeepSeek、Kimi、GLM、SiliconFlow、Doubao 等）
  *
- * Sources:
+ * 资料来源：
  * - https://platform.openai.com/docs/models
  * - https://platform.claude.com/docs/en/about-claude/models/overview
  * - https://ai.google.dev/gemini-api/docs/models
@@ -17,7 +17,7 @@
  * - https://platform.minimaxi.com/docs/guides/text-generation
  * - https://platform.minimax.io/docs/api-reference/text-anthropic-api
  * - https://docs.bigmodel.cn/cn/guide/start/model-overview
- * - https://help.aliyun.com/zh/model-studio/models (Qwen/DashScope)
+ * - https://help.aliyun.com/zh/model-studio/models（Qwen/DashScope）
  * - https://siliconflow.cn/models
  * - https://siliconflow.cn/pricing
  * - https://www.volcengine.com/docs/82379/1330310
@@ -35,18 +35,17 @@ import type {
   ThinkingConfig,
 } from '@/lib/types/provider';
 import { createLogger } from '@/lib/logger';
-// NOTE: Do NOT import thinking-context.ts here — it uses node:async_hooks
-// which is server-only, and this file is also used on the client via
-// settings.ts. The thinking context is read from globalThis instead
-// (set by thinking-context.ts at module load time on the server).
+// 注意：不要在这里导入 thinking-context.ts——它使用 node:async_hooks，
+// 这是仅服务端的，而此文件也通过 settings.ts 在客户端使用。
+// 思考上下文通过 globalThis 读取（由 thinking-context.ts 在服务端模块加载时设置）。
 
 const log = createLogger('AIProviders');
 
-// Re-export types for backward compatibility
+// 重新导出类型以保持向后兼容
 export type { ProviderId, ProviderConfig, ModelInfo, ModelConfig };
 
 /**
- * Provider registry
+ * 提供者注册表
  */
 export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
   openai: {
@@ -415,7 +414,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
     requiresApiKey: true,
     icon: '/logos/glm.svg',
     models: [
-      // GLM-5 Series - Latest flagship model
+      // GLM-5 系列 - 最新旗舰模型
       {
         id: 'glm-5',
         name: 'GLM-5',
@@ -423,7 +422,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
         outputWindow: 128000,
         capabilities: { streaming: true, tools: true, vision: false },
       },
-      // GLM-4.7 Series
+      // GLM-4.7 系列
       {
         id: 'glm-4.7',
         name: 'GLM-4.7',
@@ -445,7 +444,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
         outputWindow: 128000,
         capabilities: { streaming: true, tools: true, vision: false },
       },
-      // GLM-4.6 Series - Advanced coding & reasoning
+      // GLM-4.6 系列 - 高级编码与推理
       {
         id: 'glm-4.6',
         name: 'GLM-4.6',
@@ -467,7 +466,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
         outputWindow: 32000,
         capabilities: { streaming: true, tools: true, vision: true },
       },
-      // GLM-4.5 Series - Cost-effective models
+      // GLM-4.5 系列 - 高性价比模型
       {
         id: 'glm-4.5-air',
         name: 'GLM-4.5-Air',
@@ -589,7 +588,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
     requiresApiKey: true,
     icon: '/logos/kimi.png',
     models: [
-      // K2.5 Series (2026) - 1T MoE, 32B active parameters
+      // K2.5 系列 (2026) - 1T MoE，320 亿活跃参数
       {
         id: 'kimi-k2.5',
         name: 'Kimi K2.5',
@@ -707,7 +706,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
     requiresApiKey: true,
     icon: '/logos/siliconflow.svg',
     models: [
-      // DeepSeek Series
+      // DeepSeek 系列
       {
         id: 'deepseek-ai/DeepSeek-V3.2',
         name: 'DeepSeek-V3.2',
@@ -736,7 +735,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
         outputWindow: 8192,
         capabilities: { streaming: true, tools: true, vision: false },
       },
-      // Qwen Series
+      // Qwen 系列
       {
         id: 'Qwen/Qwen2.5-72B-Instruct',
         name: 'Qwen2.5-72B-Instruct',
@@ -765,7 +764,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
         outputWindow: 32768,
         capabilities: { streaming: true, tools: true, vision: true },
       },
-      // MiniMax Series
+      // MiniMax 系列
       {
         id: 'MiniMaxAI/MiniMax-M2',
         name: 'MiniMax-M2',
@@ -773,7 +772,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
         outputWindow: 131072,
         capabilities: { streaming: true, tools: true, vision: false },
       },
-      // Kimi Series
+      // Kimi 系列
       {
         id: 'Pro/moonshotai/Kimi-K2.5',
         name: 'Kimi-K2.5',
@@ -781,7 +780,7 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
         outputWindow: 96000,
         capabilities: { streaming: true, tools: true, vision: false },
       },
-      // GLM Series
+      // GLM 系列
       {
         id: 'THUDM/GLM-Z1-Rumination-32B-0414',
         name: 'GLM-Z1-Rumination-32B',
@@ -840,15 +839,15 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
 };
 
 /**
- * Get provider config (from built-in or unified config in localStorage)
+ * 获取提供者配置（从内置配置或 localStorage 中的统一配置）
  */
 function getProviderConfig(providerId: ProviderId): ProviderConfig | null {
-  // Check built-in providers first
+  // 优先检查内置提供者
   if (PROVIDERS[providerId]) {
     return PROVIDERS[providerId];
   }
 
-  // Check unified providersConfig in localStorage (browser only)
+  // 检查 localStorage 中的统一 providersConfig（仅浏览器）
   if (typeof window !== 'undefined') {
     try {
       const storedConfig = localStorage.getItem('providersConfig');
@@ -869,6 +868,7 @@ function getProviderConfig(providerId: ProviderId): ProviderConfig | null {
       }
     } catch (e) {
       log.error('Failed to load provider config:', e);
+      // 中文：加载提供者配置失败
     }
   }
 
@@ -876,7 +876,7 @@ function getProviderConfig(providerId: ProviderId): ProviderConfig | null {
 }
 
 /**
- * Model instance with its configuration info
+ * 带有配置信息的模型实例
  */
 export interface ModelWithInfo {
   model: LanguageModel;
@@ -884,8 +884,8 @@ export interface ModelWithInfo {
 }
 
 /**
- * Return vendor-specific body params to inject for OpenAI-compatible providers.
- * Called from the custom fetch wrapper inside getModel().
+ * 返回要为 OpenAI 兼容提供者注入的厂商特定 body 参数。
+ * 从 getModel() 内部的自定义 fetch 包装器调用。
  */
 function getCompatThinkingBodyParams(
   providerId: ProviderId,
@@ -893,12 +893,12 @@ function getCompatThinkingBodyParams(
 ): Record<string, unknown> | undefined {
   if (config.enabled === false) {
     switch (providerId) {
-      // Kimi / DeepSeek / GLM use { thinking: { type: "disabled" } }
+      // Kimi / DeepSeek / GLM 使用 { thinking: { type: "disabled" } }
       case 'kimi':
       case 'deepseek':
       case 'glm':
         return { thinking: { type: 'disabled' } };
-      // Qwen / SiliconFlow use { enable_thinking: false }
+      // Qwen / SiliconFlow 使用 { enable_thinking: false }
       case 'qwen':
       case 'siliconflow':
         return { enable_thinking: false };
@@ -923,11 +923,11 @@ function getCompatThinkingBodyParams(
 }
 
 /**
- * Get a configured language model instance with its info
- * Accepts individual parameters for flexibility and security
+ * 获取已配置的语言模型实例及其信息
+ * 接受独立参数以提供灵活性和安全性
  */
 export function getModel(config: ModelConfig): ModelWithInfo {
-  // Get provider type and requiresApiKey, with fallback to registry
+  // 获取提供者类型和 requiresApiKey，带回退到注册表
   let providerType = config.providerType;
   let requiresApiKey = config.requiresApiKey ?? true;
 
@@ -938,18 +938,20 @@ export function getModel(config: ModelConfig): ModelWithInfo {
       requiresApiKey = provider.requiresApiKey;
     } else {
       throw new Error(`Unknown provider: ${config.providerId}. Please provide providerType.`);
+      // 中文：未知的提供者：${config.providerId}。请提供 providerType。
     }
   }
 
-  // Validate API key if required
+  // 如果需要，验证 API 密钥
   if (requiresApiKey && !config.apiKey) {
     throw new Error(`API key required for provider: ${config.providerId}`);
+    // 中文：提供者需要 API 密钥：${config.providerId}
   }
 
-  // Use provided API key, or empty string for providers that don't require one
+  // 使用提供的 API 密钥，或对于不需要密钥的提供者使用空字符串
   const effectiveApiKey = config.apiKey || '';
 
-  // Resolve base URL: explicit > provider default > SDK default
+  // 解析基础 URL：显式指定 > 提供者默认值 > SDK 默认值
   const provider = getProviderConfig(config.providerId);
   const effectiveBaseUrl = config.baseUrl || provider?.defaultBaseUrl || undefined;
 
@@ -962,14 +964,14 @@ export function getModel(config: ModelConfig): ModelWithInfo {
         baseURL: effectiveBaseUrl,
       };
 
-      // For OpenAI-compatible providers (not native OpenAI), add a fetch
-      // wrapper that injects vendor-specific thinking params into the HTTP
-      // body. The thinking config is read from AsyncLocalStorage, set by
-      // callLLM / streamLLM at call time.
+      // 对于 OpenAI 兼容的提供者（非原生 OpenAI），添加一个 fetch
+      // 包装器，将厂商特定的思考参数注入到 HTTP body 中。
+      // 思考配置从 AsyncLocalStorage 读取，由 callLLM / streamLLM
+      // 在调用时设置。
       if (config.providerId !== 'openai') {
         const providerId = config.providerId;
         openaiOptions.fetch = async (url: RequestInfo | URL, init?: RequestInit) => {
-          // Read thinking config from globalThis (set by thinking-context.ts)
+          // 从 globalThis 读取思考配置（由 thinking-context.ts 设置）
           const thinkingCtx = (globalThis as Record<string, unknown>).__thinkingContext as
             | { getStore?: () => unknown }
             | undefined;
@@ -982,7 +984,7 @@ export function getModel(config: ModelConfig): ModelWithInfo {
                 Object.assign(body, extra);
                 init = { ...init, body: JSON.stringify(body) };
               } catch {
-                /* leave body as-is */
+                /* 保持 body 不变 */
               }
             }
           }
@@ -1010,7 +1012,7 @@ export function getModel(config: ModelConfig): ModelWithInfo {
         baseURL: effectiveBaseUrl,
       };
       if (config.proxy) {
-        // Dynamic require to avoid bundling undici on the client side
+        // 动态 require 以避免在客户端打包 undici
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { ProxyAgent, fetch: undiciFetch } = require('undici');
         const agent = new ProxyAgent(config.proxy);
@@ -1027,22 +1029,23 @@ export function getModel(config: ModelConfig): ModelWithInfo {
 
     default:
       throw new Error(`Unsupported provider type: ${providerType}`);
+      // 中文：不支持的提供者类型：${providerType}
   }
 
-  // Look up model info from the provider registry
+  // 从提供者注册表查找模型信息
   const modelInfo = provider?.models.find((m) => m.id === config.modelId) || null;
 
   return { model, modelInfo };
 }
 
 /**
- * Parse model string in format "providerId:modelId" or just "modelId" (defaults to OpenAI)
+ * 解析模型字符串，格式为 "providerId:modelId" 或仅 "modelId"（默认为 OpenAI）
  */
 export function parseModelString(modelString: string): {
   providerId: ProviderId;
   modelId: string;
 } {
-  // Split only on the first colon to handle model IDs that contain colons
+  // 仅在第一个冒号处分割，以处理包含冒号的模型 ID
   const colonIndex = modelString.indexOf(':');
 
   if (colonIndex > 0) {
@@ -1052,7 +1055,7 @@ export function parseModelString(modelString: string): {
     };
   }
 
-  // Default to OpenAI for backward compatibility
+  // 默认为 OpenAI 以保持向后兼容
   return {
     providerId: 'openai',
     modelId: modelString,
@@ -1060,7 +1063,7 @@ export function parseModelString(modelString: string): {
 }
 
 /**
- * Get all available models grouped by provider
+ * 获取按提供者分组的所有可用模型
  */
 export function getAllModels(): {
   provider: ProviderConfig;
@@ -1073,14 +1076,14 @@ export function getAllModels(): {
 }
 
 /**
- * Get provider by ID
+ * 根据 ID 获取提供者
  */
 export function getProvider(providerId: ProviderId): ProviderConfig | undefined {
   return PROVIDERS[providerId];
 }
 
 /**
- * Get model info
+ * 获取模型信息
  */
 export function getModelInfo(providerId: ProviderId, modelId: string): ModelInfo | undefined {
   const provider = PROVIDERS[providerId];

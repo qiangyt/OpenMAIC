@@ -1,22 +1,22 @@
 /**
- * PptxGenJS Enums
- * NOTE: `enum` wont work for objects, so use `Object.freeze`
+ * PptxGenJS 枚举
+ * 注意：`enum` 对对象不起作用，所以使用 `Object.freeze`
  */
 
 import { BorderProps, OptsChartGridLine } from './core-interfaces'
 
-// CONST
-export const EMU = 914400 // One (1) inch (OfficeXML measures in EMU (English Metric Units))
-export const ONEPT = 12700 // One (1) point (pt)
-export const CRLF = '\r\n' // AKA: Chr(13) & Chr(10)
+// 常量
+export const EMU = 914400 // 一英寸（OfficeXML 以 EMU（英制公制单位）为单位测量）
+export const ONEPT = 12700 // 一点（pt）
+export const CRLF = '\r\n' // 又名：Chr(13) 和 Chr(10)
 export const LAYOUT_IDX_SERIES_BASE = 2147483649
 export const REGEX_HEX_COLOR = /^[0-9a-fA-F]{6}$/
-export const LINEH_MODIFIER = 1.67 // AKA: Golden Ratio Typography
+export const LINEH_MODIFIER = 1.67 // 又名：黄金比例排版
 
 export const DEF_BULLET_MARGIN = 27
 export const DEF_CELL_BORDER: BorderProps = { type: 'solid', color: '666666', pt: 1 }
-export const DEF_CELL_MARGIN_PT: [number, number, number, number] = [3, 3, 3, 3] // TRBL-style // DEPRECATED 3.8.0
-export const DEF_CELL_MARGIN_IN: [number, number, number, number] = [0.05, 0.1, 0.05, 0.1] // "Normal" margins in PPT-2021 ("Narrow" is `0.05` for all 4)
+export const DEF_CELL_MARGIN_PT: [number, number, number, number] = [3, 3, 3, 3] // TRBL 样式 // 已废弃 3.8.0
+export const DEF_CELL_MARGIN_IN: [number, number, number, number] = [0.05, 0.1, 0.05, 0.1] // PPT-2021 中的"普通"边距（"窄"边距是所有四个方向都为 `0.05`）
 export const DEF_CHART_BORDER: BorderProps = { type: 'solid', color: '363636', pt: 1 }
 export const DEF_CHART_GRIDLINE: OptsChartGridLine = { color: '888888', style: 'solid', size: 1, cap: 'flat' }
 export const DEF_FONT_COLOR = '000000'
@@ -27,7 +27,7 @@ export const DEF_PRES_LAYOUT_NAME = 'DEFAULT'
 export const DEF_SHAPE_LINE_COLOR = '333333'
 export const DEF_SHAPE_SHADOW = { type: 'outer', blur: 3, offset: 23000 / 12700, angle: 90, color: '000000', opacity: 0.35, rotateWithShape: true }
 export const DEF_SLIDE_BKGD = 'FFFFFF'
-export const DEF_SLIDE_MARGIN_IN: [number, number, number, number] = [0.5, 0.5, 0.5, 0.5] // TRBL-style
+export const DEF_SLIDE_MARGIN_IN: [number, number, number, number] = [0.5, 0.5, 0.5, 0.5] // TRBL 样式
 export const DEF_TEXT_SHADOW = { type: 'outer', blur: 8, offset: 4, angle: 270, color: '000000', opacity: 0.75 }
 export const DEF_TEXT_GLOW = { size: 8, color: 'FFFFFF', opacity: 0.75 }
 
@@ -95,9 +95,9 @@ export enum TEXT_VALIGN {
 
 export const SLDNUMFLDID = '{F7021451-1387-4CA6-816F-3879F97B5CBC}'
 
-// ENUM
-// TODO: 3.5 or v4.0: rationalize ts-def exported enum names/case!
-// NOTE: First tsdef enum named correctly (shapes -> 'Shape', colors -> 'Color'), etc.
+// 枚举
+// TODO: 3.5 或 v4.0：合理化 ts-def 导出的枚举名称/大小写！
+// 注意：第一个 tsdef 枚举命名正确（shapes -> 'Shape', colors -> 'Color'），等等
 export enum OutputType {
 	'arraybuffer' = 'arraybuffer',
 	'base64' = 'base64',
@@ -300,7 +300,7 @@ export enum ShapeType {
 	'wedgeRoundRectCallout' = 'wedgeRoundRectCallout',
 }
 /**
- * TODO: FUTURE: v4.0: rename to `ThemeColor`
+ * TODO: 未来：v4.0：重命名为 `ThemeColor`
  */
 export enum SchemeColor {
 	'text1' = 'tx1',
@@ -764,7 +764,7 @@ export enum BULLET_TYPES {
 	'TRIANGLE' = '&#x25B6;',
 }
 
-// IMAGES (base64)
+// 图片（base64）
 export const IMG_BROKEN =
 	'data:image/png;base64,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'
 

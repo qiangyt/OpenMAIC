@@ -56,7 +56,7 @@ function buildInputSummary(input: GenerateClassroomInput): ClassroomGenerationJo
   };
 }
 
-/** Simple per-job mutex to serialize read-modify-write on the same job file. */
+/** 简单的作业级互斥锁，用于序列化对同一作业文件的读-改-写操作。 */
 const jobLocks = new Map<string, Promise<void>>();
 
 async function withJobLock<T>(jobId: string, fn: () => Promise<T>): Promise<T> {
@@ -75,8 +75,8 @@ async function withJobLock<T>(jobId: string, fn: () => Promise<T>): Promise<T> {
   }
 }
 
-/** Max age (ms) before a "running" job without an active runner is considered stale. */
-const STALE_JOB_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+/** 没有 active runner 的 "running" 状态作业被视为过期前的最大存活时间（毫秒）。 */
+const STALE_JOB_TIMEOUT_MS = 30 * 60 * 1000; // 30 分钟
 
 function markStaleIfNeeded(job: ClassroomGenerationJob): ClassroomGenerationJob {
   if (job.status !== 'running') return job;

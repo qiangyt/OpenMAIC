@@ -28,8 +28,8 @@ export function TTSSettings({ selectedProviderId }: TTSSettingsProps) {
   const setTTSProviderConfig = useSettingsStore((state) => state.setTTSProviderConfig);
   const activeProviderId = useSettingsStore((state) => state.ttsProviderId);
 
-  // When testing a non-active provider, use that provider's default voice
-  // instead of the active provider's voice (which may be incompatible)
+  // 当测试非当前激活的服务商时，使用该服务商的默认音色
+  // 而不是当前激活服务商的音色（可能不兼容）
   const effectiveVoice =
     selectedProviderId === activeProviderId
       ? ttsVoice
@@ -44,12 +44,12 @@ export function TTSSettings({ selectedProviderId }: TTSSettingsProps) {
   const [testMessage, setTestMessage] = useState('');
   const { previewing: testingTTS, startPreview, stopPreview } = useTTSPreview();
 
-  // Update test text when language changes
+  // 当语言变更时更新测试文本
   useEffect(() => {
     setTestText(t('settings.ttsTestTextDefault'));
   }, [t]);
 
-  // Reset state when provider changes
+  // 当服务商变更时重置状态
   useEffect(() => {
     stopPreview();
     setShowApiKey(false);
@@ -87,14 +87,14 @@ export function TTSSettings({ selectedProviderId }: TTSSettingsProps) {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {/* Server-configured notice */}
+      {/* 服务端配置提示 */}
       {isServerConfigured && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30 p-3 text-sm text-blue-700 dark:text-blue-300">
           {t('settings.serverConfiguredNotice')}
         </div>
       )}
 
-      {/* API Key & Base URL */}
+      {/* API 密钥和 Base URL */}
       {(ttsProvider.requiresApiKey || isServerConfigured) && (
         <>
           <div className="grid grid-cols-2 gap-4">
@@ -147,7 +147,7 @@ export function TTSSettings({ selectedProviderId }: TTSSettingsProps) {
               />
             </div>
           </div>
-          {/* Request URL Preview */}
+          {/* 请求 URL 预览 */}
           {(() => {
             const effectiveBaseUrl =
               ttsProvidersConfig[selectedProviderId]?.baseUrl || ttsProvider.defaultBaseUrl || '';
@@ -175,7 +175,7 @@ export function TTSSettings({ selectedProviderId }: TTSSettingsProps) {
         </>
       )}
 
-      {/* Test TTS */}
+      {/* 测试 TTS */}
       <div className="space-y-2">
         <Label className="text-sm">{t('settings.testTTS')}</Label>
         <div className="flex gap-2">

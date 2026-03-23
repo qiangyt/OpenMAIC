@@ -1,30 +1,30 @@
 /**
- * Agent Configuration Types
- * Defines the structure for configurable AI agents in the multi-agent system
+ * 智能体配置类型
+ * 定义多智能体系统中可配置 AI 智能体的结构
  */
 
 export interface AgentConfig {
-  id: string; // Unique agent ID
-  name: string; // Display name (Chinese)
-  role: string; // Short role description
-  persona: string; // Full system prompt (personality, responsibilities)
-  avatar: string; // Emoji or image URL
-  color: string; // UI theme color (hex)
-  allowedActions: string[]; // Action types this agent can use
-  priority: number; // Priority for director selection (1-10)
+  id: string; // 唯一智能体 ID
+  name: string; // 显示名称（中文）
+  role: string; // 简短角色描述
+  persona: string; // 完整系统提示词（个性、职责）
+  avatar: string; // Emoji 或图片 URL
+  color: string; // UI 主题颜色（十六进制）
+  allowedActions: string[]; // 此智能体可使用的动作类型
+  priority: number; // 导演选择的优先级（1-10）
 
-  // Metadata
+  // 元数据
   createdAt: Date;
   updatedAt: Date;
-  isDefault: boolean; // Is this a default template?
+  isDefault: boolean; // 是否为默认模板？
 
-  // LLM-generated agent fields
-  isGenerated?: boolean; // true for LLM-generated agents
-  boundStageId?: string; // stage ID this agent was generated for
+  // LLM 生成的智能体字段
+  isGenerated?: boolean; // 对于 LLM 生成的智能体为 true
+  boundStageId?: string; // 此智能体为之生成的阶段 ID
 }
 
 export interface AgentTemplate {
-  // Same as AgentConfig but without id/dates (for creating new agents)
+  // 与 AgentConfig 相同，但没有 id/dates（用于创建新智能体）
   name: string;
   role: string;
   persona: string;
@@ -33,13 +33,13 @@ export interface AgentTemplate {
   allowedActions: string[];
   priority: number;
 
-  // LLM-generated agent fields
-  isGenerated?: boolean; // true for LLM-generated agents
-  boundStageId?: string; // stage ID this agent was generated for
+  // LLM 生成的智能体字段
+  isGenerated?: boolean; // 对于 LLM 生成的智能体为 true
+  boundStageId?: string; // 此智能体为之生成的阶段 ID
 }
 
 /**
- * Create a new AgentConfig from a template
+ * 从模板创建新的 AgentConfig
  */
 export function createAgentFromTemplate(template: AgentTemplate, id: string): AgentConfig {
   return {
@@ -51,7 +51,7 @@ export function createAgentFromTemplate(template: AgentTemplate, id: string): Ag
   };
 }
 
-// Action types available to agents (canonical source for role-based mapping)
+// 智能体可用的动作类型（基于角色映射的权威来源）
 export const WHITEBOARD_ACTIONS = [
   'wb_open',
   'wb_close',
@@ -68,8 +68,8 @@ export const WHITEBOARD_ACTIONS = [
 export const SLIDE_ACTIONS = ['spotlight', 'laser', 'play_video'];
 
 /**
- * Maps agent roles to their allowed action sets.
- * Teachers get slide + whiteboard control; others get whiteboard only.
+ * 将智能体角色映射到其允许的动作集。
+ * 老师获得幻灯片 + 白板控制权；其他角色仅获得白板控制权。
  */
 export const ROLE_ACTIONS: Record<string, string[]> = {
   teacher: [...SLIDE_ACTIONS, ...WHITEBOARD_ACTIONS],
@@ -78,8 +78,8 @@ export const ROLE_ACTIONS: Record<string, string[]> = {
 };
 
 /**
- * Get the default allowed actions for a given role.
- * Falls back to whiteboard-only actions for unknown roles.
+ * 获取给定角色的默认允许动作。
+ * 对于未知角色回退到仅白板动作。
  */
 export function getActionsForRole(role: string): string[] {
   return ROLE_ACTIONS[role] || [...WHITEBOARD_ACTIONS];

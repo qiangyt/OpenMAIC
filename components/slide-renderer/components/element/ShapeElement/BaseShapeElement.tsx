@@ -13,7 +13,7 @@ export interface BaseShapeElementProps {
 }
 
 /**
- * Base shape element for read-only/playback mode
+ * 基础形状元素（只读/播放模式）
  */
 export function BaseShapeElement({ elementInfo }: BaseShapeElementProps) {
   const { fill } = useElementFill(elementInfo, 'base');

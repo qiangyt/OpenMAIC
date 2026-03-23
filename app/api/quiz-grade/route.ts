@@ -1,8 +1,8 @@
 /**
- * Quiz Grading API
+ * 测验评分 API
  *
- * POST: Receives a text question + user answer, calls LLM for scoring and feedback.
- * Used for short-answer (text) questions that cannot be graded locally.
+ * POST: 接收文本问题 + 用户答案，调用 LLM 进行评分和反馈。
+ * 用于无法在本地评分的简答题（文本）。
  */
 
 import { NextRequest } from 'next/server';
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'question and userAnswer are required');
     }
 
-    // Resolve model from request headers
+    // 从请求 headers 解析模型
     const { model: languageModel } = resolveModelFromHeaders(req);
 
     const isZh = language === 'zh-CN';
@@ -64,12 +64,12 @@ ${commentPrompt ? `Grading guidance: ${commentPrompt}\n` : ''}Student answer: ${
       'quiz-grade',
     );
 
-    // Parse the LLM response as JSON
+    // 将 LLM 响应解析为 JSON
     const text = result.text.trim();
     let gradeResult: GradeResponse;
 
     try {
-      // Try to extract JSON from the response
+      // 尝试从响应中提取 JSON
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON found');
       const parsed = JSON.parse(jsonMatch[0]);
@@ -78,7 +78,7 @@ ${commentPrompt ? `Grading guidance: ${commentPrompt}\n` : ''}Student answer: ${
         comment: String(parsed.comment || ''),
       };
     } catch {
-      // Fallback: give partial credit with a generic comment
+      // 回退：给予部分分数并提供通用评语
       gradeResult = {
         score: Math.round(points * 0.5),
         comment: isZh

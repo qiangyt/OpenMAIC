@@ -53,7 +53,7 @@ export function AgentSettings({
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="space-y-4">
-        {/* Mode Toggle */}
+        {/* 模式切换 */}
         <div className="space-y-2">
           <Label>{t('settings.agentMode')}</Label>
           <div className="inline-flex rounded-lg border bg-muted/30 p-0.5">
@@ -85,7 +85,7 @@ export function AgentSettings({
 
         {agentMode === 'preset' ? (
           <>
-            {/* Preset mode: existing agent multi-select */}
+            {/* 预设模式：现有的智能体多选 */}
             <div className="space-y-2">
               <Label>{t('settings.selectAgents')}</Label>
               <p className="text-sm text-muted-foreground">{t('settings.agentSettingsDesc')}</p>
@@ -128,7 +128,7 @@ export function AgentSettings({
               ))}
             </div>
 
-            {/* Mode indicator */}
+            {/* 模式指示器 */}
             <div
               className={`p-3 rounded-lg text-sm ${
                 selectedAgentIds.length === 0
@@ -167,7 +167,7 @@ export function AgentSettings({
               )}
             </div>
 
-            {/* Max turns config - only show for multi-agent */}
+            {/* 最大轮数配置 - 仅在多智能体模式下显示 */}
             {selectedAgentIds.length > 1 && (
               <div className="space-y-2 border-l-4 border-purple-500 pl-4">
                 <Label>{t('settings.maxTurns')}</Label>
@@ -185,7 +185,7 @@ export function AgentSettings({
           </>
         ) : (
           <>
-            {/* Auto mode: description */}
+            {/* 自动模式：描述 */}
             <div className="flex items-start gap-2.5 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 text-sm">
               <Info className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{t('settings.agentModeAutoDesc')}</span>

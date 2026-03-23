@@ -25,8 +25,8 @@ export interface ShapeElementProps {
 }
 
 /**
- * Shape element component with text editing support
- * Supports gradients, patterns, and rich text content
+ * 形状元素组件（支持文本编辑）
+ * 支持渐变、图案和富文本内容
  */
 export function ShapeElement({ elementInfo, selectElement }: ShapeElementProps) {
   const handleElementId = useCanvasStore.use.handleElementId();
@@ -46,15 +46,15 @@ export function ShapeElement({ elementInfo, selectElement }: ShapeElementProps) 
     selectElement?.(e, elementInfo, canMove);
   };
 
-  // Stop editing when element is no longer active
+  // 当元素不再处于活动状态时停止编辑
   useEffect(() => {
     if (handleElementId !== elementInfo.id && editable) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Sync editable state with active element
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- 同步可编辑状态与活动元素
       setEditable(false);
     }
   }, [handleElementId, elementInfo.id, editable]);
 
-  // Default text configuration
+  // 默认文本配置
   const text = useMemo<ShapeText>(() => {
     const defaultText: ShapeText = {
       content: '',
@@ -66,7 +66,7 @@ export function ShapeElement({ elementInfo, selectElement }: ShapeElementProps) 
     return elementInfo.text;
   }, [elementInfo.text]);
 
-  // Update text content
+  // 更新文本内容
   const updateText = useCallback(
     (content: string, ignore = false) => {
       const _text = { ...text, content };
@@ -80,19 +80,19 @@ export function ShapeElement({ elementInfo, selectElement }: ShapeElementProps) 
     [elementInfo.id, text, updateElement, addHistorySnapshot],
   );
 
-  // Check and remove empty text
+  // 检查并移除空文本
   const checkEmptyText = useCallback(() => {
     if (!elementInfo.text) return;
 
     const pureText = elementInfo.text.content.replace(/<[^>]+>/g, '');
     if (!pureText) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 'text' is specific to PPTShapeElement, not in keyof PPTElement union
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 'text' 是 PPTShapeElement 特有的，不在 keyof PPTElement 联合类型中
       removeElementProps({ id: elementInfo.id, propName: 'text' as any });
       addHistorySnapshot();
     }
   }, [elementInfo.id, elementInfo.text, removeElementProps, addHistorySnapshot]);
 
-  // Start editing on double click
+  // 双击开始编辑
   const startEdit = () => {
     setEditable(true);
   };

@@ -12,38 +12,38 @@ export type SettingsSection =
   | 'web-search';
 
 /**
- * Unified provider configuration stored in JSON format
- * Stores all provider-specific settings and metadata in one object
- * Both built-in and custom providers use the same structure
+ * 统一的服务提供者配置，以 JSON 格式存储
+ * 将所有服务提供者特定的设置和元数据存储在一个对象中
+ * 内置和自定义服务提供者使用相同的结构
  */
 export interface ProviderSettings {
-  // Configuration
+  // 配置
   apiKey: string;
   baseUrl: string;
-  models: ModelInfo[]; // All models (user can edit/delete any)
+  models: ModelInfo[]; // 所有模型（用户可编辑/删除任意模型）
 
-  // Metadata (same for built-in and custom providers)
+  // 元数据（内置和自定义服务提供者相同）
   name: string;
   type: ProviderType;
   defaultBaseUrl?: string;
   icon?: string;
   requiresApiKey: boolean;
-  isBuiltIn: boolean; // true for built-in providers, false for custom
+  isBuiltIn: boolean; // 内置服务提供者为 true，自定义服务提供者为 false
 
-  // Server-side configuration (set by fetchServerProviders)
-  isServerConfigured?: boolean; // Server has API key for this provider
-  serverModels?: string[]; // Server-restricted model list (if set)
-  serverBaseUrl?: string; // Server-provided base URL override
+  // 服务端配置（由 fetchServerProviders 设置）
+  isServerConfigured?: boolean; // 服务端是否为此服务提供者配置了 API 密钥
+  serverModels?: string[]; // 服务端限制的模型列表（如果设置）
+  serverBaseUrl?: string; // 服务端提供的基础 URL 覆盖
 }
 
 /**
- * Provider configurations storage format
- * Key: providerId, Value: ProviderSettings
+ * 服务提供者配置存储格式
+ * 键：providerId，值：ProviderSettings
  */
 export type ProvidersConfig = Record<ProviderId, ProviderSettings>;
 
 export interface EditingModel {
   providerId: ProviderId;
-  modelIndex: number | null; // null for new model
+  modelIndex: number | null; // null 表示新模型
   model: ModelInfo;
 }

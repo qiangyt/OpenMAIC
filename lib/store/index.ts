@@ -1,4 +1,4 @@
-// Core stores
+// 核心 Store
 import { useCanvasStore } from './canvas';
 import { useSnapshotStore } from './snapshot';
 import { useKeyboardStore } from './keyboard';
@@ -6,7 +6,7 @@ import { useStageStore } from './stage';
 import { useSettingsStore } from './settings';
 
 export {
-  // New architecture
+  // 新架构
   useCanvasStore,
   useStageStore,
   useSnapshotStore,
@@ -14,5 +14,5 @@ export {
   useSettingsStore,
 };
 
-// Scene Context API (for extensible scene types)
+// 场景上下文 API（用于可扩展的场景类型）
 export { SceneProvider, useSceneData, useSceneSelector } from '@/lib/contexts/scene-context';

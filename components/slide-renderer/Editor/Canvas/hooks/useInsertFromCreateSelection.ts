@@ -7,7 +7,7 @@ export function useInsertFromCreateSelection(viewportRef: RefObject<HTMLElement 
   const creatingElement = useCanvasStore.use.creatingElement();
   const setCreatingElement = useCanvasStore.use.setCreatingElement();
 
-  // Calculate selection position and size from the start and end points of mouse drag selection
+  // 根据鼠标拖拽选区的起点和终点计算选区位置和尺寸
   const formatCreateSelection = useCallback(
     (selectionData: CreateElementSelectionData) => {
       const { start, end } = selectionData;
@@ -32,7 +32,7 @@ export function useInsertFromCreateSelection(viewportRef: RefObject<HTMLElement 
     [viewportRef, canvasScale],
   );
 
-  // Calculate line position and start/end points on canvas from the start and end points of mouse drag selection
+  // 根据鼠标拖拽选区的起点和终点计算线条在画布上的位置和起止点
   const formatCreateSelectionForLine = useCallback(
     (selectionData: CreateElementSelectionData) => {
       const { start, end } = selectionData;
@@ -65,7 +65,7 @@ export function useInsertFromCreateSelection(viewportRef: RefObject<HTMLElement 
     [viewportRef, canvasScale],
   );
 
-  // Insert element based on mouse selection position and size
+  // 根据鼠标选区位置和尺寸插入元素
   const insertElementFromCreateSelection = useCallback(
     (selectionData: CreateElementSelectionData) => {
       if (!creatingElement) return;
@@ -74,17 +74,17 @@ export function useInsertFromCreateSelection(viewportRef: RefObject<HTMLElement 
       if (type === 'text') {
         const position = formatCreateSelection(selectionData);
         if (position) {
-          // TODO: Implement createTextElement
+          // TODO: 实现 createTextElement
         }
       } else if (type === 'shape') {
         const position = formatCreateSelection(selectionData);
         if (position) {
-          // TODO: Implement createShapeElement
+          // TODO: 实现 createShapeElement
         }
       } else if (type === 'line') {
         const position = formatCreateSelectionForLine(selectionData);
         if (position) {
-          // TODO: Implement createLineElement
+          // TODO: 实现 createLineElement
         }
       }
       setCreatingElement(null);

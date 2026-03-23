@@ -75,7 +75,7 @@ export function getStyle(element, ancestors, previousStyle = {}) {
       variant = ''
     }
   }
-  // Override variant for some types
+  // 为某些类型覆盖变体
   if (!elAttributes.mathvariant) {
     const textContent = getTextContent(element)
     if (

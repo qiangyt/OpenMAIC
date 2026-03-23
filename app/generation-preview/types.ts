@@ -7,7 +7,7 @@ import type {
   ImageMapping,
 } from '@/lib/types/generation';
 
-// Session state stored in sessionStorage
+// 存储在 sessionStorage 中的会话状态
 export interface GenerationSessionState {
   sessionId: string;
   requirements: UserRequirements;
@@ -17,12 +17,12 @@ export interface GenerationSessionState {
   imageMapping?: ImageMapping;
   sceneOutlines?: SceneOutline[] | null;
   currentStep: 'generating' | 'complete';
-  // PDF deferred parsing fields
+  // PDF 延迟解析字段
   pdfStorageKey?: string;
   pdfFileName?: string;
   pdfProviderId?: string;
   pdfProviderConfig?: { apiKey?: string; baseUrl?: string };
-  // Web search context
+  // 网络搜索上下文
   researchContext?: string;
   researchSources?: Array<{ title: string; url: string }>;
 }

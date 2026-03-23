@@ -77,24 +77,24 @@ function HomePage() {
     import('@/lib/types/settings').SettingsSection | undefined
   >(undefined);
 
-  // Draft cache for requirement text
+  // 需求文本的草稿缓存
   const { cachedValue: cachedRequirement, updateCache: updateRequirementCache } =
     useDraftCache<string>({ key: 'requirementDraft' });
 
-  // Model setup state
+  // 模型设置状态
   const currentModelId = useSettingsStore((s) => s.modelId);
   const [storeHydrated, setStoreHydrated] = useState(false);
   const [recentOpen, setRecentOpen] = useState(true);
 
-  // Hydrate client-only state after mount (avoids SSR mismatch)
-  /* eslint-disable react-hooks/set-state-in-effect -- Hydration from localStorage must happen in effect */
+  // 挂载后注水客户端状态（避免 SSR 不匹配）
+  /* eslint-disable react-hooks/set-state-in-effect -- 从 localStorage 注水必须在 effect 中进行 */
   useEffect(() => {
     setStoreHydrated(true);
     try {
       const saved = localStorage.getItem(RECENT_OPEN_STORAGE_KEY);
       if (saved !== null) setRecentOpen(saved !== 'false');
     } catch {
-      /* localStorage unavailable */
+      /* localStorage 不可用 */
     }
     try {
       const savedWebSearch = localStorage.getItem(WEB_SEARCH_STORAGE_KEY);
@@ -111,12 +111,12 @@ function HomePage() {
         setForm((prev) => ({ ...prev, ...updates }));
       }
     } catch {
-      /* localStorage unavailable */
+      /* localStorage 不可用 */
     }
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  // Restore requirement draft from cache (derived state pattern — no effect needed)
+  // 从缓存恢复需求草稿（派生状态模式 — 无需 effect）
   const [prevCachedRequirement, setPrevCachedRequirement] = useState(cachedRequirement);
   if (cachedRequirement !== prevCachedRequirement) {
     setPrevCachedRequirement(cachedRequirement);
@@ -135,7 +135,7 @@ function HomePage() {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Close dropdowns when clicking outside
+  // 点击外部时关闭下拉菜单
   useEffect(() => {
     if (!languageOpen && !themeOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
@@ -152,24 +152,24 @@ function HomePage() {
     try {
       const list = await listStages();
       setClassrooms(list);
-      // Load first slide thumbnails
+      // 加载第一张幻灯片缩略图
       if (list.length > 0) {
         const slides = await getFirstSlideByStages(list.map((c) => c.id));
         setThumbnails(slides);
       }
     } catch (err) {
-      log.error('Failed to load classrooms:', err);
+      log.error('加载课堂列表失败：', err);
     }
   };
 
   useEffect(() => {
-    // Clear stale media store to prevent cross-course thumbnail contamination.
-    // The store may hold tasks from a previously visited classroom whose elementIds
-    // (gen_img_1, etc.) collide with other courses' placeholders.
+    // 清除过期的媒体存储以防止跨课程缩略图污染。
+    // 存储可能包含之前访问过的课堂的任务，其 elementIds
+    //（gen_img_1 等）与其他课程的占位符冲突。
     useMediaGenerationStore.getState().revokeObjectUrls();
     useMediaGenerationStore.setState({ tasks: {} });
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Store hydration on mount
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 挂载时进行存储注水
     loadClassrooms();
   }, []);
 
@@ -196,7 +196,7 @@ function HomePage() {
       if (field === 'language') localStorage.setItem(LANGUAGE_STORAGE_KEY, String(value));
       if (field === 'requirement') updateRequirementCache(value as string);
     } catch {
-      /* ignore */
+      /* 忽略 */
     }
   };
 
@@ -231,7 +231,7 @@ function HomePage() {
   };
 
   const handleGenerate = async () => {
-    // Validate setup before proceeding
+    // 在继续之前验证设置
     if (!currentModelId) {
       showSetupToast(
         <BotOff className="size-4.5 text-amber-600 dark:text-amber-400" />,
@@ -324,12 +324,12 @@ function HomePage() {
 
   return (
     <div className="min-h-[100dvh] w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center p-4 pt-16 md:p-8 md:pt-16 overflow-x-hidden">
-      {/* ═══ Top-right pill (unchanged) ═══ */}
+      {/* ═══ 右上角胶囊栏（未更改） ═══ */}
       <div
         ref={toolbarRef}
         className="fixed top-4 right-4 z-50 flex items-center gap-1 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md px-2 py-1.5 rounded-full border border-gray-100/50 dark:border-gray-700/50 shadow-sm"
       >
-        {/* Language Selector */}
+        {/* 语言选择器 */}
         <div className="relative">
           <button
             onClick={() => {
@@ -374,7 +374,7 @@ function HomePage() {
 
         <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
 
-        {/* Theme Selector */}
+        {/* 主题选择器 */}
         <div className="relative">
           <button
             onClick={() => {
@@ -437,7 +437,7 @@ function HomePage() {
 
         <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
 
-        {/* Settings Button */}
+        {/* 设置按钮 */}
         <div className="relative">
           <button
             onClick={() => setSettingsOpen(true)}
@@ -470,7 +470,7 @@ function HomePage() {
         initialSection={settingsSection}
       />
 
-      {/* ═══ Background Decor ═══ */}
+      {/* ═══ 背景装饰 ═══ */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"
@@ -482,7 +482,7 @@ function HomePage() {
         />
       </div>
 
-      {/* ═══ Hero section: title + input (centered, wider) ═══ */}
+      {/* ═══ 主区域：标题 + 输入（居中，更宽） ═══ */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -507,7 +507,7 @@ function HomePage() {
           className="h-12 md:h-16 mb-2 -ml-2 md:-ml-3"
         />
 
-        {/* ── Slogan ── */}
+        {/* ── 标语 ── */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -517,7 +517,7 @@ function HomePage() {
           {t('home.slogan')}
         </motion.p>
 
-        {/* ── Unified input area ── */}
+        {/* ── 统一输入区域 ── */}
         <motion.div
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -525,7 +525,7 @@ function HomePage() {
           className="w-full"
         >
           <div className="w-full rounded-2xl border border-border/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl shadow-black/[0.03] dark:shadow-black/20 transition-shadow focus-within:shadow-2xl focus-within:shadow-violet-500/[0.06]">
-            {/* ── Greeting + Profile + Agents ── */}
+            {/* ── 问候语 + 个人资料 + 智能体 ── */}
             <div className="relative z-20 flex items-start justify-between">
               <GreetingBar />
               <div className="pr-3 pt-3.5 shrink-0">
@@ -533,7 +533,7 @@ function HomePage() {
               </div>
             </div>
 
-            {/* Textarea */}
+            {/* 文本区域 */}
             <textarea
               ref={textareaRef}
               placeholder={t('upload.requirementPlaceholder')}
@@ -544,7 +544,7 @@ function HomePage() {
               rows={4}
             />
 
-            {/* Toolbar row */}
+            {/* 工具栏行 */}
             <div className="px-3 pb-3 flex items-end gap-2">
               <div className="flex-1 min-w-0">
                 <GenerationToolbar
@@ -562,7 +562,7 @@ function HomePage() {
                 />
               </div>
 
-              {/* Voice input */}
+              {/* 语音输入 */}
               <SpeechButton
                 size="md"
                 onTranscription={(text) => {
@@ -574,7 +574,7 @@ function HomePage() {
                 }}
               />
 
-              {/* Send button */}
+              {/* 发送按钮 */}
               <button
                 onClick={handleGenerate}
                 disabled={!canGenerate}
@@ -592,7 +592,7 @@ function HomePage() {
           </div>
         </motion.div>
 
-        {/* ── Error ── */}
+        {/* ── 错误 ── */}
         <AnimatePresence>
           {error && (
             <motion.div
@@ -607,7 +607,7 @@ function HomePage() {
         </AnimatePresence>
       </motion.div>
 
-      {/* ═══ Recent classrooms — collapsible ═══ */}
+      {/* ═══ 最近课堂 — 可折叠 ═══ */}
       {classrooms.length > 0 && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -615,7 +615,7 @@ function HomePage() {
           transition={{ delay: 0.5 }}
           className="relative z-10 mt-10 w-full max-w-6xl flex flex-col items-center"
         >
-          {/* Trigger — divider-line with centered text */}
+          {/* 触发器 — 带居中文本的分隔线 */}
           <button
             onClick={() => {
               const next = !recentOpen;
@@ -623,7 +623,7 @@ function HomePage() {
               try {
                 localStorage.setItem(RECENT_OPEN_STORAGE_KEY, String(next));
               } catch {
-                /* ignore */
+                /* 忽略 */
               }
             }}
             className="group w-full flex items-center gap-4 py-2 cursor-pointer"
@@ -643,7 +643,7 @@ function HomePage() {
             <div className="flex-1 h-px bg-border/40 group-hover:bg-border/70 transition-colors" />
           </button>
 
-          {/* Expandable content */}
+          {/* 可展开内容 */}
           <AnimatePresence>
             {recentOpen && (
               <motion.div
@@ -684,7 +684,7 @@ function HomePage() {
         </motion.div>
       )}
 
-      {/* Footer — flows with content, at the very end */}
+      {/* 页脚 — 随内容流动，在最底部 */}
       <div className="mt-auto pt-12 pb-4 text-center text-xs text-muted-foreground/40">
         OpenMAIC Open Source Project
       </div>
@@ -692,7 +692,7 @@ function HomePage() {
   );
 }
 
-// ─── Greeting Bar — avatar + "Hi, Name", click to edit in-place ────
+// ─── 问候栏 — 头像 + "Hi, 名字"，点击可就地编辑 ────
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
 
 function isCustomAvatar(src: string) {
@@ -718,7 +718,7 @@ function GreetingBar() {
 
   const displayName = nickname || t('profile.defaultNickname');
 
-  // Click-outside to collapse
+  // 点击外部折叠
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -784,7 +784,7 @@ function GreetingBar() {
         onChange={handleAvatarUpload}
       />
 
-      {/* ── Collapsed pill (always in flow) ── */}
+      {/* ── 折叠胶囊（始终在流中） ── */}
       {!open && (
         <div
           className="flex items-center gap-2.5 cursor-pointer transition-all duration-200 group rounded-full px-2.5 py-1.5 border border-border/50 text-muted-foreground/70 hover:text-foreground hover:bg-muted/60 active:scale-[0.97]"
@@ -821,7 +821,7 @@ function GreetingBar() {
         </div>
       )}
 
-      {/* ── Expanded panel (absolute, floating) ── */}
+      {/* ── 展开面板（绝对定位，浮动） ── */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -832,7 +832,7 @@ function GreetingBar() {
             className="absolute left-4 top-3.5 z-50 w-64"
           >
             <div className="rounded-2xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06] shadow-[0_1px_8px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_8px_-2px_rgba(0,0,0,0.3)] px-2.5 py-2">
-              {/* ── Row: avatar + name ── */}
+              {/* ── 行：头像 + 名字 ── */}
               <div
                 className="flex items-center gap-2.5 cursor-pointer transition-all duration-200"
                 onClick={() => {
@@ -841,7 +841,7 @@ function GreetingBar() {
                   setAvatarPickerOpen(false);
                 }}
               >
-                {/* Avatar */}
+                {/* 头像 */}
                 <div
                   className="shrink-0 relative cursor-pointer"
                   onClick={(e) => {
@@ -866,7 +866,7 @@ function GreetingBar() {
                   </motion.div>
                 </div>
 
-                {/* Text */}
+                {/* 文本 */}
                 <div className="flex-1 min-w-0">
                   {editingName ? (
                     <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
@@ -908,7 +908,7 @@ function GreetingBar() {
                   )}
                 </div>
 
-                {/* Collapse arrow */}
+                {/* 折叠箭头 */}
                 <motion.div
                   initial={{ opacity: 0, y: -2 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -918,9 +918,9 @@ function GreetingBar() {
                 </motion.div>
               </div>
 
-              {/* ── Expandable content ── */}
+              {/* ── 可展开内容 ── */}
               <div className="pt-2" onClick={(e) => e.stopPropagation()}>
-                {/* Avatar picker */}
+                {/* 头像选择器 */}
                 <AnimatePresence>
                   {avatarPickerOpen && (
                     <motion.div
@@ -964,7 +964,7 @@ function GreetingBar() {
                   )}
                 </AnimatePresence>
 
-                {/* Bio */}
+                {/* 个人简介 */}
                 <UITextarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
@@ -982,7 +982,7 @@ function GreetingBar() {
   );
 }
 
-// ─── Classroom Card — clean, minimal style ──────────────────────
+// ─── 课堂卡片 — 简洁风格 ──────────────────────
 function ClassroomCard({
   classroom,
   slide,
@@ -1018,7 +1018,7 @@ function ClassroomCard({
 
   return (
     <div className="group cursor-pointer" onClick={confirmingDelete ? undefined : onClick}>
-      {/* Thumbnail — large radius, no border, subtle bg */}
+      {/* 缩略图 — 大圆角，无边框，微妙背景 */}
       <div
         ref={thumbRef}
         className="relative w-full aspect-[16/9] rounded-2xl bg-slate-100 dark:bg-slate-800/80 overflow-hidden transition-transform duration-200 group-hover:scale-[1.02]"
@@ -1038,7 +1038,7 @@ function ClassroomCard({
           </div>
         ) : null}
 
-        {/* Delete — top-right, only on hover */}
+        {/* 删除按钮 — 右上角，仅悬停时显示 */}
         <AnimatePresence>
           {!confirmingDelete && (
             <motion.div
@@ -1062,7 +1062,7 @@ function ClassroomCard({
           )}
         </AnimatePresence>
 
-        {/* Inline delete confirmation overlay */}
+        {/* 内联删除确认遮罩 */}
         <AnimatePresence>
           {confirmingDelete && (
             <motion.div
@@ -1095,7 +1095,7 @@ function ClassroomCard({
         </AnimatePresence>
       </div>
 
-      {/* Info — outside the thumbnail */}
+      {/* 信息 — 缩略图外部 */}
       <div className="mt-2.5 px-1 flex items-center gap-2">
         <span className="shrink-0 inline-flex items-center rounded-full bg-violet-100 dark:bg-violet-900/30 px-2 py-0.5 text-[11px] font-medium text-violet-600 dark:text-violet-400">
           {classroom.sceneCount} {t('classroom.slides')} · {formatDate(classroom.updatedAt)}

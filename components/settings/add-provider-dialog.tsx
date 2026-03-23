@@ -27,14 +27,14 @@ interface AddProviderDialogProps {
 export function AddProviderDialog({ open, onOpenChange, onAdd }: AddProviderDialogProps) {
   const { t } = useI18n();
 
-  // Internal state
+  // 内部状态
   const [name, setName] = useState('');
   const [type, setType] = useState<'openai' | 'anthropic' | 'google'>('openai');
   const [baseUrl, setBaseUrl] = useState('');
   const [icon, setIcon] = useState('');
   const [requiresApiKey, setRequiresApiKey] = useState(true);
 
-  // Reset form when dialog closes (derived state pattern)
+  // 对话框关闭时重置表单（派生状态模式）
   const [prevOpen, setPrevOpen] = useState(open);
   if (open !== prevOpen) {
     setPrevOpen(open);
@@ -73,7 +73,7 @@ export function AddProviderDialog({ open, onOpenChange, onAdd }: AddProviderDial
             <h2 className="text-lg font-semibold">{t('settings.addProviderDialog')}</h2>
           </div>
 
-          {/* Provider Name */}
+          {/* 服务商名称 */}
           <div className="space-y-2">
             <Label>{t('settings.providerName')}</Label>
             <Input
@@ -83,7 +83,7 @@ export function AddProviderDialog({ open, onOpenChange, onAdd }: AddProviderDial
             />
           </div>
 
-          {/* API Mode */}
+          {/* API 模式 */}
           <div className="space-y-2">
             <Label>{t('settings.providerApiMode')}</Label>
             <div className="grid grid-cols-3 gap-2">
@@ -123,7 +123,7 @@ export function AddProviderDialog({ open, onOpenChange, onAdd }: AddProviderDial
             </div>
           </div>
 
-          {/* Default Base URL */}
+          {/* 默认 Base URL */}
           <div className="space-y-2">
             <Label>{t('settings.defaultBaseUrl')}</Label>
             <Input
@@ -134,7 +134,7 @@ export function AddProviderDialog({ open, onOpenChange, onAdd }: AddProviderDial
             />
           </div>
 
-          {/* Icon URL */}
+          {/* 图标 URL */}
           <div className="space-y-2">
             <Label>{t('settings.providerIcon')}</Label>
             <Input
@@ -145,7 +145,7 @@ export function AddProviderDialog({ open, onOpenChange, onAdd }: AddProviderDial
             />
           </div>
 
-          {/* Requires API Key */}
+          {/* 是否需要 API 密钥 */}
           <div className="flex items-center space-x-2">
             <Checkbox
               id="requires-api-key"
@@ -157,7 +157,7 @@ export function AddProviderDialog({ open, onOpenChange, onAdd }: AddProviderDial
             </label>
           </div>
 
-          {/* Footer */}
+          {/* 底部 */}
           <div className="flex items-center justify-end gap-2 pt-3 border-t">
             <Button variant="outline" size="sm" onClick={handleClose}>
               {t('settings.cancelEdit')}

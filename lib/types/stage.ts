@@ -1,4 +1,4 @@
-// Stage and Scene data types
+// 舞台和场景数据类型
 import type { Slide } from '@/lib/types/slides';
 import type { Action } from '@/lib/types/action';
 import type { PBLProjectConfig } from '@/lib/pbl/types';
@@ -10,7 +10,7 @@ export type StageMode = 'autonomous' | 'playback';
 export type Whiteboard = Omit<Slide, 'theme' | 'turningMode' | 'sectionTag' | 'type'>;
 
 /**
- * Stage - Represents the entire classroom/course
+ * 舞台 - 表示整个课堂/课程
  */
 export interface Stage {
   id: string;
@@ -18,60 +18,60 @@ export interface Stage {
   description?: string;
   createdAt: number;
   updatedAt: number;
-  // Stage metadata
+  // 舞台元数据
   language?: string;
   style?: string;
-  // Whiteboard data
+  // 白板数据
   whiteboard?: Whiteboard[];
 }
 
 /**
- * Scene - Represents a single page/scene in the course
+ * 场景 - 表示课程中的单个页面/场景
  */
 export interface Scene {
   id: string;
-  stageId: string; // ID of the parent stage (for data integrity checks)
+  stageId: string; // 父舞台 ID（用于数据完整性检查）
   type: SceneType;
   title: string;
-  order: number; // Display order
+  order: number; // 显示顺序
 
-  // Type-specific content
+  // 特定类型的内容
   content: SceneContent;
 
-  // Actions to execute during playback
+  // 回放期间执行的动作
   actions?: Action[];
 
-  // Whiteboards to explain deeply
+  // 用于深入讲解的白板
   whiteboards?: Slide[];
 
-  // Multi-agent discussion configuration
+  // 多智能体讨论配置
   multiAgent?: {
-    enabled: boolean; // Enable multi-agent for this scene
-    agentIds: string[]; // Which agents to include (from registry)
-    directorPrompt?: string; // Optional custom director instructions
+    enabled: boolean; // 为此场景启用多智能体
+    agentIds: string[]; // 要包含的智能体（来自注册表）
+    directorPrompt?: string; // 可选的自定义导演指令
   };
 
-  // Metadata
+  // 元数据
   createdAt?: number;
   updatedAt?: number;
 }
 
 /**
- * Scene content based on type
+ * 基于类型的场景内容
  */
 export type SceneContent = SlideContent | QuizContent | InteractiveContent | PBLContent;
 
 /**
- * Slide content - PPTist Canvas data
+ * 幻灯片内容 - PPTist 画布数据
  */
 export interface SlideContent {
   type: 'slide';
-  // PPTist slide data structure
+  // PPTist 幻灯片数据结构
   canvas: Slide;
 }
 
 /**
- * Quiz content - React component props/data
+ * 测验内容 - React 组件属性/数据
  */
 export interface QuizContent {
   type: 'quiz';
@@ -79,8 +79,8 @@ export interface QuizContent {
 }
 
 export interface QuizOption {
-  label: string; // Display text
-  value: string; // Selection key: "A", "B", "C", "D"
+  label: string; // 显示文本
+  value: string; // 选择键："A"、"B"、"C"、"D"
 }
 
 export interface QuizQuestion {
@@ -88,32 +88,32 @@ export interface QuizQuestion {
   type: 'single' | 'multiple' | 'short_answer';
   question: string;
   options?: QuizOption[];
-  answer?: string[]; // Correct answer values: ["A"], ["A","C"], or undefined for text
-  analysis?: string; // Explanation shown after grading
-  commentPrompt?: string; // Grading guidance for text questions
-  hasAnswer?: boolean; // Whether auto-grading is possible
-  points?: number; // Points per question (default 1)
+  answer?: string[]; // 正确答案值：["A"]、["A","C"]，或文本题时为 undefined
+  analysis?: string; // 评分后显示的解释
+  commentPrompt?: string; // 文本题的评分指导
+  hasAnswer?: boolean; // 是否可以自动评分
+  points?: number; // 每题分数（默认 1）
 }
 
 /**
- * Interactive content - Interactive web page (iframe)
+ * 互动内容 - 互动网页（iframe）
  */
 export interface InteractiveContent {
   type: 'interactive';
-  url: string; // URL of the interactive page
-  // Optional: embedded HTML content
+  url: string; // 互动页面的 URL
+  // 可选：嵌入的 HTML 内容
   html?: string;
 }
 
 /**
- * PBL content - Project-based learning
+ * PBL 内容 - 项目式学习
  */
 export interface PBLContent {
   type: 'pbl';
   projectConfig: PBLProjectConfig;
 }
 
-// Re-export generation types for convenience
+// 为方便使用，重新导出生成类型
 export type {
   UserRequirements,
   SceneOutline,

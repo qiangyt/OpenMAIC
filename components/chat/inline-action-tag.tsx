@@ -27,7 +27,7 @@ interface InlineActionTagProps {
   state: string;
 }
 
-// ── Style tokens ──────────────────────────────────────────────
+// ── 样式令牌 ──────────────────────────────────────────────
 
 const WB_STYLE =
   'bg-violet-50 dark:bg-violet-500/15 border-violet-300/40 dark:border-violet-500/30 text-violet-600 dark:text-violet-300';
@@ -42,29 +42,29 @@ const DISCUSS_STYLE =
 const DEFAULT_STYLE =
   'bg-gray-50 dark:bg-gray-500/15 border-gray-300/40 dark:border-gray-500/30 text-gray-600 dark:text-gray-300';
 
-// ── Action config ─────────────────────────────────────────────
+// ── 动作配置 ─────────────────────────────────────────────
 
 interface ActionCfg {
   label: string;
   Icon: LucideIcon;
   style: string;
-  /** Whiteboard family — gets the pen-line accent indicator */
+  /** 白板系列 —— 获得笔线强调指示器 */
   wb?: boolean;
 }
 
 const ACTION_CONFIG: Record<string, ActionCfg> = {
-  // Slide effects
+  // 幻灯片效果
   spotlight: { label: 'Spotlight', Icon: Flashlight, style: SPOTLIGHT_STYLE },
   laser: { label: 'Laser', Icon: MousePointer2, style: LASER_STYLE },
   play_video: { label: 'Play', Icon: Play, style: SPOTLIGHT_STYLE },
 
-  // Whiteboard lifecycle
+  // 白板生命周期
   wb_open: { label: 'Open', Icon: PanelLeftOpen, style: WB_STYLE, wb: true },
   wb_close: { label: 'Close', Icon: PanelLeftClose, style: WB_STYLE, wb: true },
   wb_clear: { label: 'Clear', Icon: Eraser, style: WB_STYLE, wb: true },
   wb_delete: { label: 'Delete', Icon: Trash2, style: WB_STYLE, wb: true },
 
-  // Whiteboard drawing
+  // 白板绘制
   wb_draw_text: { label: 'Text', Icon: Type, style: WB_STYLE, wb: true },
   wb_draw_shape: { label: 'Shape', Icon: Shapes, style: WB_STYLE, wb: true },
   wb_draw_chart: { label: 'Chart', Icon: BarChart3, style: WB_STYLE, wb: true },
@@ -72,11 +72,11 @@ const ACTION_CONFIG: Record<string, ActionCfg> = {
   wb_draw_table: { label: 'Table', Icon: Table2, style: WB_STYLE, wb: true },
   wb_draw_line: { label: 'Line', Icon: Minus, style: WB_STYLE, wb: true },
 
-  // Social
+  // 社交
   discussion: { label: 'Discuss', Icon: MessageSquare, style: DISCUSS_STYLE },
 };
 
-// ── Component ─────────────────────────────────────────────────
+// ── 组件 ─────────────────────────────────────────────────
 
 export function InlineActionTag({ actionName, state }: InlineActionTagProps) {
   const config = ACTION_CONFIG[actionName];
@@ -91,13 +91,13 @@ export function InlineActionTag({ actionName, state }: InlineActionTagProps) {
       className={cn(
         'inline-flex items-center mx-1 rounded-full border align-middle leading-none whitespace-nowrap',
         'text-[9px] font-bold tracking-wide',
-        // Slightly tighter padding when wb accent is present (accent provides left visual weight)
+        // 当存在白板强调时使用稍紧的内边距（强调器提供左侧视觉重量）
         isWb ? 'pl-0.5 pr-1.5 py-px' : 'px-1.5 py-px',
         style,
         isRunning && 'animate-pulse',
       )}
     >
-      {/* Whiteboard accent: tiny PenLine chip on the left */}
+      {/* 白板强调器：左侧的小 PenLine 芯片 */}
       {isWb && (
         <span
           className={cn(
@@ -110,7 +110,7 @@ export function InlineActionTag({ actionName, state }: InlineActionTagProps) {
         </span>
       )}
 
-      {/* Action icon */}
+      {/* 动作图标 */}
       {isRunning ? (
         <Loader2 className="w-2.5 h-2.5 animate-spin shrink-0" />
       ) : (

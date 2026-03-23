@@ -1,11 +1,11 @@
 /**
- * Two-Stage Generation Pipeline
+ * 两阶段生成流水线
  *
- * Barrel re-export — all symbols previously exported from this file
- * are now spread across focused sub-modules.
+ * 桶重导出 — 之前从此文件导出的所有符号
+ * 现在分散到专注的子模块中。
  */
 
-// Types
+// 类型
 export type {
   AgentInfo,
   SceneGenerationContext,
@@ -15,7 +15,7 @@ export type {
   AICallFn,
 } from './pipeline-types';
 
-// Prompt formatters
+// Prompt 格式化器
 export {
   buildCourseContext,
   formatAgentsForPrompt,
@@ -25,13 +25,13 @@ export {
   buildVisionUserContent,
 } from './prompt-formatters';
 
-// JSON repair
+// JSON 修复
 export { parseJsonResponse, tryParseJson } from './json-repair';
 
-// Outline generator (Stage 1)
+// 大纲生成器（阶段 1）
 export { generateSceneOutlinesFromRequirements, applyOutlineFallbacks } from './outline-generator';
 
-// Scene generator (Stage 2)
+// 场景生成器（阶段 2）
 export {
   generateFullScenes,
   generateSceneContent,
@@ -39,12 +39,12 @@ export {
   createSceneWithActions,
 } from './scene-generator';
 
-// Scene builder (standalone)
+// 场景构建器（独立）
 export {
   buildSceneFromOutline,
   buildCompleteScene,
   uniquifyMediaElementIds,
 } from './scene-builder';
 
-// Pipeline runner
+// 流水线运行器
 export { createGenerationSession, runGenerationPipeline } from './pipeline-runner';

@@ -71,18 +71,18 @@ export default class Slide {
 		this._slideLayout = params.slideLayout || null
 		this._slideNum = params.slideNumber
 		this._slideObjects = []
-		/** NOTE: Slide Numbers: In order for Slide Numbers to function they need to be in all 3 files: master/layout/slide
-		 * `defineSlideMaster` and `addNewSlide.slideNumber` will add {slideNumber} to `this.masterSlide` and `this.slideLayouts`
-		 * so, lastly, add to the Slide now.
+		/** 注意: 幻灯片编号: 为了使幻灯片编号正常工作，它们需要出现在所有 3 个文件中: master/layout/slide
+		 * `defineSlideMaster` 和 `addNewSlide.slideNumber` 会将 {slideNumber} 添加到 `this.masterSlide` 和 `this.slideLayouts`
+		 * 所以，最后，添加到幻灯片中。
 		 */
 		this._slideNumberProps = this._slideLayout?._slideNumberProps ? this._slideLayout._slideNumberProps : null
 	}
 
 	/**
-	 * Background color
-	 * @type {string|BackgroundProps}
-	 * @deprecated in v3.3.0 - use `background` instead
-	 */
+	 * 背景颜色
+     * @type {string|BackgroundProps}
+     * @deprecated in v3.3.0 - 使用 `background` 代替
+     */
 	private _bkgd: string | BackgroundProps
 	public set bkgd(value: string | BackgroundProps) {
 		this._bkgd = value
@@ -108,7 +108,7 @@ export default class Slide {
 	private _background: BackgroundProps
 	public set background(props: BackgroundProps) {
 		this._background = props
-		// Add background (image data/path must be captured before `exportPresentation()` is called)
+		// 添加背景（图片数据/路径必须在调用 `exportPresentation()` 之前捕获）
 		if (props) genObj.addBackgroundDefinition(props, this)
 	}
 

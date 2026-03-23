@@ -1,8 +1,8 @@
 /**
- * Director Prompt Builder
+ * 导演提示词构建器
  *
- * Constructs the system prompt for the director agent that decides
- * which agent should respond next in a multi-agent conversation.
+ * 为导演智能体构建系统提示词，该智能体决定
+ * 在多智能体对话中下一个应该响应的智能体。
  */
 
 import type { AgentConfig } from '@/lib/orchestration/registry/types';
@@ -11,7 +11,7 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('DirectorPrompt');
 
 /**
- * A single whiteboard action performed by an agent, recorded in the ledger.
+ * 智能体执行的单个白板操作，记录在账本中。
  */
 export interface WhiteboardActionRecord {
   actionName:
@@ -31,7 +31,7 @@ export interface WhiteboardActionRecord {
 }
 
 /**
- * Summary of an agent's turn in the current round
+ * 当前轮次中智能体发言的摘要
  */
 export interface AgentTurnSummary {
   agentId: string;
@@ -42,12 +42,12 @@ export interface AgentTurnSummary {
 }
 
 /**
- * Build the system prompt for the director agent
+ * 构建导演智能体的系统提示词
  *
- * @param agents - Available agent configurations
- * @param conversationSummary - Condensed summary of recent conversation
- * @param agentResponses - Agents that have already responded this round
- * @param turnCount - Current turn number in this round
+ * @param agents - 可用的智能体配置
+ * @param conversationSummary - 最近对话的精简摘要
+ * @param agentResponses - 本轮已响应的智能体
+ * @param turnCount - 本轮当前的轮次编号
  */
 export function buildDirectorPrompt(
   agents: AgentConfig[],
@@ -73,7 +73,7 @@ export function buildDirectorPrompt(
             return `- ${r.agentName} (${r.agentId}): "${r.contentPreview}" [${r.actionCount} actions${wbPart}]`;
           })
           .join('\n')
-      : 'None yet.';
+      : 'None yet.'; // 中文：暂无
 
   const isDiscussion = !!discussionContext;
 
@@ -87,10 +87,10 @@ This is a student-initiated discussion, not a Q&A session.\n`
     ? `1. The discussion initiator${triggerAgentId ? ` ("${triggerAgentId}")` : ''} should speak first to kick off the topic. Then the teacher responds to guide the discussion. After that, other students may add their perspectives.`
     : "1. The teacher (role: teacher, highest priority) should usually speak first to address the user's question or topic.";
 
-  // Build whiteboard state section for director awareness
+  // 为导演构建白板状态部分
   const whiteboardSection = buildWhiteboardStateForDirector(whiteboardLedger);
 
-  // Build student profile section for director awareness
+  // 为导演构建学生资料部分
   const studentProfileSection =
     userProfile?.nickname || userProfile?.bio
       ? `
@@ -101,6 +101,7 @@ ${userProfile.bio ? `Background: ${userProfile.bio}` : ''}
       : '';
 
   return `You are the Director of a multi-agent classroom. Your job is to decide which agent should speak next based on the conversation context.
+// 中文：你是多智能体课堂的导演。你的工作是根据对话上下文决定下一个应该发言的智能体。
 
 # Available Agents
 ${agentList}
@@ -138,7 +139,7 @@ or
 }
 
 /**
- * Summarize a single agent's whiteboard actions into a compact description.
+ * 将单个智能体的白板操作摘要为紧凑的描述。
  */
 function summarizeAgentWhiteboardActions(actions: WhiteboardActionRecord[]): string {
   if (!actions || actions.length === 0) return '';
@@ -190,7 +191,7 @@ function summarizeAgentWhiteboardActions(actions: WhiteboardActionRecord[]): str
         break;
       case 'wb_open':
       case 'wb_close':
-        // Skip open/close from summary — they're structural, not content
+        // 从摘要中跳过 open/close — 它们是结构性的，不是内容
         break;
     }
   }
@@ -198,7 +199,7 @@ function summarizeAgentWhiteboardActions(actions: WhiteboardActionRecord[]): str
 }
 
 /**
- * Replay the whiteboard ledger to compute current element count and contributors.
+ * 重放白板账本以计算当前元素数量和贡献者。
  */
 export function summarizeWhiteboardForDirector(ledger: WhiteboardActionRecord[]): {
   elementCount: number;
@@ -210,7 +211,7 @@ export function summarizeWhiteboardForDirector(ledger: WhiteboardActionRecord[])
   for (const record of ledger) {
     if (record.actionName === 'wb_clear') {
       elementCount = 0;
-      // Don't reset contributors — they still participated
+      // 不重置贡献者 — 他们仍然参与过
     } else if (record.actionName === 'wb_delete') {
       elementCount = Math.max(0, elementCount - 1);
     } else if (record.actionName.startsWith('wb_draw_')) {
@@ -226,8 +227,8 @@ export function summarizeWhiteboardForDirector(ledger: WhiteboardActionRecord[])
 }
 
 /**
- * Build the whiteboard state section for the director prompt.
- * Returns empty string if there are no whiteboard actions.
+ * 为导演提示词构建白板状态部分。
+ * 如果没有白板操作则返回空字符串。
  */
 function buildWhiteboardStateForDirector(ledger?: WhiteboardActionRecord[]): string {
   if (!ledger || ledger.length === 0) return '';
@@ -246,17 +247,17 @@ Contributors: ${contributors.length > 0 ? contributors.join(', ') : 'none'}${cro
 }
 
 /**
- * Parse the director's decision from its response
+ * 从响应中解析导演的决策
  *
- * @param content - Raw LLM response content
- * @returns Parsed decision with nextAgentId and shouldEnd flag
+ * @param content - 原始 LLM 响应内容
+ * @returns 解析后的决策，包含 nextAgentId 和 shouldEnd 标志
  */
 export function parseDirectorDecision(content: string): {
   nextAgentId: string | null;
   shouldEnd: boolean;
 } {
   try {
-    // Try to extract JSON from the response
+    // 尝试从响应中提取 JSON
     const jsonMatch = content.match(/\{[\s\S]*?"next_agent"[\s\S]*?\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
@@ -272,6 +273,6 @@ export function parseDirectorDecision(content: string): {
     log.warn('[Director] Failed to parse decision:', content.slice(0, 200));
   }
 
-  // Default: end the round if we can't parse
+  // 默认：如果无法解析则结束本轮
   return { nextAgentId: null, shouldEnd: true };
 }

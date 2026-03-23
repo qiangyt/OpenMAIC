@@ -15,10 +15,10 @@ interface SpotlightRect {
 }
 
 /**
- * Spotlight overlay component
+ * 聚光灯覆盖层组件
  *
- * Uses DOM measurement (getBoundingClientRect) to compute spotlight position,
- * avoiding alignment offsets from percentage coordinate conversion.
+ * 使用 DOM 测量 (getBoundingClientRect) 计算聚光灯位置，
+ * 避免百分比坐标转换带来的对齐偏移。
  */
 export function SpotlightOverlay() {
   const spotlightElementId = useCanvasStore.use.spotlightElementId();
@@ -30,7 +30,7 @@ export function SpotlightOverlay() {
     (content) => content.canvas.elements,
   );
 
-  // Compute target element position in SVG coordinate system via DOM measurement
+  // 通过 DOM 测量计算 SVG 坐标系中的目标元素位置
   const measure = useCallback(() => {
     if (!spotlightElementId || !containerRef.current) {
       setRect(null);
@@ -43,7 +43,7 @@ export function SpotlightOverlay() {
       return;
     }
 
-    // Prefer measuring .element-content (the actual rendered area for auto-height)
+    // 优先测量 .element-content（自动高度的实际渲染区域）
     const contentEl = domElement.querySelector('.element-content');
     const targetEl = contentEl ?? domElement;
 
@@ -55,7 +55,7 @@ export function SpotlightOverlay() {
       return;
     }
 
-    // Convert to SVG viewBox 0-100 coordinates
+    // 转换为 SVG viewBox 0-100 坐标
     setRect({
       x: ((targetRect.left - containerRect.left) / containerRect.width) * 100,
       y: ((targetRect.top - containerRect.top) / containerRect.height) * 100,
@@ -65,7 +65,7 @@ export function SpotlightOverlay() {
   }, [spotlightElementId]);
 
   useLayoutEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM measurement requires effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM 测量需要在 effect 中进行
     measure();
   }, [measure, elements]);
 
@@ -95,9 +95,9 @@ export function SpotlightOverlay() {
             >
               <defs>
                 <mask id={`mask-${spotlightElementId}`}>
-                  {/* White background = show mask layer (dimmed) */}
+                  {/* 白色背景 = 显示遮罩层（变暗） */}
                   <rect x="0" y="0" width="100" height="100" fill="white" />
-                  {/* Black rectangle = hide mask layer (highlighted area / cutout) */}
+                  {/* 黑色矩形 = 隐藏遮罩层（高亮区域/镂空） */}
                   <motion.rect
                     fill="black"
                     initial={{
@@ -122,7 +122,7 @@ export function SpotlightOverlay() {
                 </mask>
               </defs>
 
-              {/* Dimmed Background */}
+              {/* 变暗背景 */}
               <rect
                 width="100"
                 height="100"
@@ -131,7 +131,7 @@ export function SpotlightOverlay() {
                 className="backdrop-blur-[1.5px]"
               />
 
-              {/* THE ONE BORDER - white border */}
+              {/* 边框 - 白色边框 */}
               <motion.rect
                 initial={{
                   x: rect.x - 4,

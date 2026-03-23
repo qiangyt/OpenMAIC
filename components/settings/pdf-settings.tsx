@@ -13,7 +13,7 @@ import { CheckCircle2, Eye, EyeOff, Loader2, Zap, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
- * Get display label for feature
+ * 获取功能的显示标签
  */
 function getFeatureLabel(feature: string, t: (key: string) => string): string {
   const labels: Record<string, string> = {
@@ -46,7 +46,7 @@ export function PDFSettings({ selectedProviderId }: PDFSettingsProps) {
   const hasBaseUrl = !!providerConfig?.baseUrl;
   const needsRemoteConfig = selectedProviderId === 'mineru';
 
-  // Reset state when provider changes
+  // 当服务商变更时重置状态
   const [prevSelectedProviderId, setPrevSelectedProviderId] = useState(selectedProviderId);
   if (selectedProviderId !== prevSelectedProviderId) {
     setPrevSelectedProviderId(selectedProviderId);
@@ -91,14 +91,14 @@ export function PDFSettings({ selectedProviderId }: PDFSettingsProps) {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {/* Server-configured notice */}
+      {/* 服务端配置提示 */}
       {isServerConfigured && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30 p-3 text-sm text-blue-700 dark:text-blue-300">
           {t('settings.serverConfiguredNotice')}
         </div>
       )}
 
-      {/* Base URL + API Key Configuration (for remote providers like MinerU) */}
+      {/* Base URL + API Key 配置（适用于 MinerU 等远程服务商） */}
       {(needsRemoteConfig || isServerConfigured) && (
         <>
           <div className="grid grid-cols-2 gap-4">
@@ -174,7 +174,7 @@ export function PDFSettings({ selectedProviderId }: PDFSettingsProps) {
             </div>
           </div>
 
-          {/* Test result message */}
+          {/* 测试结果消息 */}
           {testMessage && (
             <div
               className={cn(
@@ -193,7 +193,7 @@ export function PDFSettings({ selectedProviderId }: PDFSettingsProps) {
             </div>
           )}
 
-          {/* Request URL Preview */}
+          {/* 请求 URL 预览 */}
           {(() => {
             const effectiveBaseUrl = providerConfig?.baseUrl || '';
             if (!effectiveBaseUrl) return null;
@@ -207,7 +207,7 @@ export function PDFSettings({ selectedProviderId }: PDFSettingsProps) {
         </>
       )}
 
-      {/* Features List */}
+      {/* 功能列表 */}
       <div className="space-y-2">
         <Label className="text-sm">{t('settings.pdfFeatures')}</Label>
         <div className="flex flex-wrap gap-2">

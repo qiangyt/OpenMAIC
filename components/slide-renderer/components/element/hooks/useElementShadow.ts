@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import type { PPTElementShadow } from '@/lib/types/slides';
 
 /**
- * Calculate element shadow style
- * Converts shadow object to CSS box-shadow string
- * @param shadow Shadow configuration
+ * 计算元素阴影样式
+ * 将阴影对象转换为 CSS box-shadow 字符串
+ * @param shadow 阴影配置
  */
 export function useElementShadow(shadow?: PPTElementShadow) {
   const shadowStyle = useMemo(() => {

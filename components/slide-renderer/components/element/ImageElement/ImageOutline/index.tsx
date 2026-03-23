@@ -11,7 +11,7 @@ export interface ImageOutlineProps {
 }
 
 /**
- * Image outline dispatcher based on clip shape type
+ * 图片边框分发器，根据裁剪形状类型选择对应的边框组件
  */
 export function ImageOutline({ elementInfo }: ImageOutlineProps) {
   const { clipShape } = useClipImage(elementInfo);

@@ -62,7 +62,7 @@ export function EditableElement({
       [ElementTypes.LATEX]: LatexElement,
       [ElementTypes.TABLE]: TableElement,
       [ElementTypes.VIDEO]: VideoElement,
-      // TODO: Add other element types
+      // TODO: 添加其他元素类型
       // [ElementTypes.AUDIO]: AudioElement,
     };
     return elementTypeMap[elementInfo.type] || null;
@@ -251,7 +251,7 @@ export function EditableElement({
               return <ContextMenuSeparator key={index} />;
             }
 
-            // If has children, use submenu component
+            // 如果有子项，使用子菜单组件
             if (item.children && item.children.length > 0) {
               return (
                 <ContextMenuSub key={index}>
@@ -285,7 +285,7 @@ export function EditableElement({
               );
             }
 
-            // Regular menu item
+            // 常规菜单项
             return (
               <ContextMenuItem
                 key={index}

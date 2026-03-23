@@ -6,11 +6,11 @@ import type { SlideContent } from '@/lib/types/stage';
 import type { SlideBackground } from '@/lib/types/slides';
 
 /**
- * Viewport background component using Scene Context
- * Renders the slide background from current scene data
+ * 使用 Scene Context 的视口背景组件
+ * 从当前场景数据渲染幻灯片背景
  */
 export function ViewportBackground() {
-  // Subscribe only to background for performance
+  // 仅订阅背景以优化性能
   const background = useSceneSelector<SlideContent, SlideBackground | undefined>(
     (content) => content.canvas.background,
   );
@@ -23,7 +23,7 @@ export function ViewportBackground() {
     height: '100%',
     backgroundPosition: 'center',
     position: 'absolute',
-    pointerEvents: 'none', // Don't block mouse events
+    pointerEvents: 'none', // 不阻挡鼠标事件
   };
 
   return <div className="viewport-background" style={backgroundStyle} />;

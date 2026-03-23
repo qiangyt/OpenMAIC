@@ -1,5 +1,5 @@
 /**
- * Video Generation Service -- routes to provider adapters
+ * 视频生成服务 —— 路由到提供商适配器
  */
 
 import type {
@@ -95,9 +95,9 @@ export async function testVideoConnectivity(
 }
 
 /**
- * Normalize video generation options against provider capabilities.
- * Ensures duration, aspectRatio, and resolution are valid for the given provider.
- * Falls back to the first supported value when the requested value is unsupported.
+ * 根据提供商能力规范化视频生成选项。
+ * 确保 duration、aspectRatio 和 resolution 对给定提供商有效。
+ * 当请求的值不被支持时，回退到第一个支持的值。
  */
 export function normalizeVideoOptions(
   providerId: VideoProviderId,
@@ -108,14 +108,14 @@ export function normalizeVideoOptions(
 
   const normalized = { ...options };
 
-  // Duration: use first supported value if unset or unsupported
+  // 时长：如未设置或不支持，使用第一个支持的值
   if (provider.supportedDurations && provider.supportedDurations.length > 0) {
     if (!normalized.duration || !provider.supportedDurations.includes(normalized.duration)) {
       normalized.duration = provider.supportedDurations[0];
     }
   }
 
-  // Aspect ratio: use first supported value if unset or unsupported
+  // 宽高比：如未设置或不支持，使用第一个支持的值
   if (provider.supportedAspectRatios && provider.supportedAspectRatios.length > 0) {
     if (
       !normalized.aspectRatio ||
@@ -128,7 +128,7 @@ export function normalizeVideoOptions(
     }
   }
 
-  // Resolution: use first supported value if unset or unsupported
+  // 分辨率：如未设置或不支持，使用第一个支持的值
   if (provider.supportedResolutions && provider.supportedResolutions.length > 0) {
     if (!normalized.resolution || !provider.supportedResolutions.includes(normalized.resolution)) {
       normalized.resolution = provider.supportedResolutions[0];

@@ -10,8 +10,8 @@ export interface ElementOutlineProps {
 }
 
 /**
- * Element outline (border) component
- * Renders an SVG outline around an element based on outline configuration
+ * 元素轮廓（边框）组件
+ * 根据轮廓配置在元素周围渲染 SVG 轮廓
  */
 export function ElementOutline({ width, height, outline }: ElementOutlineProps) {
   const { outlineWidth, outlineColor, strokeDashArray } = useElementOutline(outline);

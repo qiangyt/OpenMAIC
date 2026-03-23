@@ -1,8 +1,7 @@
 /**
- * Agent Profiles Generation API
+ * 智能体画像生成 API
  *
- * Generates agent profiles (teacher, assistant, student) for a course stage
- * based on stage info and scene outlines.
+ * 根据课程阶段信息和场景大纲生成智能体画像（教师、助教、学生）。
  */
 
 import { NextRequest } from 'next/server';
@@ -40,7 +39,7 @@ interface RequestBody {
 
 function stripCodeFences(text: string): string {
   let cleaned = text.trim();
-  // Remove markdown code fences (```json ... ``` or ``` ... ```)
+  // 移除 markdown 代码围栏（```json ... ``` 或 ``` ... ```）
   if (cleaned.startsWith('```')) {
     cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
   }
@@ -52,7 +51,7 @@ export async function POST(req: NextRequest) {
     const body = (await req.json()) as RequestBody;
     const { stageInfo, sceneOutlines, language, availableAvatars } = body;
 
-    // ── Validate required fields ──
+    // ── 验证必填字段 ──
     if (!stageInfo?.name) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'stageInfo.name is required');
     }
@@ -67,10 +66,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ── Model resolution from request headers ──
+    // ── 从请求 headers 解析模型 ──
     const { model: languageModel, modelString } = resolveModelFromHeaders(req);
 
-    // ── Build prompt ──
+    // ── 构建 prompt ──
     const sceneSummary = sceneOutlines?.length
       ? sceneOutlines
           .map((s, i) => `${i + 1}. ${s.title}${s.description ? ` — ${s.description}` : ''}`)
@@ -120,7 +119,7 @@ Return a JSON object with this exact structure:
       'agent-profiles',
     );
 
-    // ── Parse LLM response ──
+    // ── 解析 LLM 响应 ──
     const rawText = stripCodeFences(result.text);
     let parsed: {
       agents: Array<{
@@ -140,7 +139,7 @@ Return a JSON object with this exact structure:
       return apiError('PARSE_FAILED', 500, 'Failed to parse agent profiles from LLM response');
     }
 
-    // ── Validate parsed structure ──
+    // ── 验证解析后的结构 ──
     if (!parsed.agents || !Array.isArray(parsed.agents) || parsed.agents.length < 2) {
       log.error(`Expected at least 2 agents, got ${parsed.agents?.length ?? 0}`);
       return apiError(
@@ -160,7 +159,7 @@ Return a JSON object with this exact structure:
       );
     }
 
-    // ── Build output with IDs ──
+    // ── 构建带 ID 的输出 ──
     const agents = parsed.agents.map((agent, index) => ({
       id: `gen-${nanoid(8)}`,
       name: agent.name,

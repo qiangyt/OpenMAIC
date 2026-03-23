@@ -10,9 +10,9 @@ import type { DiscussionAction } from '@/lib/types/action';
 interface ProactiveCardProps {
   action: DiscussionAction;
   mode: 'playback' | 'paused' | 'autonomous';
-  /** Ref to the anchor element the card points to (avatar, etc.) */
+  /** 卡片指向的锚点元素引用（头像等） */
   anchorRef: React.RefObject<HTMLElement | null>;
-  /** Where the card prefers to align relative to the anchor */
+  /** 卡片相对于锚点的首选对齐方式 */
   align?: 'left' | 'right';
   agentName?: string;
   agentAvatar?: string;
@@ -22,7 +22,7 @@ interface ProactiveCardProps {
   onTogglePause: () => void;
 }
 
-const CARD_WIDTH = 256; // w-64
+const CARD_WIDTH = 256; // w-64 宽度
 const VIEWPORT_PAD = 12;
 
 /**
@@ -48,7 +48,7 @@ export const ProactiveCard = ({
   const skippedRef = useRef(false);
   const isPaused = mode === 'paused';
 
-  // Computed position state
+  // 计算的位置状态
   const [pos, setPos] = useState<{
     left: number;
     bottom: number;
@@ -62,19 +62,19 @@ export const ProactiveCard = ({
     const anchorCenterX = rect.left + rect.width / 2;
     const anchorTop = rect.top;
 
-    // Center card on anchor, clamped to viewport
+    // 将卡片居中于锚点，并限制在视口内
     let cardLeft = anchorCenterX - CARD_WIDTH / 2;
     cardLeft = Math.max(
       VIEWPORT_PAD,
       Math.min(window.innerWidth - CARD_WIDTH - VIEWPORT_PAD, cardLeft),
     );
     const tailOffset = Math.max(16, Math.min(CARD_WIDTH - 16, anchorCenterX - cardLeft));
-    const bottom = window.innerHeight - anchorTop + 12; // 12px gap above anchor
+    const bottom = window.innerHeight - anchorTop + 12; // 锚点上方 12px 间距
 
     setPos({ left: cardLeft, bottom, tailOffset });
   }, [anchorRef]);
 
-  // Continuously track anchor position via rAF to handle CSS transitions, sidebar collapse, etc.
+  // 通过 rAF 持续追踪锚点位置，以处理 CSS 过渡、侧边栏折叠等情况
   useEffect(() => {
     let rafId: number;
     const tick = () => {
@@ -130,7 +130,7 @@ export const ProactiveCard = ({
       }}
     >
       <div className="relative">
-        {/* Close button */}
+        {/* 关闭按钮 */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -142,7 +142,7 @@ export const ProactiveCard = ({
           <X className="w-3 h-3 stroke-[2.5]" />
         </button>
 
-        {/* Triangle Tail */}
+        {/* 三角形尾标 */}
         <div
           className="absolute -bottom-[6px] w-3 h-3 bg-white dark:bg-gray-800 border-b border-r border-gray-100 dark:border-gray-700 z-10"
           style={{
@@ -151,9 +151,9 @@ export const ProactiveCard = ({
           }}
         />
 
-        {/* Card body */}
+        {/* 卡片主体 */}
         <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm p-3.5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-gray-100 dark:border-gray-700 flex flex-col gap-2.5 relative overflow-hidden">
-          {/* Progress Bar */}
+          {/* 进度条 */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gray-50/50 dark:bg-gray-700/50">
             <div
               className={`h-full transition-all duration-[50ms] ease-linear ${
@@ -165,7 +165,7 @@ export const ProactiveCard = ({
             />
           </div>
 
-          {/* Header */}
+          {/* 头部 */}
           <div className="flex items-center gap-2 px-0.5 pt-1">
             {agentAvatar && (
               <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 border border-gray-100 dark:border-gray-700">

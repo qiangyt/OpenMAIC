@@ -2,9 +2,9 @@ import { getNary, getNaryTarget } from '../ooml/index.js'
 import { walker } from '../walker.js'
 
 export function munderover(element, targetParent, previousSibling, nextSibling, ancestors) {
-  // Munderover
+  // 上下标
   if (element.children.length !== 3) {
-    // treat as mrow
+    // 视为 mrow 处理
     return targetParent
   }
 
@@ -18,9 +18,9 @@ export function munderover(element, targetParent, previousSibling, nextSibling, 
   //
   // m:nAry
   //
-  // Conditions:
-  // 1. base text must be nary operator
-  // 2. no accents
+  // 条件：
+  // 1. 基底文本必须是 nary 运算符
+  // 2. 没有重音符号
   const naryChar = getNary(base)
   if (
     naryChar &&
@@ -50,7 +50,7 @@ export function munderover(element, targetParent, previousSibling, nextSibling, 
     return
   }
 
-  // Fallback: m:limUpp()m:limlow
+  // 回退：m:limUpp()m:limlow
 
   const baseTarget = {
     name: 'm:e',
@@ -97,5 +97,5 @@ export function munderover(element, targetParent, previousSibling, nextSibling, 
       overscriptTarget
     ]
   })
-  // Don't iterate over children in the usual way.
+  // 不要以常规方式遍历子元素。
 }

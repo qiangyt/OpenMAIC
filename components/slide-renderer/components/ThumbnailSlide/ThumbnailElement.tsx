@@ -16,9 +16,9 @@ interface ThumbnailElementProps {
 }
 
 /**
- * Thumbnail element component
+ * 缩略图元素组件
  *
- * Renders the corresponding Base component based on element type
+ * 根据元素类型渲染对应的 Base 组件
  */
 export function ThumbnailElement({ elementInfo, elementIndex }: ThumbnailElementProps) {
   const CurrentElementComponent = useMemo(() => {
@@ -31,7 +31,7 @@ export function ThumbnailElement({ elementInfo, elementIndex }: ThumbnailElement
       [ElementTypes.CHART]: BaseChartElement,
       [ElementTypes.LATEX]: BaseLatexElement,
       [ElementTypes.TABLE]: BaseTableElement,
-      // TODO: Add other element types
+      // TODO: 添加其他元素类型
       [ElementTypes.VIDEO]: BaseVideoElement,
       // [ElementTypes.AUDIO]: BaseAudioElement,
     };

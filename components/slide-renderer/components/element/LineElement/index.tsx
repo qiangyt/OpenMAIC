@@ -14,8 +14,8 @@ export interface LineElementProps {
 }
 
 /**
- * Line element component
- * Renders SVG lines with optional arrow/dot endpoints
+ * 线条元素组件
+ * 渲染带有可选箭头/圆点端点的 SVG 线条
  */
 export function LineElement({ elementInfo, selectElement }: LineElementProps) {
   const { shadowStyle } = useElementShadow(elementInfo.shadow);
@@ -26,7 +26,7 @@ export function LineElement({ elementInfo, selectElement }: LineElementProps) {
     selectElement?.(e, elementInfo);
   };
 
-  // Calculate SVG dimensions
+  // 计算 SVG 尺寸
   const svgWidth = useMemo(() => {
     const width = Math.abs(elementInfo.start[0] - elementInfo.end[0]);
     return width < 24 ? 24 : width;
@@ -37,7 +37,7 @@ export function LineElement({ elementInfo, selectElement }: LineElementProps) {
     return height < 24 ? 24 : height;
   }, [elementInfo.start, elementInfo.end]);
 
-  // Calculate line dash array for dashed/dotted styles
+  // 计算虚线/点线样式的线条虚线数组
   const lineDashArray = useMemo(() => {
     const size = elementInfo.width;
     if (elementInfo.style === 'dashed') {
@@ -49,7 +49,7 @@ export function LineElement({ elementInfo, selectElement }: LineElementProps) {
     return '0 0';
   }, [elementInfo.width, elementInfo.style]);
 
-  // Generate path data
+  // 生成路径数据
   const path = useMemo(() => {
     return getLineElementPath(elementInfo);
   }, [elementInfo]);
@@ -96,7 +96,7 @@ export function LineElement({ elementInfo, selectElement }: LineElementProps) {
               />
             )}
           </defs>
-          {/* Visible line */}
+          {/* 可见线条 */}
           <path
             className={`line-point pointer-events-auto ${elementInfo.lock ? 'cursor-default' : 'cursor-move'}`}
             d={path}
@@ -111,7 +111,7 @@ export function LineElement({ elementInfo, selectElement }: LineElementProps) {
               elementInfo.points[1] ? `url(#${elementInfo.id}-${elementInfo.points[1]}-end)` : ''
             }
           />
-          {/* Invisible wider path for easier clicking */}
+          {/* 更宽的不可见路径，便于点击 */}
           <path
             className={`line-path pointer-events-auto ${elementInfo.lock ? 'cursor-default' : 'cursor-move'}`}
             d={path}

@@ -22,21 +22,21 @@ export function ScreenCanvas() {
   );
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  // Viewport size and positioning
+  // 视口尺寸和定位
   const { viewportStyles } = useViewportSize(canvasRef);
 
-  // Get background style
+  // 获取背景样式
   const background = useSceneSelector<SlideContent, SlideBackground | undefined>(
     (content) => content.canvas.background,
   );
   const { backgroundStyle } = useSlideBackgroundStyle(background);
 
-  // Get visual effect state
+  // 获取视觉效果状态
   const laserElementId = useCanvasStore.use.laserElementId();
   const laserOptions = useCanvasStore.use.laserOptions();
   const zoomTarget = useCanvasStore.use.zoomTarget();
 
-  // Compute laser pointer geometry
+  // 计算激光笔几何位置
   const laserGeometry = useMemo<PercentageGeometry | null>(() => {
     if (!laserElementId) return null;
     const element = elements.find((el) => el.id === laserElementId);
@@ -47,7 +47,7 @@ export function ScreenCanvas() {
     );
   }, [laserElementId, elements]);
 
-  // Compute zoom target geometry
+  // 计算缩放目标几何位置
   const zoomGeometry = useMemo<PercentageGeometry | null>(() => {
     if (!zoomTarget) return null;
     const element = elements.find((el) => el.id === zoomTarget.elementId);
@@ -75,13 +75,13 @@ export function ScreenCanvas() {
             : {}),
         }}
       >
-        {/* Background layer */}
+        {/* 背景层 */}
         <div
           className="w-full h-full bg-position-center rounded-lg"
           style={{ ...backgroundStyle }}
         ></div>
 
-        {/* Content layer - scaled */}
+        {/* 内容层 - 已缩放 */}
         <div
           className="absolute top-0 left-0 origin-top-left"
           style={{
@@ -94,17 +94,17 @@ export function ScreenCanvas() {
             <ScreenElement key={element.id} elementInfo={element} elementIndex={index + 1} />
           ))}
 
-          {/* Highlight overlay - stacked above elements */}
+          {/* 高亮覆盖层 - 叠加在元素之上 */}
           <HighlightOverlay />
         </div>
 
-        {/* Spotlight overlay - covers the entire slide, positioned via DOM measurement */}
+        {/* 聚光灯覆盖层 - 覆盖整个幻灯片，通过 DOM 测量定位 */}
         <SpotlightOverlay />
 
-        {/* Visual effects layer - outside the scale layer, using percentage coordinates */}
+        {/* 视觉效果层 - 位于缩放层外部，使用百分比坐标 */}
         <div className="absolute inset-0 pointer-events-none" style={{ padding: '5%' }}>
           <div className="relative w-full h-full">
-            {/* Laser pointer overlay */}
+            {/* 激光笔覆盖层 */}
             <AnimatePresence>
               {laserElementId && laserGeometry && (
                 <LaserOverlay

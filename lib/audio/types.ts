@@ -1,55 +1,55 @@
 /**
- * Audio Provider Type Definitions
+ * 音频提供商类型定义
  *
- * Unified types for TTS (Text-to-Speech) and ASR (Automatic Speech Recognition)
- * with extensible architecture to support multiple providers.
+ * TTS（文本转语音）和 ASR（自动语音识别）的统一类型定义，
+ * 采用可扩展架构以支持多个提供商。
  *
- * Currently Supported TTS Providers:
- * - OpenAI TTS (https://platform.openai.com/docs/guides/text-to-speech)
- * - Azure TTS (https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech)
- * - GLM TTS (https://docs.bigmodel.cn/cn/guide/models/sound-and-video/glm-tts)
- * - Qwen TTS (https://bailian.console.aliyun.com/)
- * - Browser Native TTS (Web Speech API, client-side only)
+ * 当前支持的 TTS 提供商：
+ * - OpenAI TTS（https://platform.openai.com/docs/guides/text-to-speech）
+ * - Azure TTS（https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech）
+ * - GLM TTS（https://docs.bigmodel.cn/cn/guide/models/sound-and-video/glm-tts）
+ * - Qwen TTS（https://bailian.console.aliyun.com/）
+ * - 浏览器原生 TTS（Web Speech API，仅客户端）
  *
- * Currently Supported ASR Providers:
- * - OpenAI Whisper (https://platform.openai.com/docs/guides/speech-to-text)
- * - Browser Native (Web Speech API, client-side only)
- * - Qwen ASR (DashScope API)
+ * 当前支持的 ASR 提供商：
+ * - OpenAI Whisper（https://platform.openai.com/docs/guides/speech-to-text）
+ * - 浏览器原生（Web Speech API，仅客户端）
+ * - Qwen ASR（DashScope API）
  *
- * Future Provider Support (extensible):
- * - ElevenLabs TTS/ASR (https://elevenlabs.io/docs)
- * - Fish Audio TTS (https://fish.audio/docs)
- * - Cartesia TTS (https://cartesia.ai/docs)
- * - PlayHT TTS (https://docs.play.ht/)
- * - AssemblyAI ASR (https://www.assemblyai.com/docs)
- * - Deepgram ASR (https://developers.deepgram.com/docs)
+ * 未来计划支持的提供商（可扩展）：
+ * - ElevenLabs TTS/ASR（https://elevenlabs.io/docs）
+ * - Fish Audio TTS（https://fish.audio/docs）
+ * - Cartesia TTS（https://cartesia.ai/docs）
+ * - PlayHT TTS（https://docs.play.ht/）
+ * - AssemblyAI ASR（https://www.assemblyai.com/docs）
+ * - Deepgram ASR（https://developers.deepgram.com/docs）
  *
- * HOW TO ADD A NEW PROVIDER:
+ * 如何添加新提供商：
  *
- * Step 1: Add provider ID to the union type
- *   - For TTS: Add to TTSProviderId below
- *   - For ASR: Add to ASRProviderId below
+ * 步骤 1：将提供商 ID 添加到联合类型
+ *   - 对于 TTS：添加到下方的 TTSProviderId
+ *   - 对于 ASR：添加到下方的 ASRProviderId
  *
- * Step 2: Add provider configuration to constants.ts
- *   - Define provider metadata (name, icon, voices, formats, etc.)
- *   - Add to TTS_PROVIDERS or ASR_PROVIDERS registry
+ * 步骤 2：在 constants.ts 中添加提供商配置
+ *   - 定义提供商元数据（名称、图标、语音、格式等）
+ *   - 添加到 TTS_PROVIDERS 或 ASR_PROVIDERS 注册表
  *
- * Step 3: Implement provider logic in tts-providers.ts or asr-providers.ts
- *   - Add case to generateTTS() or transcribeAudio() switch statement
- *   - Implement API call logic for the new provider
+ * 步骤 3：在 tts-providers.ts 或 asr-providers.ts 中实现提供商逻辑
+ *   - 在 generateTTS() 或 transcribeAudio() switch 语句中添加 case
+ *   - 为新提供商实现 API 调用逻辑
  *
- * Step 4: Add i18n translations
- *   - Add provider name translations in lib/i18n.ts
- *   - Format: `provider{ProviderName}TTS` or `provider{ProviderName}ASR`
+ * 步骤 4：添加 i18n 翻译
+ *   - 在 lib/i18n.ts 中添加提供商名称翻译
+ *   - 格式：`provider{ProviderName}TTS` 或 `provider{ProviderName}ASR`
  *
- * Step 5 (Optional): Create client-side hook if needed
- *   - For browser-only providers, create hooks like use-browser-tts.ts
- *   - Export from lib/hooks/
+ * 步骤 5（可选）：如需要，创建客户端 Hook
+ *   - 对于仅浏览器提供商，创建类似 use-browser-tts.ts 的 Hook
+ *   - 从 lib/hooks/ 导出
  *
- * Example: Adding ElevenLabs TTS
- * ================================
- * 1. Add 'elevenlabs-tts' to TTSProviderId union type
- * 2. In constants.ts:
+ * 示例：添加 ElevenLabs TTS
+ * =================================
+ * 1. 将 'elevenlabs-tts' 添加到 TTSProviderId 联合类型
+ * 2. 在 constants.ts 中：
  *    TTS_PROVIDERS['elevenlabs-tts'] = {
  *      id: 'elevenlabs-tts',
  *      name: 'ElevenLabs',
@@ -60,22 +60,22 @@
  *      supportedFormats: ['mp3', 'pcm'],
  *      speedRange: { min: 0.5, max: 2.0, default: 1.0 }
  *    }
- * 3. In tts-providers.ts:
+ * 3. 在 tts-providers.ts 中：
  *    case 'elevenlabs-tts':
  *      return await generateElevenLabsTTS(config, text);
- * 4. In i18n.ts:
- *    providerElevenLabsTTS: 'ElevenLabs TTS' / 'ElevenLabs Text-to-Speech'
+ * 4. 在 i18n.ts 中：
+ *    providerElevenLabsTTS: 'ElevenLabs TTS' / 'ElevenLabs 文本转语音'
  */
 
 // ============================================================================
-// TTS (Text-to-Speech) Types
+// TTS（文本转语音）类型
 // ============================================================================
 
 /**
- * TTS Provider IDs
+ * TTS 提供商 ID
  *
- * Add new TTS providers here as union members.
- * Keep in sync with TTS_PROVIDERS registry in constants.ts
+ * 在此处将新的 TTS 提供商添加为联合成员。
+ * 与 constants.ts 中的 TTS_PROVIDERS 注册表保持同步
  */
 export type TTSProviderId =
   | 'openai-tts'
@@ -83,26 +83,26 @@ export type TTSProviderId =
   | 'glm-tts'
   | 'qwen-tts'
   | 'browser-native-tts';
-// Add new TTS providers below (uncomment and modify):
+// 在下方添加新的 TTS 提供商（取消注释并修改）：
 // | 'elevenlabs-tts'
 // | 'fish-audio-tts'
 // | 'cartesia-tts'
 // | 'playht-tts'
 
 /**
- * Voice information for TTS
+ * TTS 语音信息
  */
 export interface TTSVoiceInfo {
   id: string;
   name: string;
   language: string;
-  localeName?: string; // Language name in its native script (e.g., "中文（简体，中国）", "日本語")
+  localeName?: string; // 语言的原生名称（如 "中文（简体，中国）"、"日本語"）
   gender?: 'male' | 'female' | 'neutral';
   description?: string;
 }
 
 /**
- * TTS Provider Configuration
+ * TTS 提供商配置
  */
 export interface TTSProviderConfig {
   id: TTSProviderId;
@@ -111,7 +111,7 @@ export interface TTSProviderConfig {
   defaultBaseUrl?: string;
   icon?: string;
   voices: TTSVoiceInfo[];
-  supportedFormats: string[]; // ['mp3', 'wav', 'opus', etc.]
+  supportedFormats: string[]; // ['mp3', 'wav', 'opus' 等]
   speedRange?: {
     min: number;
     max: number;
@@ -120,7 +120,7 @@ export interface TTSProviderConfig {
 }
 
 /**
- * TTS Model Configuration for API calls
+ * API 调用的 TTS 模型配置
  */
 export interface TTSModelConfig {
   providerId: TTSProviderId;
@@ -132,24 +132,24 @@ export interface TTSModelConfig {
 }
 
 // ============================================================================
-// ASR (Automatic Speech Recognition) Types
+// ASR（自动语音识别）类型
 // ============================================================================
 
 /**
- * ASR Provider IDs
+ * ASR 提供商 ID
  *
- * Add new ASR providers here as union members.
- * Keep in sync with ASR_PROVIDERS registry in constants.ts
+ * 在此处将新的 ASR 提供商添加为联合成员。
+ * 与 constants.ts 中的 ASR_PROVIDERS 注册表保持同步
  */
 export type ASRProviderId = 'openai-whisper' | 'browser-native' | 'qwen-asr';
-// Add new ASR providers below (uncomment and modify):
+// 在下方添加新的 ASR 提供商（取消注释并修改）：
 // | 'elevenlabs-asr'
 // | 'assemblyai-asr'
 // | 'deepgram-asr'
 // | 'azure-asr'
 
 /**
- * ASR Provider Configuration
+ * ASR 提供商配置
  */
 export interface ASRProviderConfig {
   id: ASRProviderId;
@@ -162,7 +162,7 @@ export interface ASRProviderConfig {
 }
 
 /**
- * ASR Model Configuration for API calls
+ * API 调用的 ASR 模型配置
  */
 export interface ASRModelConfig {
   providerId: ASRProviderId;

@@ -31,29 +31,29 @@
  */
 
 /**
- * Units of Measure used in PowerPoint documents
+ * PowerPoint 文档中使用的度量单位
  *
- * PowerPoint units are in `DXA` (except for font sizing)
- * - 1 inch is 1440 DXA
- * - 1 inch is 72 points
- * -  1 DXA is 1/20th's of a point
- * - 20 DXA is 1 point
+ * PowerPoint 单位为 `DXA`（字体大小除外）
+ * - 1 英寸 = 1440 DXA
+ * - 1 英寸 = 72 点
+ * -  1 DXA = 1/20 点
+ * - 20 DXA = 1 点
  *
- * Another form of measurement using is an `EMU`
- * - 914400 EMUs is 1 inch
- * -  12700 EMUs is 1 point
+ * 另一种度量形式是 `EMU`
+ * - 914400 EMU = 1 英寸
+ * -  12700 EMU = 1 点
  *
  * @see https://startbigthinksmall.wordpress.com/2010/01/04/points-inches-and-emus-measuring-units-in-office-open-xml/
  */
 
 /**
- * Object Layouts
+ * 对象布局
  *
  * - 16x9 (10" x 5.625")
  * - 16x10 (10" x 6.25")
  * - 4x3 (10" x 7.5")
  * - Wide (13.33" x 7.5")
- * - [custom] (any size)
+ * - [custom] (任意大小)
  *
  * @see https://docs.microsoft.com/en-us/office/open-xml/structure-of-a-presentationml-document
  * @see https://docs.microsoft.com/en-us/previous-versions/office/developer/office-2010/hh273476(v=office.14)
@@ -101,17 +101,17 @@ import * as genXml from './gen-xml'
 const VERSION = '4.0.1'
 
 export default class PptxGenJS implements IPresentationProps {
-	// Property getters/setters
+	// 属性 getter/setter
 
 	/**
-	 * Presentation layout name
-	 * Standard layouts:
+	 * 演示文稿布局名称
+	 * 标准布局:
 	 * - 'LAYOUT_4x3'   (10"    x 7.5")
 	 * - 'LAYOUT_16x9'  (10"    x 5.625")
 	 * - 'LAYOUT_16x10' (10"    x 6.25")
 	 * - 'LAYOUT_WIDE'  (13.33" x 7.5")
-	 * Custom layouts:
-	 * Use `pptx.defineLayout()` to create custom layouts (e.g.: 'A4')
+	 * 自定义布局:
+	 * 使用 `pptx.defineLayout()` 创建自定义布局（例如: 'A4'）
 	 * @type {string}
 	 * @see https://support.office.com/en-us/article/Change-the-size-of-your-slides-040a811c-be43-40b9-8d04-0de5ed79987e
 	 */
@@ -132,7 +132,7 @@ export default class PptxGenJS implements IPresentationProps {
 	}
 
 	/**
-	 * PptxGenJS Library Version
+	 * PptxGenJS 库版本
 	 */
 	private readonly _version: string = VERSION
 	public get version(): string {
@@ -225,7 +225,7 @@ export default class PptxGenJS implements IPresentationProps {
 		return this._rtlMode
 	}
 
-	/** master slide layout object */
+	/** 母版幻灯片布局对象 */
 	private readonly _masterSlide: PresSlide
 	public get masterSlide(): PresSlide {
 		return this._masterSlide
@@ -324,13 +324,13 @@ export default class PptxGenJS implements IPresentationProps {
 			LAYOUT_WIDE: layoutWide,
 		}
 
-		// Core
+		// 核心
 		this._author = 'PptxGenJS'
 		this._company = 'PptxGenJS'
-		this._revision = '1' // Note: Must be a whole number
-		this._subject = 'PptxGenJS Presentation'
-		this._title = 'PptxGenJS Presentation'
-		// PptxGenJS props
+		this._revision = '1' // 注意: 必须是整数
+		this._subject = 'PptxGenJS 演示文稿'
+		this._title = 'PptxGenJS 演示文稿'
+		// PptxGenJS 属性
 		this._presLayout = {
 			name: this.LAYOUTS[DEF_PRES_LAYOUT].name,
 			_sizeW: this.LAYOUTS[DEF_PRES_LAYOUT].width,

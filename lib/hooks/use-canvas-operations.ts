@@ -1,7 +1,7 @@
 /**
- * Canvas Element Operations Hook
+ * 画布元素操作 Hook
  *
- * Provides convenient element CRUD methods to avoid repetitive definitions in each component
+ * 提供便捷的元素 CRUD 方法，避免在每个组件中重复定义
  *
  * @example
  * function MyComponent() {
@@ -69,9 +69,9 @@ export function useCanvasOperations() {
   const { moveUpElement, moveDownElement, moveTopElement, moveBottomElement } = useOrderElement();
 
   /**
-   * Add element(s)
-   * @param element Single element or element array
-   * @param autoSelect Whether to auto-select newly added elements (default true)
+   * 添加元素
+   * @param element 单个元素或元素数组
+   * @param autoSelect 是否自动选中新添加的元素（默认 true）
    */
   const addElement = useCallback(
     (element: PPTElement | PPTElement[], autoSelect = true) => {
@@ -81,7 +81,7 @@ export function useCanvasOperations() {
         draft.canvas.elements.push(...elements);
       });
 
-      // Auto-select newly added elements
+      // 自动选中新添加的元素
       if (autoSelect) {
         const newIds = elements.map((el) => el.id);
         setActiveElementIdList(newIds);
@@ -90,18 +90,18 @@ export function useCanvasOperations() {
     [updateSceneData, setActiveElementIdList],
   );
 
-  // Delete all selected elements
-  // If a group member is selected for independent operation, delete that element first. Otherwise delete all selected elements.
-  // If elementId is provided, only delete that element
+  // 删除所有选中的元素
+  // 如果分组成员被选中进行独立操作，首先删除该元素。否则删除所有选中的元素。
+  // 如果提供了 elementId，只删除该元素
   const deleteElement = (elementId?: string) => {
     let newElementList: PPTElement[] = [];
 
     if (elementId) {
-      // Delete specified element
+      // 删除指定元素
       newElementList = currentSlide.elements.filter((el) => el.id !== elementId);
       setActiveElementIdList(activeElementIdList.filter((id) => id !== elementId));
     } else {
-      // Original logic: delete selected elements
+      // 原始逻辑：删除选中的元素
       if (!activeElementIdList.length) return;
 
       if (activeGroupElementId) {
@@ -116,7 +116,7 @@ export function useCanvasOperations() {
     addHistorySnapshot();
   };
 
-  // Delete all elements on the page (regardless of selection)
+  // 删除页面上的所有元素（无论是否选中）
   const deleteAllElements = () => {
     if (!currentSlide.elements.length) return;
     setActiveElementIdList([]);
@@ -125,8 +125,8 @@ export function useCanvasOperations() {
   };
 
   /**
-   * Update element properties
-   * @param props Properties to update
+   * 更新元素属性
+   * @param props 要更新的属性
    */
   const updateElement = useCallback(
     (data: UpdateElementData) => {
@@ -145,7 +145,7 @@ export function useCanvasOperations() {
   );
 
   /**
-   * Update slide content
+   * 更新幻灯片内容
    */
   const updateSlide = useCallback(
     (props: Partial<Slide>) => {
@@ -157,7 +157,7 @@ export function useCanvasOperations() {
   );
 
   /**
-   * Remove element properties
+   * 移除元素属性
    */
   const removeElementProps = useCallback(
     (data: RemovePropData) => {
@@ -178,7 +178,7 @@ export function useCanvasOperations() {
     [updateSceneData],
   );
 
-  // Copy selected element data to clipboard
+  // 复制选中的元素数据到剪贴板
   const copyElement = () => {
     // if (!activeElementIdList.length) return
 
@@ -193,14 +193,14 @@ export function useCanvasOperations() {
     toast.warning('Not implemented');
   };
 
-  // Copy and delete selected elements (cut)
+  // 复制并删除选中的元素（剪切）
   const cutElement = () => {
     // copyElement()
     // deleteElement()
     toast.warning('Not implemented');
   };
 
-  // Attempt to paste element data from clipboard
+  // 尝试从剪贴板粘贴元素数据
   const pasteElement = () => {
     // readClipboard().then(text => {
     //   pasteTextClipboardData(text)
@@ -208,13 +208,13 @@ export function useCanvasOperations() {
     toast.warning('Not implemented');
   };
 
-  // Copy and immediately paste selected elements
+  // 复制并立即粘贴选中的元素
   const _quickCopyElement = () => {
     copyElement();
     pasteElement();
   };
 
-  // Lock selected elements and clear selection state
+  // 锁定选中的元素并清除选择状态
   const lockElement = () => {
     const newElementList: PPTElement[] = JSON.parse(JSON.stringify(currentSlide.elements));
 
@@ -227,8 +227,8 @@ export function useCanvasOperations() {
   };
 
   /**
-   * Unlock an element and set it as the current selection
-   * @param handleElement The element to unlock
+   * 解锁元素并将其设为当前选择
+   * @param handleElement 要解锁的元素
    */
   const unlockElement = (handleElement: PPTElement) => {
     const newElementList: PPTElement[] = JSON.parse(JSON.stringify(currentSlide.elements));
@@ -256,7 +256,7 @@ export function useCanvasOperations() {
     addHistorySnapshot();
   };
 
-  // Select all elements on the current page
+  // 选择当前页面上的所有元素
   const selectAllElements = () => {
     const unlockedElements = currentSlide.elements.filter(
       (el) => !el.lock && !hiddenElementIdList.includes(el.id),
@@ -265,7 +265,7 @@ export function useCanvasOperations() {
     setActiveElementIdList(newActiveElementIdList);
   };
 
-  // Select a specific element
+  // 选择特定元素
   const selectElement = (id: string) => {
     if (handleElementId === id) return;
     if (hiddenElementIdList.includes(id)) return;
@@ -277,8 +277,8 @@ export function useCanvasOperations() {
   };
 
   /**
-   * Align all selected elements to the canvas
-   * @param command Alignment direction
+   * 将所有选中元素对齐到画布
+   * @param command 对齐方向
    */
   const alignElementToCanvas = (command: ElementAlignCommands) => {
     const viewportWidth = viewportSize;
@@ -289,7 +289,7 @@ export function useCanvasOperations() {
     for (const element of newElementList) {
       if (!activeElementIdList.includes(element.id)) continue;
 
-      // Center horizontally and vertically
+      // 水平和垂直居中
       if (command === ElementAlignCommands.CENTER) {
         const offsetY = minY + (maxY - minY) / 2 - viewportHeight / 2;
         const offsetX = minX + (maxX - minX) / 2 - viewportWidth / 2;
@@ -297,37 +297,37 @@ export function useCanvasOperations() {
         element.left = element.left - offsetX;
       }
 
-      // Align to top
+      // 顶部对齐
       if (command === ElementAlignCommands.TOP) {
         const offsetY = minY - 0;
         element.top = element.top - offsetY;
       }
 
-      // Center vertically
+      // 垂直居中
       else if (command === ElementAlignCommands.VERTICAL) {
         const offsetY = minY + (maxY - minY) / 2 - viewportHeight / 2;
         element.top = element.top - offsetY;
       }
 
-      // Align to bottom
+      // 底部对齐
       else if (command === ElementAlignCommands.BOTTOM) {
         const offsetY = maxY - viewportHeight;
         element.top = element.top - offsetY;
       }
 
-      // Align to left
+      // 左对齐
       else if (command === ElementAlignCommands.LEFT) {
         const offsetX = minX - 0;
         element.left = element.left - offsetX;
       }
 
-      // Center horizontally
+      // 水平居中
       else if (command === ElementAlignCommands.HORIZONTAL) {
         const offsetX = minX + (maxX - minX) / 2 - viewportWidth / 2;
         element.left = element.left - offsetX;
       }
 
-      // Align to right
+      // 右对齐
       else if (command === ElementAlignCommands.RIGHT) {
         const offsetX = maxX - viewportWidth;
         element.left = element.left - offsetX;
@@ -339,9 +339,9 @@ export function useCanvasOperations() {
   };
 
   /**
-   * Adjust element z-order
-   * @param element The element to reorder
-   * @param command Reorder command: move up, move down, bring to front, send to back
+   * 调整元素 z 轴顺序
+   * @param element 要重排的元素
+   * @param command 重排命令：上移、下移、置于顶层、置于底层
    */
   const orderElement = (element: PPTElement, command: ElementOrderCommands) => {
     let newElementList;
@@ -362,7 +362,7 @@ export function useCanvasOperations() {
   };
 
   /**
-   * Check if current selected elements can be grouped
+   * 检查当前选中的元素是否可以分组
    */
   const _canCombine = useMemo(() => {
     if (activeElementList.length < 2) return false;
@@ -377,18 +377,18 @@ export function useCanvasOperations() {
   }, [activeElementList]);
 
   /**
-   * Group current selected elements: assign the same group ID to all selected elements
+   * 将当前选中的元素分组：为所有选中元素分配相同的分组 ID
    */
   const combineElements = () => {
     if (!activeElementList.length) return;
 
-    // Create a new element list for subsequent operations
+    // 创建新的元素列表用于后续操作
     let newElementList: PPTElement[] = JSON.parse(JSON.stringify(currentSlide.elements));
 
-    // Generate group ID
+    // 生成分组 ID
     const groupId = nanoid(10);
 
-    // Collect elements to be grouped and assign the unique group ID
+    // 收集要分组的元素并分配唯一的分组 ID
     const combineElementList: PPTElement[] = [];
     for (const element of newElementList) {
       if (activeElementIdList.includes(element.id)) {
@@ -397,9 +397,9 @@ export function useCanvasOperations() {
       }
     }
 
-    // Ensure all group members have consecutive z-order levels:
-    // First find the highest z-level member, remove all group members from the element list,
-    // then insert the collected group members back at the appropriate position based on the highest level
+    // 确保所有分组成员具有连续的 z 轴层级：
+    // 首先找到 z 轴层级最高的成员，从元素列表中移除所有分组成员，
+    // 然后根据最高层级将收集的分组成员插入到适当位置
     const combineElementMaxLevel = newElementList.findIndex(
       (_element) => _element.id === combineElementList[combineElementList.length - 1].id,
     );
@@ -416,7 +416,7 @@ export function useCanvasOperations() {
   };
 
   /**
-   * Ungroup elements: remove the group ID from selected elements
+   * 取消元素分组：从选中的元素中移除分组 ID
    */
   const uncombineElements = () => {
     if (!activeElementList.length) return;
@@ -429,8 +429,8 @@ export function useCanvasOperations() {
     }
     updateSlide({ elements: newElementList });
 
-    // After ungrouping, reset active element state
-    // Default to the currently handled element, or empty if none exists
+    // 取消分组后，重置活动元素状态
+    // 默认为当前处理的元素，如果不存在则为空
     const handleElementIdList = handleElementId ? [handleElementId] : [];
     setActiveElementIdList(handleElementIdList);
 
@@ -438,8 +438,8 @@ export function useCanvasOperations() {
   };
 
   /**
-   * Update background
-   * @param background New background settings
+   * 更新背景
+   * @param background 新的背景设置
    */
   const updateBackground = useCallback(
     (background: SlideContent['canvas']['background']) => {
@@ -451,8 +451,8 @@ export function useCanvasOperations() {
   );
 
   /**
-   * Update theme
-   * @param theme Theme settings (partial)
+   * 更新主题
+   * @param theme 主题设置（部分）
    */
   const updateTheme = useCallback(
     (theme: Partial<SlideContent['canvas']['theme']>) => {
@@ -467,25 +467,25 @@ export function useCanvasOperations() {
   );
 
   /**
-   * Spotlight focus on an element
-   * @param elementId Element ID
-   * @param options Spotlight options
+   * 聚光灯聚焦元素
+   * @param elementId 元素 ID
+   * @param options 聚光灯选项
    */
   const spotlightElement = useCallback((elementId: string, options?: SpotlightOptions) => {
     useCanvasStore.getState().setSpotlight(elementId, options);
   }, []);
 
   /**
-   * Clear spotlight
+   * 清除聚光灯
    */
   const clearSpotlight = useCallback(() => {
     useCanvasStore.getState().clearSpotlight();
   }, []);
 
   /**
-   * Highlight elements
-   * @param elementIds Element ID list
-   * @param options Highlight options
+   * 高亮元素
+   * @param elementIds 元素 ID 列表
+   * @param options 高亮选项
    */
   const highlightElements = useCallback(
     (elementIds: string[], options?: HighlightOverlayOptions) => {
@@ -495,16 +495,16 @@ export function useCanvasOperations() {
   );
 
   /**
-   * Clear highlight
+   * 清除高亮
    */
   const clearHighlight = useCallback(() => {
     useCanvasStore.getState().clearHighlight();
   }, []);
 
   /**
-   * Laser pointer effect
-   * @param elementId Element ID
-   * @param options Laser pointer options
+   * 激光笔效果
+   * @param elementId 元素 ID
+   * @param options 激光笔选项
    */
   const laserElement = useCallback(
     (elementId: string, options?: { color?: string; duration?: number }) => {
@@ -514,30 +514,30 @@ export function useCanvasOperations() {
   );
 
   /**
-   * Clear laser pointer
+   * 清除激光笔
    */
   const clearLaser = useCallback(() => {
     useCanvasStore.getState().clearLaser();
   }, []);
 
   /**
-   * Zoom an element
-   * @param elementId Element ID
-   * @param scale Zoom scale
+   * 缩放元素
+   * @param elementId 元素 ID
+   * @param scale 缩放比例
    */
   const zoomElement = useCallback((elementId: string, scale: number) => {
     useCanvasStore.getState().setZoom(elementId, scale);
   }, []);
 
   /**
-   * Clear zoom
+   * 清除缩放
    */
   const clearZoom = useCallback(() => {
     useCanvasStore.getState().clearZoom();
   }, []);
 
   /**
-   * Clear all teaching effects (spotlight + highlight + laser + zoom)
+   * 清除所有教学效果（聚光灯 + 高亮 + 激光笔 + 缩放）
    */
   const clearAllEffects = useCallback(() => {
     useCanvasStore.getState().clearSpotlight();
@@ -547,7 +547,7 @@ export function useCanvasOperations() {
   }, []);
 
   return {
-    // Basic operations
+    // 基础操作
     addElement,
     deleteElement,
     deleteAllElements,
@@ -558,7 +558,7 @@ export function useCanvasOperations() {
     pasteElement,
     cutElement,
 
-    // Advanced operations
+    // 高级操作
     lockElement,
     unlockElement,
     selectAllElements,
@@ -568,11 +568,11 @@ export function useCanvasOperations() {
     combineElements,
     uncombineElements,
 
-    // Canvas operations
+    // 画布操作
     updateBackground,
     updateTheme,
 
-    // Teaching features
+    // 教学功能
     spotlightElement,
     clearSpotlight,
     highlightElements,
@@ -585,5 +585,5 @@ export function useCanvasOperations() {
   };
 }
 
-// Export type
+// 导出类型
 export type CanvasOperations = ReturnType<typeof useCanvasOperations>;

@@ -1,8 +1,8 @@
 /**
- * Server-side Provider Configuration
+ * 服务端提供商配置
  *
- * Loads provider configs from YAML (primary) + environment variables (fallback).
- * Keys never leave the server — only provider IDs and metadata are exposed via API.
+ * 从 YAML（主要）+ 环境变量（回退）加载提供商配置。
+ * 密钥不会离开服务端 —— 只有提供商 ID 和元数据通过 API 暴露。
  */
 
 import fs from 'fs';
@@ -13,7 +13,7 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('ServerProviderConfig');
 
 // ---------------------------------------------------------------------------
-// Types
+// 类型定义
 // ---------------------------------------------------------------------------
 
 interface ServerProviderEntry {
@@ -34,7 +34,7 @@ interface ServerConfig {
 }
 
 // ---------------------------------------------------------------------------
-// Env-var prefix mappings
+// 环境变量前缀映射
 // ---------------------------------------------------------------------------
 
 const LLM_ENV_MAP: Record<string, string> = {
@@ -85,7 +85,7 @@ const WEB_SEARCH_ENV_MAP: Record<string, string> = {
 };
 
 // ---------------------------------------------------------------------------
-// YAML loading
+// YAML 加载
 // ---------------------------------------------------------------------------
 
 type YamlData = Partial<{
@@ -113,7 +113,7 @@ function loadYamlFile(filename: string): YamlData {
 }
 
 // ---------------------------------------------------------------------------
-// Env-var helpers
+// 环境变量辅助函数
 // ---------------------------------------------------------------------------
 
 function loadEnvSection(
@@ -122,7 +122,7 @@ function loadEnvSection(
 ): Record<string, ServerProviderEntry> {
   const result: Record<string, ServerProviderEntry> = {};
 
-  // First, add everything from YAML as defaults
+  // 首先，将 YAML 中的所有内容作为默认值添加
   if (yamlSection) {
     for (const [id, entry] of Object.entries(yamlSection)) {
       if (entry?.apiKey) {
@@ -136,7 +136,7 @@ function loadEnvSection(
     }
   }
 
-  // Then, apply env vars (env takes priority over YAML)
+  // 然后，应用环境变量（环境变量优先于 YAML）
   for (const [prefix, providerId] of Object.entries(envMap)) {
     const envApiKey = process.env[`${prefix}_API_KEY`] || undefined;
     const envBaseUrl = process.env[`${prefix}_BASE_URL`] || undefined;
@@ -149,7 +149,7 @@ function loadEnvSection(
       : undefined;
 
     if (result[providerId]) {
-      // YAML entry exists — env vars override individual fields
+      // YAML 条目存在 —— 环境变量覆盖各个字段
       if (envApiKey) result[providerId].apiKey = envApiKey;
       if (envBaseUrl) result[providerId].baseUrl = envBaseUrl;
       if (envModels) result[providerId].models = envModels;
@@ -168,12 +168,12 @@ function loadEnvSection(
 }
 
 // ---------------------------------------------------------------------------
-// Module-level cache (process singleton)
+// 模块级缓存（进程单例）
 // ---------------------------------------------------------------------------
 
 const DEFAULT_FILENAME = 'server-providers.yml';
 
-/** Cache keyed by YAML filename (empty string = default file). */
+/** 按 YAML 文件名作为键的缓存（空字符串 = 默认文件）。 */
 const _configs: Map<string, ServerConfig> = new Map();
 
 function buildConfig(yamlData: YamlData): ServerConfig {
@@ -217,10 +217,10 @@ function getConfig(): ServerConfig {
 }
 
 // ---------------------------------------------------------------------------
-// Public API — LLM
+// 公共 API — LLM
 // ---------------------------------------------------------------------------
 
-/** Returns server-configured LLM providers (no apiKeys) */
+/** 返回服务端配置的 LLM 提供商（不包含 apiKeys） */
 export function getServerProviders(): Record<string, { models?: string[]; baseUrl?: string }> {
   const cfg = getConfig();
   const result: Record<string, { models?: string[]; baseUrl?: string }> = {};
@@ -232,25 +232,25 @@ export function getServerProviders(): Record<string, { models?: string[]; baseUr
   return result;
 }
 
-/** Resolve API key: client key > server key > empty string */
+/** 解析 API key：客户端 key > 服务端 key > 空字符串 */
 export function resolveApiKey(providerId: string, clientKey?: string): string {
   if (clientKey) return clientKey;
   return getConfig().providers[providerId]?.apiKey || '';
 }
 
-/** Resolve base URL: client > server > undefined */
+/** 解析 base URL：客户端 > 服务端 > undefined */
 export function resolveBaseUrl(providerId: string, clientBaseUrl?: string): string | undefined {
   if (clientBaseUrl) return clientBaseUrl;
   return getConfig().providers[providerId]?.baseUrl;
 }
 
-/** Resolve proxy URL for a provider (server config only) */
+/** 解析提供商的代理 URL（仅服务端配置） */
 export function resolveProxy(providerId: string): string | undefined {
   return getConfig().providers[providerId]?.proxy;
 }
 
 // ---------------------------------------------------------------------------
-// Public API — TTS
+// 公共 API — TTS
 // ---------------------------------------------------------------------------
 
 export function getServerTTSProviders(): Record<string, { baseUrl?: string }> {
@@ -274,7 +274,7 @@ export function resolveTTSBaseUrl(providerId: string, clientBaseUrl?: string): s
 }
 
 // ---------------------------------------------------------------------------
-// Public API — ASR
+// 公共 API — ASR
 // ---------------------------------------------------------------------------
 
 export function getServerASRProviders(): Record<string, { baseUrl?: string }> {
@@ -298,7 +298,7 @@ export function resolveASRBaseUrl(providerId: string, clientBaseUrl?: string): s
 }
 
 // ---------------------------------------------------------------------------
-// Public API — PDF
+// 公共 API — PDF
 // ---------------------------------------------------------------------------
 
 export function getServerPDFProviders(): Record<string, { baseUrl?: string }> {
@@ -322,7 +322,7 @@ export function resolvePDFBaseUrl(providerId: string, clientBaseUrl?: string): s
 }
 
 // ---------------------------------------------------------------------------
-// Public API — Image Generation
+// 公共 API — 图片生成
 // ---------------------------------------------------------------------------
 
 export function getServerImageProviders(): Record<string, Record<string, never>> {
@@ -348,7 +348,7 @@ export function resolveImageBaseUrl(
 }
 
 // ---------------------------------------------------------------------------
-// Public API — Video Generation
+// 公共 API — 视频生成
 // ---------------------------------------------------------------------------
 
 export function getServerVideoProviders(): Record<string, Record<string, never>> {
@@ -374,10 +374,10 @@ export function resolveVideoBaseUrl(
 }
 
 // ---------------------------------------------------------------------------
-// Public API — Web Search (Tavily)
+// 公共 API — 网络搜索（Tavily）
 // ---------------------------------------------------------------------------
 
-/** Returns server-configured web search providers (no apiKeys exposed) */
+/** 返回服务端配置的网络搜索提供商（不暴露 apiKeys） */
 export function getServerWebSearchProviders(): Record<string, { baseUrl?: string }> {
   const cfg = getConfig();
   const result: Record<string, { baseUrl?: string }> = {};
@@ -388,7 +388,7 @@ export function getServerWebSearchProviders(): Record<string, { baseUrl?: string
   return result;
 }
 
-/** Resolve Tavily API key: client key > server key > TAVILY_API_KEY env > empty */
+/** 解析 Tavily API key：客户端 key > 服务端 key > TAVILY_API_KEY 环境变量 > 空 */
 export function resolveWebSearchApiKey(clientKey?: string): string {
   if (clientKey) return clientKey;
   const serverKey = getConfig().webSearch.tavily?.apiKey;

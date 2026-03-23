@@ -1,8 +1,8 @@
 /**
- * Stage Storage Manager
+ * 课程存储管理器
  *
- * Manages multiple stage data in IndexedDB
- * Each stage has its own storage key based on stageId
+ * 在 IndexedDB 中管理多个课程数据
+ * 每个课程有自己的基于 stageId 的存储键
  */
 
 import { Stage, Scene } from '../types/stage';
@@ -31,13 +31,13 @@ export interface StageListItem {
 }
 
 /**
- * Save stage data to IndexedDB
+ * 将课程数据保存到 IndexedDB
  */
 export async function saveStageData(stageId: string, data: StageStoreData): Promise<void> {
   try {
     const now = Date.now();
 
-    // Save to stages table
+    // 保存到 stages 表
     await db.stages.put({
       id: stageId,
       name: data.stage.name || 'Untitled Stage',
@@ -49,10 +49,10 @@ export async function saveStageData(stageId: string, data: StageStoreData): Prom
       currentSceneId: data.currentSceneId || undefined,
     });
 
-    // Delete old scenes first to avoid orphaned data
+    // 先删除旧场景以避免孤立数据
     await db.scenes.where('stageId').equals(stageId).delete();
 
-    // Save new scenes
+    // 保存新场景
     if (data.scenes && data.scenes.length > 0) {
       await db.scenes.bulkPut(
         data.scenes.map((scene, index) => ({
@@ -65,7 +65,7 @@ export async function saveStageData(stageId: string, data: StageStoreData): Prom
       );
     }
 
-    // Save chat sessions to independent table
+    // 将聊天会话保存到独立表
     if (data.chats) {
       await saveChatSessions(stageId, data.chats);
     }
@@ -78,21 +78,21 @@ export async function saveStageData(stageId: string, data: StageStoreData): Prom
 }
 
 /**
- * Load stage data from IndexedDB
+ * 从 IndexedDB 加载课程数据
  */
 export async function loadStageData(stageId: string): Promise<StageStoreData | null> {
   try {
-    // Load stage
+    // 加载课程
     const stage = await db.stages.get(stageId);
     if (!stage) {
       log.info(`Stage not found: ${stageId}`);
       return null;
     }
 
-    // Load scenes
+    // 加载场景
     const scenes = await db.scenes.where('stageId').equals(stageId).sortBy('order');
 
-    // Load chat sessions from independent table
+    // 从独立表加载聊天会话
     const chats = await loadChatSessions(stageId);
 
     log.info(`Loaded stage: ${stageId}, scenes: ${scenes.length}, chats: ${chats.length}`);
@@ -110,17 +110,17 @@ export async function loadStageData(stageId: string): Promise<StageStoreData | n
 }
 
 /**
- * Delete stage and all related data
+ * 删除课程及所有相关数据
  */
 export async function deleteStageData(stageId: string): Promise<void> {
   try {
-    // Delete stage
+    // 删除课程
     await db.stages.delete(stageId);
 
-    // Delete scenes
+    // 删除场景
     await db.scenes.where('stageId').equals(stageId).delete();
 
-    // Delete chat sessions and playback state
+    // 删除聊天会话和播放状态
     await deleteChatSessions(stageId);
     await clearPlaybackState(stageId);
 
@@ -132,7 +132,7 @@ export async function deleteStageData(stageId: string): Promise<void> {
 }
 
 /**
- * List all stages
+ * 列出所有课程
  */
 export async function listStages(): Promise<StageListItem[]> {
   try {
@@ -161,9 +161,9 @@ export async function listStages(): Promise<StageListItem[]> {
 }
 
 /**
- * Get first slide scene's canvas data for each stage (for thumbnail preview).
- * Also resolves gen_img_* placeholders from mediaFiles so thumbnails show real images.
- * Returns a map of stageId -> Slide (canvas data with resolved images)
+ * 获取每个课程的第一张幻灯片场景的画布数据（用于缩略图预览）。
+ * 同时解析 mediaFiles 中的 gen_img_* 占位符，使缩略图显示真实图片。
+ * 返回 stageId -> Slide 的映射（包含已解析图片的画布数据）
  */
 export async function getFirstSlideByStages(
   stageIds: string[],
@@ -177,7 +177,7 @@ export async function getFirstSlideByStages(
         if (firstSlide && firstSlide.content.type === 'slide') {
           const slide = structuredClone(firstSlide.content.canvas);
 
-          // Resolve gen_img_* placeholders from mediaFiles
+          // 从 mediaFiles 解析 gen_img_* 占位符
           const placeholderEls = slide.elements.filter(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (el: any) => el.type === 'image' && /^gen_(img|vid)_[\w-]+$/i.test(el.src as string),
@@ -186,7 +186,7 @@ export async function getFirstSlideByStages(
             const mediaRecords = await db.mediaFiles.where('stageId').equals(stageId).toArray();
             const mediaMap = new Map(
               mediaRecords.map((r) => {
-                // Key format: stageId:elementId → extract elementId
+                // 键格式：stageId:elementId → 提取 elementId
                 const elementId = r.id.includes(':') ? r.id.split(':').slice(1).join(':') : r.id;
                 return [elementId, r.blob] as const;
               }),
@@ -196,8 +196,8 @@ export async function getFirstSlideByStages(
               if (blob) {
                 el.src = URL.createObjectURL(blob);
               } else {
-                // Clear unresolved placeholder so BaseImageElement won't subscribe
-                // to the global media store (which may have stale data from another course)
+                // 清除未解析的占位符，使 BaseImageElement 不会
+                // 订阅全局媒体存储（可能有来自其他课程的过期数据）
                 el.src = '';
               }
             }
@@ -214,7 +214,7 @@ export async function getFirstSlideByStages(
 }
 
 /**
- * Check if stage exists
+ * 检查课程是否存在
  */
 export async function stageExists(stageId: string): Promise<boolean> {
   try {

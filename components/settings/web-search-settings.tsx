@@ -23,7 +23,7 @@ export function WebSearchSettings({ selectedProviderId }: WebSearchSettingsProps
   const provider = WEB_SEARCH_PROVIDERS[selectedProviderId];
   const isServerConfigured = !!webSearchProvidersConfig[selectedProviderId]?.isServerConfigured;
 
-  // Reset showApiKey when provider changes (derived state pattern)
+  // 当服务商变更时重置 showApiKey（派生状态模式）
   const [prevSelectedProviderId, setPrevSelectedProviderId] = useState(selectedProviderId);
   if (selectedProviderId !== prevSelectedProviderId) {
     setPrevSelectedProviderId(selectedProviderId);
@@ -32,14 +32,14 @@ export function WebSearchSettings({ selectedProviderId }: WebSearchSettingsProps
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {/* Server-configured notice */}
+      {/* 服务端配置提示 */}
       {isServerConfigured && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30 p-3 text-sm text-blue-700 dark:text-blue-300">
           {t('settings.serverConfiguredNotice')}
         </div>
       )}
 
-      {/* API Key + Base URL Configuration */}
+      {/* API 密钥 + Base URL 配置 */}
       {(provider.requiresApiKey || isServerConfigured) && (
         <>
           <div className="grid grid-cols-2 gap-4">
@@ -95,7 +95,7 @@ export function WebSearchSettings({ selectedProviderId }: WebSearchSettingsProps
             </div>
           </div>
 
-          {/* Request URL Preview */}
+          {/* 请求 URL 预览 */}
           {(() => {
             const effectiveBaseUrl =
               webSearchProvidersConfig[selectedProviderId]?.baseUrl ||

@@ -25,7 +25,7 @@ export function useDraftCache<T>({
         return JSON.parse(raw) as T;
       }
     } catch {
-      /* ignore parse errors */
+      /* 忽略解析错误 */
     }
     return undefined;
   });
@@ -46,7 +46,7 @@ export function useDraftCache<T>({
       try {
         localStorage.setItem(keyRef.current, JSON.stringify(pendingValueRef.current));
       } catch {
-        /* ignore quota errors */
+        /* 忽略配额错误 */
       }
       pendingValueRef.current = undefined;
     }
@@ -63,7 +63,7 @@ export function useDraftCache<T>({
         try {
           localStorage.setItem(keyRef.current, JSON.stringify(value));
         } catch {
-          /* ignore quota errors */
+          /* 忽略配额错误 */
         }
         pendingValueRef.current = undefined;
       }, debounceMs);
@@ -80,11 +80,11 @@ export function useDraftCache<T>({
     try {
       localStorage.removeItem(keyRef.current);
     } catch {
-      /* ignore */
+      /* 忽略 */
     }
   }, []);
 
-  // Flush pending write on unmount
+  // 卸载时刷新待写入
   useEffect(() => {
     return () => {
       flushPending();

@@ -1,6 +1,6 @@
 /**
- * Top-level pipeline orchestration.
- * Creates sessions and runs the full generation pipeline.
+ * 顶层流水线编排。
+ * 创建会话并运行完整的生成流水线。
  */
 
 import { nanoid } from 'nanoid';
@@ -26,7 +26,7 @@ export function createGenerationSession(requirements: UserRequirements): Generat
   };
 }
 
-// For full testing
+// 用于完整测试
 export async function runGenerationPipeline(
   session: GenerationSession,
   store: StageStore,
@@ -34,7 +34,7 @@ export async function runGenerationPipeline(
   callbacks?: GenerationCallbacks,
 ): Promise<GenerationResult<GenerationSession>> {
   try {
-    // Stage 1: Generate Scene Outlines from Requirements
+    // 阶段 1: 从需求生成场景大纲
     callbacks?.onProgress?.({
       ...session.progress,
       currentStage: 1,
@@ -44,8 +44,8 @@ export async function runGenerationPipeline(
 
     const outlinesResult = await generateSceneOutlinesFromRequirements(
       session.requirements,
-      undefined, // No PDF text in this flow
-      undefined, // No PDF images in this flow
+      undefined, // 此流程中无 PDF 文本
+      undefined, // 此流程中无 PDF 图片
       aiCall,
       callbacks,
     );
@@ -55,7 +55,7 @@ export async function runGenerationPipeline(
     session.sceneOutlines = outlinesResult.data;
     callbacks?.onStageComplete?.(1, session.sceneOutlines);
 
-    // Stage 2: Generate Full Scenes
+    // 阶段 2: 生成完整场景
     callbacks?.onProgress?.({
       ...session.progress,
       currentStage: 2,
@@ -70,7 +70,7 @@ export async function runGenerationPipeline(
     }
     callbacks?.onStageComplete?.(2, scenesResult.data);
 
-    // Complete
+    // 完成
     session.completedAt = new Date();
     session.progress = {
       currentStage: 2,

@@ -59,7 +59,7 @@ import { ModelEditDialog } from './model-edit-dialog';
 import { AddProviderDialog, type NewProviderData } from './add-provider-dialog';
 import type { SettingsSection, EditingModel } from '@/lib/types/settings';
 
-// ─── Provider List Column (reusable) ───
+// ─── 服务商列表列（可复用） ───
 function ProviderListColumn<T extends string>({
   providers,
   configs,
@@ -114,7 +114,7 @@ function ProviderListColumn<T extends string>({
   );
 }
 
-// ─── Helper: get TTS/ASR provider display name ───
+// ─── 辅助函数：获取 TTS/ASR 服务商显示名称 ───
 function getTTSProviderName(providerId: TTSProviderId, t: (key: string) => string): string {
   const names: Record<TTSProviderId, string> = {
     'openai-tts': t('settings.providerOpenAITTS'),
@@ -135,7 +135,7 @@ function getASRProviderName(providerId: ASRProviderId, t: (key: string) => strin
   return names[providerId];
 }
 
-// ─── Image/Video provider name helpers ───
+// ─── 图像/视频服务商名称辅助函数 ───
 const IMAGE_PROVIDER_NAMES: Record<ImageProviderId, string> = {
   seedream: 'providerSeedream',
   'qwen-image': 'providerQwenImage',
@@ -171,7 +171,7 @@ interface SettingsDialogProps {
 export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsDialogProps) {
   const { t } = useI18n();
 
-  // Get settings from store
+  // 从 store 获取设置
   const providerId = useSettingsStore((state) => state.providerId);
   const _modelId = useSettingsStore((state) => state.modelId);
   const providersConfig = useSettingsStore((state) => state.providersConfig);
@@ -188,14 +188,14 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
   const asrProviderId = useSettingsStore((state) => state.asrProviderId);
   const asrProvidersConfig = useSettingsStore((state) => state.asrProvidersConfig);
 
-  // Store actions
+  // Store 操作
   const setModel = useSettingsStore((state) => state.setModel);
   const setProviderConfig = useSettingsStore((state) => state.setProviderConfig);
   const setProvidersConfig = useSettingsStore((state) => state.setProvidersConfig);
   const setTTSProvider = useSettingsStore((state) => state.setTTSProvider);
   const setASRProvider = useSettingsStore((state) => state.setASRProvider);
 
-  // Navigation
+  // 导航
   const [activeSection, setActiveSection] = useState<SettingsSection>('providers');
   const [selectedProviderId, setSelectedProviderId] = useState<ProviderId>(providerId);
   const [selectedPdfProviderId, setSelectedPdfProviderId] = useState<PDFProviderId>(pdfProviderId);
@@ -205,28 +205,28 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
     useState<ImageProviderId>(imageProviderId);
   const [selectedVideoProviderId, setSelectedVideoProviderId] =
     useState<VideoProviderId>(videoProviderId);
-  // Navigate to initialSection when dialog opens
+  // 当对话框打开时导航到 initialSection
   useEffect(() => {
     if (open && initialSection) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Sync section from prop when dialog opens
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- 对话框打开时从 prop 同步 section
       setActiveSection(initialSection);
     }
   }, [open, initialSection]);
 
-  // Model editing state
+  // 模型编辑状态
   const [editingModel, setEditingModel] = useState<EditingModel | null>(null);
   const [showModelDialog, setShowModelDialog] = useState(false);
 
-  // Provider deletion confirmation
+  // 服务商删除确认
   const [providerToDelete, setProviderToDelete] = useState<ProviderId | null>(null);
 
-  // Add provider dialog
+  // 添加服务商对话框
   const [showAddProviderDialog, setShowAddProviderDialog] = useState(false);
 
-  // Save status indicator
+  // 保存状态指示器
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved' | 'error'>('idle');
 
-  // Resizable column widths
+  // 可调整大小的列宽
   const [sidebarWidth, setSidebarWidth] = useState(192);
   const [providerListWidth, setProviderListWidth] = useState(192);
   const [isResizing, setIsResizing] = useState(false);
@@ -317,7 +317,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
       }
     : undefined;
 
-  // Handle model editing
+  // 处理模型编辑
   const handleEditModel = (pid: ProviderId, modelIndex: number) => {
     const allModels = providersConfig[pid]?.models || [];
     setEditingModel({
@@ -398,7 +398,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
     setEditingModel(null);
   };
 
-  // Handle provider management
+  // 处理服务商管理
   const handleAddProvider = (providerData: NewProviderData) => {
     if (!providerData.name.trim()) {
       toast.error(t('settings.providerNameRequired'));
@@ -464,7 +464,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
     toast.success(t('settings.resetSuccess'));
   };
 
-  // Get all providers from providersConfig
+  // 从 providersConfig 获取所有服务商
   const allProviders = Object.entries(providersConfig).map(([id, config]) => ({
     id: id as ProviderId,
     name: config.name,
@@ -476,7 +476,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
     isServerConfigured: config.isServerConfigured,
   }));
 
-  // Sections that show a provider list column
+  // 显示服务商列表列的 section
   const _hasProviderList = [
     'providers',
     'pdf',
@@ -487,7 +487,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
     'asr',
   ].includes(activeSection);
 
-  // Get header content based on section
+  // 根据 section 获取头部内容
   const getHeaderContent = () => {
     switch (activeSection) {
       case 'general':
@@ -655,7 +655,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
         <DialogTitle className="sr-only">{t('settings.title')}</DialogTitle>
         <DialogDescription className="sr-only">{t('settings.description')}</DialogDescription>
         <div className="flex h-full overflow-hidden">
-          {/* Left Sidebar - Navigation */}
+          {/* 左侧边栏 - 导航 */}
           <div className="flex-shrink-0 bg-muted/30 p-3 space-y-1" style={{ width: sidebarWidth }}>
             <button
               onClick={() => setActiveSection('providers')}
@@ -762,7 +762,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
             </button>
           </div>
 
-          {/* Sidebar resize handle */}
+          {/* 侧边栏调整大小手柄 */}
           <div
             onMouseDown={(e) => handleResizeStart(e, 'sidebar')}
             className="flex-shrink-0 w-[5px] cursor-col-resize group flex justify-center"
@@ -770,7 +770,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
             <div className="w-px h-full bg-border group-hover:bg-primary/50 transition-colors" />
           </div>
 
-          {/* Middle - Provider List (only shown for provider-based sections) */}
+          {/* 中间 - 服务商列表（仅在基于服务商的 section 中显示） */}
           {activeSection === 'providers' && (
             <>
               <ProviderList
@@ -919,9 +919,9 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
             </>
           )}
 
-          {/* Right - Configuration Panel */}
+          {/* 右侧 - 配置面板 */}
           <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-            {/* Header */}
+            {/* 头部 */}
             <div className="flex items-center justify-between p-5 border-b">
               <div className="flex items-center gap-3">{getHeaderContent()}</div>
               <div className="flex items-center gap-2">
@@ -942,7 +942,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
               </div>
             </div>
 
-            {/* Content */}
+            {/* 内容 */}
             <div className="flex-1 overflow-y-auto p-5">
               {activeSection === 'general' && <GeneralSettings />}
 
@@ -983,7 +983,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
               {activeSection === 'asr' && <ASRSettings selectedProviderId={asrProviderId} />}
             </div>
 
-            {/* Footer */}
+            {/* 底部 */}
             <div className="flex items-center justify-end gap-3 px-5 py-3 border-t bg-muted/30">
               {saveStatus === 'saved' && (
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -1008,7 +1008,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
         </div>
       </DialogContent>
 
-      {/* Edit Model Dialog */}
+      {/* 编辑模型对话框 */}
       <ModelEditDialog
         open={showModelDialog}
         onOpenChange={setShowModelDialog}
@@ -1023,14 +1023,14 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
         requiresApiKey={providersConfig[selectedProviderId]?.requiresApiKey}
       />
 
-      {/* Add Provider Dialog */}
+      {/* 添加服务商对话框 */}
       <AddProviderDialog
         open={showAddProviderDialog}
         onOpenChange={setShowAddProviderDialog}
         onAdd={handleAddProvider}
       />
 
-      {/* Delete Provider Confirmation */}
+      {/* 删除服务商确认 */}
       <AlertDialog
         open={providerToDelete !== null}
         onOpenChange={(open) => !open && setProviderToDelete(null)}

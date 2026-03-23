@@ -220,7 +220,7 @@ export const getTableSubThemeColor = (themeColor: string) => {
  * @param element 线条元素
  */
 export const getLineElementPath = (element: PPTLineElement) => {
-  // Defensive: ensure start and end are arrays
+  // 防御性检查：确保 start 和 end 是数组
   const startArr = Array.isArray(element.start) ? element.start : [0, 0];
   const endArr = Array.isArray(element.end) ? element.end : [100, 100];
   const start = startArr.join(',');

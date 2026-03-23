@@ -1,9 +1,9 @@
 import type { PPTElement } from '@/lib/types/slides';
 
 /**
- * Extract the semantic payload for each element type.
- * Used by elementFingerprint to detect content-only changes
- * (same id/position but different text, chart data, media src, etc.).
+ * 提取每种元素类型的语义内容。
+ * 由 elementFingerprint 用于检测仅内容变更
+ * （相同 id/位置但文本、图表数据、媒体 src 等不同）。
  */
 function semanticPart(e: PPTElement): unknown {
   switch (e.type) {
@@ -53,12 +53,11 @@ function semanticPart(e: PPTElement): unknown {
 }
 
 /**
- * Generate a fingerprint string for a list of whiteboard elements.
- * Used for change detection and deduplication in history snapshots.
+ * 为白板元素列表生成指纹字符串。
+ * 用于历史快照中的变更检测和去重。
  *
- * Covers both geometry (id, position, size) AND semantic content
- * via structured JSON.stringify — avoids delimiter-collision issues
- * that hand-concatenated strings would have with rich-text HTML content.
+ * 通过结构化的 JSON.stringify 同时覆盖几何信息（id、位置、大小）和语义内容
+ * — 避免了手动拼接字符串在处理富文本 HTML 内容时可能出现的分隔符冲突问题。
  */
 export function elementFingerprint(els: PPTElement[]): string {
   return JSON.stringify(

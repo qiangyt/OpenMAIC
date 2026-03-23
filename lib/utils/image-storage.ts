@@ -1,8 +1,8 @@
 /**
- * Image Storage Utilities
+ * 图片存储工具
  *
- * Store PDF images in IndexedDB to avoid sessionStorage 5MB limit.
- * Images are stored as Blobs for efficient storage.
+ * 将 PDF 图片存储到 IndexedDB 以避免 sessionStorage 5MB 限制。
+ * 图片以 Blob 形式存储以提高效率。
  */
 
 import { db, type ImageFileRecord } from './database';
@@ -12,7 +12,7 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('ImageStorage');
 
 /**
- * Convert base64 data URL to Blob
+ * 将 base64 数据 URL 转换为 Blob
  */
 function base64ToBlob(base64DataUrl: string): Blob {
   const parts = base64DataUrl.split(',');
@@ -31,7 +31,7 @@ function base64ToBlob(base64DataUrl: string): Blob {
 }
 
 /**
- * Convert Blob to base64 data URL
+ * 将 Blob 转换为 base64 数据 URL
  */
 async function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -43,8 +43,8 @@ async function blobToBase64(blob: Blob): Promise<string> {
 }
 
 /**
- * Store images in IndexedDB
- * Returns array of stored image IDs
+ * 将图片存储到 IndexedDB
+ * 返回已存储的图片 ID 数组
  */
 export async function storeImages(
   images: Array<{ id: string; src: string; pageNumber?: number }>,
@@ -58,7 +58,7 @@ export async function storeImages(
       const mimeMatch = img.src.match(/data:(.*?);/);
       const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
 
-      // Use session-prefixed ID to allow cleanup
+      // 使用会话前缀的 ID 以便清理
       const storageId = `session_${sessionId}_${img.id}`;
 
       const record: ImageFileRecord = {
@@ -81,8 +81,8 @@ export async function storeImages(
 }
 
 /**
- * Load images from IndexedDB and return as imageMapping
- * @param imageIds - Array of storage IDs (session_xxx_img_1 format)
+ * 从 IndexedDB 加载图片并返回 imageMapping
+ * @param imageIds - 存储 ID 数组（session_xxx_img_1 格式）
  * @returns ImageMapping { img_1: "data:image/png;base64,..." }
  */
 export async function loadImageMapping(imageIds: string[]): Promise<Record<string, string>> {
@@ -93,7 +93,7 @@ export async function loadImageMapping(imageIds: string[]): Promise<Record<strin
       const record = await db.imageFiles.get(storageId);
       if (record) {
         const base64 = await blobToBase64(record.blob);
-        // Extract original ID (img_1) from storage ID (session_xxx_img_1)
+        // 从存储 ID（session_xxx_img_1）中提取原始 ID（img_1）
         const originalId = storageId.replace(/^session_[^_]+_/, '');
         mapping[originalId] = base64;
       }
@@ -106,7 +106,7 @@ export async function loadImageMapping(imageIds: string[]): Promise<Record<strin
 }
 
 /**
- * Clean up images by session prefix
+ * 按会话前缀清理图片
  */
 export async function cleanupSessionImages(sessionId: string): Promise<void> {
   try {
@@ -125,7 +125,7 @@ export async function cleanupSessionImages(sessionId: string): Promise<void> {
 }
 
 /**
- * Clean up old images (older than specified hours)
+ * 清理旧图片（超过指定小时数）
  */
 export async function cleanupOldImages(hoursOld: number = 24): Promise<void> {
   try {
@@ -138,7 +138,7 @@ export async function cleanupOldImages(hoursOld: number = 24): Promise<void> {
 }
 
 /**
- * Get total size of stored images
+ * 获取已存储图片的总大小
  */
 export async function getImageStorageSize(): Promise<number> {
   const images = await db.imageFiles.toArray();
@@ -146,8 +146,8 @@ export async function getImageStorageSize(): Promise<number> {
 }
 
 /**
- * Store a PDF file as a Blob in IndexedDB.
- * Returns a storage key that can be used to retrieve the blob later.
+ * 将 PDF 文件作为 Blob 存储到 IndexedDB。
+ * 返回可用于稍后检索 blob 的存储键。
  */
 export async function storePdfBlob(file: File): Promise<string> {
   const storageKey = `pdf_${nanoid(10)}`;
@@ -169,7 +169,7 @@ export async function storePdfBlob(file: File): Promise<string> {
 }
 
 /**
- * Load a PDF Blob from IndexedDB by its storage key.
+ * 通过存储键从 IndexedDB 加载 PDF Blob。
  */
 export async function loadPdfBlob(key: string): Promise<Blob | null> {
   const record = await db.imageFiles.get(key);

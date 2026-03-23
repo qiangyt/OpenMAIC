@@ -42,7 +42,7 @@ interface MediaPopoverProps {
   onSettingsOpen: (section: SettingsSection) => void;
 }
 
-// ─── Provider icon maps ───
+// ─── 提供商图标映射 ───
 const IMAGE_PROVIDER_ICONS: Record<string, string> = {
   seedream: '/logos/doubao.svg',
   'qwen-image': '/logos/bailian.svg',
@@ -64,7 +64,7 @@ const TABS: Array<{ id: TabId; icon: LucideIcon; label: string }> = [
   { id: 'asr', icon: Mic, label: 'ASR' },
 ];
 
-/** Extract the English name from voice name format "ChineseName (English)" */
+/** 从语音名称格式"中文名 (English)"中提取英文名 */
 function getVoiceDisplayName(name: string, lang: string): string {
   if (lang === 'en-US') {
     const match = name.match(/\(([^)]+)\)/);
@@ -79,7 +79,7 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
   const [activeTab, setActiveTab] = useState<TabId>('image');
   const { previewing, startPreview, stopPreview } = useTTSPreview();
 
-  // ─── Store ───
+  // ─── 状态存储 ───
   const imageGenerationEnabled = useSettingsStore((s) => s.imageGenerationEnabled);
   const videoGenerationEnabled = useSettingsStore((s) => s.videoGenerationEnabled);
   const ttsEnabled = useSettingsStore((s) => s.ttsEnabled);
@@ -136,7 +136,7 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
 
   const ttsSpeedRange = TTS_PROVIDERS[ttsProviderId]?.speedRange;
 
-  // ─── Grouped select data (only available providers) ───
+  // ─── 分组选择数据（仅包含可用提供商） ───
   const imageGroups = useMemo(
     () =>
       Object.values(IMAGE_PROVIDERS)
@@ -171,7 +171,7 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
     [videoProvidersConfig],
   );
 
-  // TTS: flat voice list from current provider, localized
+  // TTS：当前提供商的扁平化语音列表，已本地化
   const ttsVoices = useMemo(
     () =>
       getTTSVoices(ttsProviderId).map((v) => ({
@@ -181,7 +181,7 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
     [ttsProviderId, locale],
   );
 
-  // TTS preview
+  // TTS 预览
   const handlePreview = useCallback(async () => {
     if (previewing) {
       stopPreview();
@@ -213,7 +213,7 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
     ttsVoice,
   ]);
 
-  // ASR: only available providers
+  // ASR：仅包含可用提供商
   const asrGroups = useMemo(
     () =>
       Object.values(ASR_PROVIDERS)
@@ -231,7 +231,7 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
     [asrProvidersConfig],
   );
 
-  // Auto-select first enabled tab on open
+  // 打开时自动选择第一个启用的标签页
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       stopPreview();
@@ -263,7 +263,7 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
       </PopoverTrigger>
 
       <PopoverContent align="start" side="bottom" avoidCollisions={false} className="w-80 p-0">
-        {/* ── Tab bar (segmented control) ── */}
+        {/* ── 标签栏（分段控件） ── */}
         <div className="p-2 pb-0">
           <div className="flex gap-0.5 p-0.5 bg-muted/60 rounded-lg">
             {TABS.map((tab) => {
@@ -292,7 +292,7 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
           </div>
         </div>
 
-        {/* ── Tab content ── */}
+        {/* ── 标签页内容 ── */}
         <div className="p-3 pt-2.5">
           {activeTab === 'image' && (
             <TabPanel
@@ -339,7 +339,7 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
               enabled={ttsEnabled}
               onToggle={setTTSEnabled}
             >
-              {/* Voice select + preview */}
+              {/* 语音选择 + 预览 */}
               <div className="flex items-center gap-2">
                 <Select value={ttsVoice} onValueChange={setTTSVoice}>
                   <SelectTrigger className="h-8 rounded-lg border-border/40 bg-background/80 hover:bg-muted/40 shadow-none text-xs focus:ring-1 focus:ring-ring/30 px-2.5 flex-1 min-w-0">
@@ -422,7 +422,7 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
           )}
         </div>
 
-        {/* ── Footer ── */}
+        {/* ── 底部 ── */}
         <div className="border-t border-border/40">
           <button
             onClick={() => {
@@ -440,7 +440,7 @@ export function MediaPopover({ onSettingsOpen }: MediaPopoverProps) {
   );
 }
 
-// ─── Tab panel: header (label + switch) + optional body ───
+// ─── 标签面板：标题（标签 + 开关）+ 可选内容 ───
 function TabPanel({
   icon: Icon,
   label,
@@ -482,7 +482,7 @@ function TabPanel({
   );
 }
 
-// ─── Grouped provider+model select ───
+// ─── 分组的提供商+模型选择器 ───
 interface SelectGroupData {
   groupId: string;
   groupName: string;

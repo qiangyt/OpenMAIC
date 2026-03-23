@@ -1,7 +1,7 @@
 /**
- * Prompt Builder for Stateless Generation
+ * 无状态生成的提示词构建器
  *
- * Builds system prompts and converts messages for the LLM.
+ * 为 LLM 构建系统提示词并转换消息格式。
  */
 
 import type { StatelessChatRequest } from '@/lib/types/chat';
@@ -9,7 +9,7 @@ import type { AgentConfig } from '@/lib/orchestration/registry/types';
 import type { WhiteboardActionRecord, AgentTurnSummary } from './director-prompt';
 import { getActionDescriptions, getEffectiveActions } from './tool-schemas';
 
-// ==================== Role Guidelines ====================
+// ==================== 角色指南 ====================
 
 const ROLE_GUIDELINES: Record<string, string> = {
   teacher: `Your role in this classroom: LEAD TEACHER.
@@ -20,6 +20,14 @@ You are responsible for:
 - Using spotlight/laser to direct attention to slide elements
 - Using the whiteboard for diagrams and formulas
 You can use all available actions. Never announce your actions — just teach naturally.`,
+  // 中文：你在课堂中的角色：主讲老师。
+  // 你负责：
+  // - 控制课程流程、幻灯片和节奏
+  // - 用示例和类比清晰地解释概念
+  // - 提问以检查理解程度
+  // - 使用聚光灯/激光笔引导注意力到幻灯片元素
+  // - 使用白板绘制图表和公式
+  // 你可以使用所有可用动作。永远不要宣布你的动作 — 自然地教学即可。
 
   assistant: `Your role in this classroom: TEACHING ASSISTANT.
 You are responsible for:
@@ -28,6 +36,13 @@ You are responsible for:
 - Providing concrete examples and background context
 - Using the whiteboard sparingly to supplement (not duplicate) the teacher's content
 You play a supporting role — don't take over the lesson.`,
+  // 中文：你在课堂中的角色：助教。
+  // 你负责：
+  // - 通过填补空白和回答附带问题来支持主讲老师
+  // - 当学生困惑时用更简单的术语重新表述解释
+  // - 提供具体示例和背景上下文
+  // - 节制地使用白板来补充（而非重复）老师的内容
+  // 你扮演辅助角色 — 不要接管课程。
 
   student: `Your role in this classroom: STUDENT.
 You are responsible for:
@@ -36,23 +51,30 @@ You are responsible for:
 - Keeping responses SHORT (1-2 sentences max)
 - Only using the whiteboard when explicitly invited by the teacher
 You are NOT a teacher — your responses should be much shorter than the teacher's.`,
+  // 中文：你在课堂中的角色：学生。
+  // 你负责：
+  // - 积极参与讨论
+  // - 提问、分享观察、对课程做出反应
+  // - 保持回答简短（最多 1-2 句话）
+  // - 仅在老师明确邀请时使用白板
+  // 你不是老师 — 你的回答应该比老师的短得多。
 };
 
-// ==================== Types ====================
+// ==================== 类型定义 ====================
 
 /**
- * Discussion context for agent-initiated discussions
+ * 智能体发起讨论的讨论上下文
  */
 interface DiscussionContext {
   topic: string;
   prompt?: string;
 }
 
-// ==================== Peer Context ====================
+// ==================== 同伴上下文 ====================
 
 /**
- * Build a context section summarizing what other agents said this round.
- * Returns empty string if no agents have spoken yet.
+ * 构建总结本轮其他智能体发言内容的上下文部分。
+ * 如果还没有智能体发言则返回空字符串。
  */
 function buildPeerContextSection(
   agentResponses: AgentTurnSummary[] | undefined,
@@ -60,7 +82,7 @@ function buildPeerContextSection(
 ): string {
   if (!agentResponses || agentResponses.length === 0) return '';
 
-  // Filter out self (defensive — director shouldn't dispatch same agent twice)
+  // 过滤掉自己（防御性 — 导演不应两次调度同一智能体）
   const peers = agentResponses.filter((r) => r.agentName !== currentAgentName);
   if (peers.length === 0) return '';
 
@@ -80,15 +102,15 @@ You are ${currentAgentName}, responding AFTER the agents above. You MUST:
 `;
 }
 
-// ==================== System Prompt ====================
+// ==================== 系统提示词 ====================
 
 /**
- * Build system prompt for structured output generation
+ * 为结构化输出生成构建系统提示词
  *
- * @param agentConfig - The agent configuration
- * @param storeState - Current application state
- * @param discussionContext - Optional discussion context for agent-initiated discussions
- * @returns System prompt string
+ * @param agentConfig - 智能体配置
+ * @param storeState - 当前应用状态
+ * @param discussionContext - 可选的讨论上下文，用于智能体发起的讨论
+ * @returns 系统提示词字符串
  */
 export function buildStructuredPrompt(
   agentConfig: AgentConfig,
@@ -98,23 +120,23 @@ export function buildStructuredPrompt(
   userProfile?: { nickname?: string; bio?: string },
   agentResponses?: AgentTurnSummary[],
 ): string {
-  // Determine current scene type for action filtering
+  // 根据场景类型确定当前场景类型以进行动作过滤
   const currentScene = storeState.currentSceneId
     ? storeState.scenes.find((s) => s.id === storeState.currentSceneId)
     : undefined;
   const sceneType = currentScene?.type;
 
-  // Filter actions by scene type (spotlight/laser only available on slides)
+  // 按场景类型过滤动作（spotlight/laser 仅在幻灯片上可用）
   const effectiveActions = getEffectiveActions(agentConfig.allowedActions, sceneType);
   const actionDescriptions = getActionDescriptions(effectiveActions);
 
-  // Build context about current state
+  // 构建关于当前状态的上下文
   const stateContext = buildStateContext(storeState);
 
-  // Build virtual whiteboard context from ledger (shows changes by other agents this round)
+  // 从账本构建虚拟白板上下文（显示本轮其他智能体的更改）
   const virtualWbContext = buildVirtualWhiteboardContext(storeState, whiteboardLedger);
 
-  // Build student profile section (only when nickname or bio is present)
+  // 构建学生资料部分（仅当有昵称或简介时）
   const studentProfileSection =
     userProfile?.nickname || userProfile?.bio
       ? `\n# Student Profile
@@ -122,25 +144,25 @@ You are teaching ${userProfile.nickname || 'a student'}.${userProfile.bio ? `\nT
 Personalize your teaching based on their background when relevant. Address them by name naturally.\n`
       : '';
 
-  // Build peer context section (what agents already said this round)
+  // 构建同伴上下文部分（本轮智能体已说的内容）
   const peerContext = buildPeerContextSection(agentResponses, agentConfig.name);
 
-  // Whether spotlight/laser are available (only on slide scenes)
+  // spotlight/laser 是否可用（仅在幻灯片场景）
   const hasSlideActions =
     effectiveActions.includes('spotlight') || effectiveActions.includes('laser');
 
-  // Build format example based on available actions
+  // 根据可用动作构建格式示例
   const formatExample = hasSlideActions
     ? `[{"type":"action","name":"spotlight","params":{"elementId":"img_1"}},{"type":"text","content":"Your natural speech to students"}]`
     : `[{"type":"action","name":"wb_open","params":{}},{"type":"text","content":"Your natural speech to students"}]`;
 
-  // Ordering principles
+  // 排序原则
   const orderingPrinciples = hasSlideActions
     ? `- spotlight/laser actions should appear BEFORE the corresponding text object (point first, then speak)
 - whiteboard actions can interleave WITH text objects (draw while speaking)`
     : `- whiteboard actions can interleave WITH text objects (draw while speaking)`;
 
-  // Good examples — include spotlight/laser examples only for slide scenes
+  // 良好示例 — 仅在幻灯片场景包含 spotlight/laser 示例
   const spotlightExamples = hasSlideActions
     ? `[{"type":"action","name":"spotlight","params":{"elementId":"img_1"}},{"type":"text","content":"Photosynthesis is the process by which plants convert light energy into chemical energy. Take a look at this diagram."},{"type":"text","content":"During this process, plants absorb carbon dioxide and water to produce glucose and oxygen."}]
 
@@ -149,7 +171,7 @@ Personalize your teaching based on their background when relevant. Address them 
 `
     : '';
 
-  // Action usage guidelines — conditional spotlight/laser lines
+  // 动作使用指南 — 条件性的 spotlight/laser 行
   const slideActionGuidelines = hasSlideActions
     ? `- spotlight: Use to focus attention on ONE key element. Don't overuse — max 1-2 per response.
 - laser: Use to point at elements. Good for directing attention during explanations.
@@ -163,7 +185,7 @@ Personalize your teaching based on their background when relevant. Address them 
 
   const roleGuideline = ROLE_GUIDELINES[agentConfig.role] || ROLE_GUIDELINES.student;
 
-  // Build language constraint from stage language
+  // 从课程语言构建语言约束
   const courseLanguage = storeState.stage?.language;
   const languageConstraint = courseLanguage
     ? `\n# Language (CRITICAL)\nYou MUST speak in ${courseLanguage === 'zh-CN' ? 'Chinese (Simplified)' : courseLanguage === 'en-US' ? 'English' : courseLanguage}. ALL text content in your response MUST be in this language.\n`
@@ -252,13 +274,13 @@ IMPORTANT: As you are starting this discussion, begin by introducing the topic n
   }`;
 }
 
-// ==================== Length Guidelines ====================
+// ==================== 长度指南 ====================
 
 /**
- * Build role-aware length and style guidelines.
+ * 构建基于角色的长度和风格指南。
  *
- * All agents should be concise and conversational. Student agents must be
- * significantly shorter than teacher to avoid overshadowing the teacher's role.
+ * 所有智能体都应该简洁和对话式。学生智能体必须比老师
+ * 明显更短，以避免盖过老师的角色。
  */
 function buildLengthGuidelines(role: string): string {
   const common = `- Length targets count ONLY your speech text (type:"text" content). Actions (spotlight, whiteboard, etc.) do NOT count toward length. Use as many actions as needed — they don't make your speech "too long."
@@ -277,7 +299,7 @@ ${common}
 - One key point per response. Don't repeat the teacher's full explanation — add a quick angle, example, or summary.`;
   }
 
-  // Student roles — must be noticeably shorter than teacher
+  // 学生角色 — 必须明显比老师短
   return `- Keep your TOTAL speech text around 50 characters. 1-2 sentences max.
 ${common}
 - You are a STUDENT, not a teacher. Your responses should be much shorter than the teacher's. If your response is as long as the teacher's, you are doing it wrong.
@@ -285,14 +307,14 @@ ${common}
 - Inspire and provoke thought with punchy comments, not lengthy analysis.`;
 }
 
-// ==================== Whiteboard Guidelines ====================
+// ==================== 白板指南 ====================
 
 /**
- * Build role-aware whiteboard guidelines.
+ * 构建基于角色的白板指南。
  *
- * - Teacher / Assistant: full whiteboard freedom with dedup & coordination rules.
- * - Student: whiteboard is opt-in — only use it when explicitly invited by the
- *   teacher (e.g., "come solve this on the board"), never proactively.
+ * - 老师 / 助教：完整的白板自由，带有去重和协调规则。
+ * - 学生：白板是选择加入的 — 仅在老师明确邀请时使用
+ *   （例如"来黑板上解这道题"），从不主动使用。
  */
 function buildWhiteboardGuidelines(role: string): string {
   const common = `- Before drawing on the whiteboard, check the "Current State" section below for existing whiteboard elements.
@@ -386,7 +408,7 @@ ${latexGuidelines}
 ${common}`;
   }
 
-  // Student role: suppress proactive whiteboard usage
+  // 学生角色：抑制主动使用白板
   return `- The whiteboard is primarily the teacher's space. Do NOT draw on it proactively.
 - Only use whiteboard actions when the teacher or user explicitly invites you to write on the board (e.g., "come solve this", "show your work on the whiteboard").
 - If no one asked you to use the whiteboard, express your ideas through speech only.
@@ -394,19 +416,19 @@ ${common}`;
 ${common}`;
 }
 
-// ==================== Element Summarization ====================
+// ==================== 元素摘要 ====================
 
 /**
- * Strip HTML tags to extract plain text
+ * 去除 HTML 标签以提取纯文本
  */
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').trim();
 }
 
 /**
- * Summarize a single PPT element into a one-line description
+ * 将单个 PPT 元素摘要为单行描述
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- PPTElement variants have heterogeneous shapes
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- PPTElement 变体具有异构形状
 function summarizeElement(el: any): string {
   const id = el.id ? `[id:${el.id}]` : '';
   const pos = `at (${Math.round(el.left)},${Math.round(el.top)})`;
@@ -459,36 +481,36 @@ function summarizeElement(el: any): string {
 }
 
 /**
- * Summarize an array of elements into line descriptions
+ * 将元素数组摘要为行描述
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- PPTElement variants have heterogeneous shapes
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- PPTElement 变体具有异构形状
 function summarizeElements(elements: any[]): string {
-  if (elements.length === 0) return '  (empty)';
+  if (elements.length === 0) return '  (empty)'; // 中文：(空)
 
   const lines = elements.map((el, i) => `  ${i + 1}. ${summarizeElement(el)}`);
 
   return lines.join('\n');
 }
 
-// ==================== Virtual Whiteboard Context ====================
+// ==================== 虚拟白板上下文 ====================
 
 /**
- * Tracked element from replaying the whiteboard ledger
+ * 从重放白板账本跟踪的元素
  */
 interface VirtualWhiteboardElement {
   agentName: string;
   summary: string;
-  elementId?: string; // Present for elements from initial whiteboard state
+  elementId?: string; // 来自初始白板状态的元素存在此字段
 }
 
 /**
- * Replay the whiteboard ledger to build an attributed element list.
+ * 重放白板账本以构建带归属的元素列表。
  *
- * - wb_clear resets the accumulated elements
- * - wb_draw_* appends a new element with the agent's name
- * - wb_open / wb_close are ignored (structural, not content)
+ * - wb_clear 重置累积的元素
+ * - wb_draw_* 追加一个带有智能体名称的新元素
+ * - wb_open / wb_close 被忽略（结构性的，不是内容）
  *
- * Returns empty string when the ledger is empty (zero extra token overhead).
+ * 当账本为空时返回空字符串（零额外令牌开销）。
  */
 function buildVirtualWhiteboardContext(
   storeState: StatelessChatRequest['storeState'],
@@ -496,7 +518,7 @@ function buildVirtualWhiteboardContext(
 ): string {
   if (!ledger || ledger.length === 0) return '';
 
-  // Replay ledger to build current element list
+  // 重放账本以构建当前元素列表
   const elements: VirtualWhiteboardElement[] = [];
 
   for (const record of ledger) {
@@ -505,8 +527,8 @@ function buildVirtualWhiteboardContext(
         elements.length = 0;
         break;
       case 'wb_delete': {
-        // Remove element by matching elementId from initial whiteboard state
-        // (elements drawn this round don't have tracked IDs)
+        // 通过匹配初始白板状态的 elementId 来移除元素
+        // （本轮绘制的元素没有跟踪的 ID）
         const deleteId = String(record.params.elementId || '');
         const idx = elements.findIndex((el) => el.elementId === deleteId);
         if (idx >= 0) elements.splice(idx, 1);
@@ -556,7 +578,7 @@ function buildVirtualWhiteboardContext(
         const x = record.params.x ?? '?';
         const y = record.params.y ?? '?';
         const w = record.params.width ?? 400;
-        // Estimate latex height: ~80px default for single-line, more for complex formulas
+        // 估计 latex 高度：单行约 80px，复杂公式更多
         const h = record.params.height ?? 80;
         elements.push({
           agentName: record.agentName,
@@ -591,7 +613,7 @@ function buildVirtualWhiteboardContext(
         });
         break;
       }
-      // wb_open, wb_close — skip
+      // wb_open, wb_close — 跳过
     }
   }
 
@@ -611,32 +633,32 @@ DO NOT redraw content that already exists. Check positions above before adding n
 `;
 }
 
-// ==================== State Context ====================
+// ==================== 状态上下文 ====================
 
 /**
- * Build context string from store state
+ * 从 store 状态构建上下文字符串
  */
 function buildStateContext(storeState: StatelessChatRequest['storeState']): string {
   const { stage, scenes, currentSceneId, mode, whiteboardOpen } = storeState;
 
   const lines: string[] = [];
 
-  // Mode
+  // 模式
   lines.push(`Mode: ${mode}`);
 
-  // Whiteboard status
+  // 白板状态
   lines.push(
     `Whiteboard: ${whiteboardOpen ? 'OPEN (slide canvas is hidden)' : 'closed (slide canvas is visible)'}`,
   );
 
-  // Stage info
+  // 课程信息
   if (stage) {
     lines.push(
       `Course: ${stage.name || 'Untitled'}${stage.description ? ` - ${stage.description}` : ''}`,
     );
   }
 
-  // Scenes summary
+  // 场景摘要
   lines.push(`Total scenes: ${scenes.length}`);
 
   if (currentSceneId) {
@@ -646,13 +668,13 @@ function buildStateContext(storeState: StatelessChatRequest['storeState']): stri
         `Current scene: "${currentScene.title}" (${currentScene.type}, id: ${currentSceneId})`,
       );
 
-      // Slide scene: include element details
+      // 幻灯片场景：包含元素详情
       if (currentScene.content.type === 'slide') {
         const elements = currentScene.content.canvas.elements;
         lines.push(`Current slide elements (${elements.length}):\n${summarizeElements(elements)}`);
       }
 
-      // Quiz scene: include question summary
+      // 测验场景：包含问题摘要
       if (currentScene.content.type === 'quiz') {
         const questions = currentScene.content.questions;
         const qSummary = questions
@@ -665,10 +687,10 @@ function buildStateContext(storeState: StatelessChatRequest['storeState']): stri
       }
     }
   } else if (scenes.length > 0) {
-    lines.push('No scene currently selected');
+    lines.push('No scene currently selected'); // 中文：当前未选择场景
   }
 
-  // List first few scenes
+  // 列出前几个场景
   if (scenes.length > 0) {
     const sceneSummary = scenes
       .slice(0, 5)
@@ -679,7 +701,7 @@ function buildStateContext(storeState: StatelessChatRequest['storeState']): stri
     );
   }
 
-  // Whiteboard content (last whiteboard in the stage)
+  // 白板内容（课程中最后一个白板）
   if (stage?.whiteboard && stage.whiteboard.length > 0) {
     const lastWb = stage.whiteboard[stage.whiteboard.length - 1];
     const wbElements = lastWb.elements || [];
@@ -691,10 +713,10 @@ function buildStateContext(storeState: StatelessChatRequest['storeState']): stri
   return lines.join('\n');
 }
 
-// ==================== Conversation Summary ====================
+// ==================== 对话摘要 ====================
 
 /**
- * OpenAI message format (used by director)
+ * OpenAI 消息格式（由导演使用）
  */
 interface OpenAIMessage {
   role: 'system' | 'user' | 'assistant';
@@ -702,14 +724,14 @@ interface OpenAIMessage {
 }
 
 /**
- * Summarize conversation history for the director agent
+ * 为导演智能体摘要对话历史
  *
- * Produces a condensed text summary of the last N messages,
- * truncating long messages and including role labels.
+ * 生成最近 N 条消息的精简文本摘要，
+ * 截断长消息并包含角色标签。
  *
- * @param messages - OpenAI-format messages to summarize
- * @param maxMessages - Maximum number of recent messages to include (default 10)
- * @param maxContentLength - Maximum content length per message (default 200)
+ * @param messages - 要摘要的 OpenAI 格式消息
+ * @param maxMessages - 要包含的最大最近消息数（默认 10）
+ * @param maxContentLength - 每条消息的最大内容长度（默认 200）
  */
 export function summarizeConversation(
   messages: OpenAIMessage[],
@@ -717,7 +739,7 @@ export function summarizeConversation(
   maxContentLength = 200,
 ): string {
   if (messages.length === 0) {
-    return 'No conversation history yet.';
+    return 'No conversation history yet.'; // 中文：暂无对话历史
   }
 
   const recent = messages.slice(-maxMessages);
@@ -734,11 +756,11 @@ export function summarizeConversation(
   return lines.join('\n');
 }
 
-// ==================== Message Conversion ====================
+// ==================== 消息转换 ====================
 
 /**
- * Convert UI messages to OpenAI format
- * Includes tool call information so the model knows what actions were taken
+ * 将 UI 消息转换为 OpenAI 格式
+ * 包含工具调用信息，以便模型知道执行了哪些动作
  */
 export function convertMessagesToOpenAI(
   messages: StatelessChatRequest['messages'],
@@ -748,8 +770,8 @@ export function convertMessagesToOpenAI(
     .filter((msg) => msg.role === 'user' || msg.role === 'assistant')
     .map((msg) => {
       if (msg.role === 'assistant') {
-        // Assistant messages use JSON array format to serve as few-shot examples
-        // that match the expected output format from the system prompt
+        // 助手消息使用 JSON 数组格式，作为与系统提示词中
+        // 期望输出格式匹配的少样本示例
         const items: Array<{ type: string; [key: string]: string }> = [];
 
         if (msg.parts) {
@@ -780,8 +802,8 @@ export function convertMessagesToOpenAI(
         const content = items.length > 0 ? JSON.stringify(items) : '';
         const msgAgentId = msg.metadata?.agentId;
 
-        // When currentAgentId is provided and this message is from a DIFFERENT agent,
-        // convert to user role with agent name attribution
+        // 当提供了 currentAgentId 且此消息来自不同智能体时，
+        // 转换为带有智能体名称归属的 user 角色
         if (currentAgentId && msgAgentId && msgAgentId !== currentAgentId) {
           const agentName = msg.metadata?.senderName || msgAgentId;
           return {
@@ -796,7 +818,7 @@ export function convertMessagesToOpenAI(
         };
       }
 
-      // User messages: keep plain text concatenation
+      // 用户消息：保持纯文本连接
       const contentParts: string[] = [];
 
       if (msg.parts) {
@@ -820,14 +842,14 @@ export function convertMessagesToOpenAI(
         }
       }
 
-      // Extract speaker name from metadata (e.g. other agents' messages in discussion)
+      // 从元数据中提取说话者名称（例如讨论中其他智能体的消息）
       const senderName = msg.metadata?.senderName;
       let content = contentParts.join('\n');
       if (senderName) {
         content = `[${senderName}]: ${content}`;
       }
 
-      // Annotate interrupted messages so the LLM knows context was cut short
+      // 为被中断的消息添加注释，以便 LLM 知道上下文被截断了
       const isInterrupted =
         (msg as unknown as Record<string, unknown>).metadata &&
         ((msg as unknown as Record<string, unknown>).metadata as Record<string, unknown>)
@@ -840,8 +862,8 @@ export function convertMessagesToOpenAI(
       };
     })
     .filter((msg) => {
-      // Drop empty messages and messages with only dots/ellipsis/whitespace
-      // (produced by failed agent streams)
+      // 丢弃空消息和只有点/省略号/空白的消息
+      // （由失败的智能体流产生）
       const stripped = msg.content.replace(/[.\s…]+/g, '');
       return stripped.length > 0;
     });

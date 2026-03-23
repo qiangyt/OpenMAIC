@@ -11,7 +11,7 @@ export interface ImagePolygonOutlineProps {
 }
 
 /**
- * Polygon outline for image element
+ * 图片元素的多边形边框
  */
 export function ImagePolygonOutline({
   width,

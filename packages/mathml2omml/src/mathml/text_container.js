@@ -7,7 +7,7 @@ const STYLES = {
 }
 
 function textContainer(element, targetParent, previousSibling, nextSibling, ancestors, textType) {
-  // isNary redirect is now handled in walker's child loop
+  // isNary 重定向现在由 walker 的子循环处理
 
   const hasMglyphChild = element.children?.find((element) => element.name === 'mglyph')
   const style = getStyle(element, ancestors, previousSibling?.style)
@@ -18,7 +18,7 @@ function textContainer(element, targetParent, previousSibling, nextSibling, ance
       const previousStyle = previousSibling?.style
       return previousStyle && style[key] === previousStyle[key]
     }) && previousSibling?.hasMglyphChild === hasMglyphChild
-  const sameGroup = // Only group mtexts or mi, mn, mo with oneanother.
+  const sameGroup = // 仅将 mtexts 或 mi、mn、mo 彼此分组。
     textType === previousSibling?.name ||
     (['mi', 'mn', 'mo'].includes(textType) && ['mi', 'mn', 'mo'].includes(previousSibling?.name))
   let targetElement

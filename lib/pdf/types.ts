@@ -1,14 +1,14 @@
 /**
- * PDF Parsing Provider Type Definitions
+ * PDF 解析提供商类型定义
  */
 
 /**
- * PDF Provider IDs
+ * PDF 提供商 ID
  */
 export type PDFProviderId = 'unpdf' | 'mineru';
 
 /**
- * PDF Provider Configuration
+ * PDF 提供商配置
  */
 export interface PDFProviderConfig {
   id: PDFProviderId;
@@ -16,11 +16,11 @@ export interface PDFProviderConfig {
   requiresApiKey: boolean;
   baseUrl?: string;
   icon?: string;
-  features: string[]; // ['text', 'images', 'tables', 'formulas', 'layout-analysis', etc.]
+  features: string[]; // ['text', 'images', 'tables', 'formulas', 'layout-analysis' 等]
 }
 
 /**
- * PDF Parser Configuration for API calls
+ * API 调用的 PDF 解析器配置
  */
 export interface PDFParserConfig {
   providerId: PDFProviderId;
@@ -28,4 +28,4 @@ export interface PDFParserConfig {
   baseUrl?: string;
 }
 
-// Note: ParsedPdfContent is imported from @/lib/types/pdf to avoid duplication
+// 注意：ParsedPdfContent 从 @/lib/types/pdf 导入以避免重复

@@ -1,86 +1,86 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * PptxGenJS Interfaces
+ * PptxGenJS 接口
  */
 
 import { CHART_NAME, PLACEHOLDER_TYPE, SHAPE_NAME, SLIDE_OBJECT_TYPES, TEXT_HALIGN, TEXT_VALIGN, WRITE_OUTPUT_TYPE } from './core-enums'
 
-// Core Types
+// 核心类型
 // ==========
 
 /**
- * Coordinate number - either:
- * - Inches (0-n)
- * - Percentage (0-100)
+ * 坐标数字 - 可以是：
+ * - 英寸 (0-n)
+ * - 百分比 (0-100)
  *
- * @example 10.25 // coordinate in inches
- * @example '75%' // coordinate as percentage of slide size
+ * @example 10.25 // 以英寸为单位的坐标
+ * @example '75%' // 以幻灯片大小百分比为单位的坐标
  */
 export type Coord = number | `${number}%`
 export interface PositionProps {
 	/**
-	 * Horizontal position
-	 * - inches or percentage
-	 * @example 10.25 // position in inches
-	 * @example '75%' // position as percentage of slide size
+	 * 水平位置
+	 * - 英寸或百分比
+	 * @example 10.25 // 以英寸为单位的位置
+	 * @example '75%' // 以幻灯片大小百分比为单位的位置
 	 */
 	x?: Coord
 	/**
-	 * Vertical position
-	 * - inches or percentage
-	 * @example 10.25 // position in inches
-	 * @example '75%' // position as percentage of slide size
+	 * 垂直位置
+	 * - 英寸或百分比
+	 * @example 10.25 // 以英寸为单位的位置
+	 * @example '75%' // 以幻灯片大小百分比为单位的位置
 	 */
 	y?: Coord
 	/**
-	 * Height
-	 * - inches or percentage
-	 * @example 10.25 // height in inches
-	 * @example '75%' // height as percentage of slide size
+	 * 高度
+	 * - 英寸或百分比
+	 * @example 10.25 // 以英寸为单位的高度
+	 * @example '75%' // 以幻灯片大小百分比为单位的高度
 	 */
 	h?: Coord
 	/**
-	 * Width
-	 * - inches or percentage
-	 * @example 10.25 // width in inches
-	 * @example '75%' // width as percentage of slide size
+	 * 宽度
+	 * - 英寸或百分比
+	 * @example 10.25 // 以英寸为单位的宽度
+	 * @example '75%' // 以幻灯片大小百分比为单位的宽度
 	 */
 	w?: Coord
 }
 /**
- * Either `data` or `path` is required
+ * 必须提供 `data` 或 `path`
  */
 export interface DataOrPathProps {
 	/**
-	 * URL or relative path
+	 * URL 或相对路径
 	 *
-	 * @example 'https://onedrives.com/myimg.png` // retrieve image via URL
-	 * @example '/home/gitbrent/images/myimg.png` // retrieve image via local path
+	 * @example 'https://onedrives.com/myimg.png` // 通过 URL 获取图片
+	 * @example '/home/gitbrent/images/myimg.png` // 通过本地路径获取图片
 	 */
 	path?: string
 	/**
-	 * base64-encoded string
-	 * - Useful for avoiding potential path/server issues
+	 * base64 编码的字符串
+	 * - 用于避免潜在的路径/服务器问题
 	 *
-	 * @example 'image/png;base64,iVtDafDrBF[...]=' // pre-encoded image in base-64
+	 * @example 'image/png;base64,iVtDafDrBF[...]=' // base-64 预编码的图片
 	 */
 	data?: string
 }
 export interface BackgroundProps extends DataOrPathProps, ShapeFillProps {
 	/**
-	 * Color (hex format)
-	 * @deprecated v3.6.0 - use `ShapeFillProps` instead
+	 * 颜色（十六进制格式）
+	 * @deprecated v3.6.0 - 改用 `ShapeFillProps`
 	 */
 	fill?: HexColor
 
 	/**
-	 * source URL
-	 * @deprecated v3.6.0 - use `DataOrPathProps` instead - remove in v4.0.0
+	 * 源 URL
+	 * @deprecated v3.6.0 - 改用 `DataOrPathProps` - 将在 v4.0.0 中移除
 	 */
 	src?: string
 }
 /**
- * Color in Hex format
+ * 十六进制格式的颜色
  * @example 'FF3399'
  */
 export type HexColor = string
@@ -90,211 +90,211 @@ export type Margin = number | [number, number, number, number]
 export type HAlign = 'left' | 'center' | 'right' | 'justify'
 export type VAlign = 'top' | 'middle' | 'bottom'
 
-// used by charts, shape, text
+// 用于图表、形状、文本
 export interface BorderProps {
 	/**
-	 * Border type
+	 * 边框类型
 	 * @default solid
 	 */
 	type?: 'none' | 'dash' | 'solid'
 	/**
-	 * Border color (hex)
+	 * 边框颜色（十六进制）
 	 * @example 'FF3399'
 	 * @default '666666'
 	 */
 	color?: HexColor
 
-	// TODO: add `transparency` prop to Borders (0-100%)
+	// TODO: 为边框添加 `transparency` 属性 (0-100%)
 
-	// TODO: add `width` - deprecate `pt`
+	// TODO: 添加 `width` - 废弃 `pt`
 	/**
-	 * Border size (points)
+	 * 边框大小（点）
 	 * @default 1
 	 */
 	pt?: number
 }
-// used by: image, object, text,
+// 用于：图片、对象、文本
 export interface HyperlinkProps {
 	_rId: number
 	/**
-	 * Slide number to link to
+	 * 要链接到的幻灯片编号
 	 */
 	slide?: number
 	/**
-	 * Url to link to
+	 * 要链接到的 URL
 	 */
 	url?: string
 	/**
-	 * Hyperlink Tooltip
+	 * 超链接提示
 	 */
 	tooltip?: string
 }
-// used by: chart, text, image
+// 用于：图表、文本、图片
 export interface ShadowProps {
 	/**
-	 * shadow type
+	 * 阴影类型
 	 * @default 'none'
 	 */
 	type: 'outer' | 'inner' | 'none'
 	/**
-	 * opacity (percent)
-	 * - range: 0.0-1.0
-	 * @example 0.5 // 50% opaque
+	 * 不透明度（百分比）
+	 * - 范围：0.0-1.0
+	 * @example 0.5 // 50% 不透明
 	 */
-	opacity?: number // TODO: "Transparency (0-100%)" in PPT // TODO: deprecate and add `transparency`
+	opacity?: number // TODO: PPT 中的"透明度 (0-100%)" // TODO: 废弃并添加 `transparency`
 	/**
-	 * blur (points)
-	 * - range: 0-100
+	 * 模糊（点）
+	 * - 范围：0-100
 	 * @default 0
 	 */
 	blur?: number
 	/**
-	 * angle (degrees)
-	 * - range: 0-359
+	 * 角度（度）
+	 * - 范围：0-359
 	 * @default 0
 	 */
 	angle?: number
 	/**
-	 * shadow offset (points)
-	 * - range: 0-200
+	 * 阴影偏移（点）
+	 * - 范围：0-200
 	 * @default 0
 	 */
-	offset?: number // TODO: "Distance" in PPT
+	offset?: number // TODO: PPT 中的"距离"
 	/**
-	 * shadow color (hex format)
+	 * 阴影颜色（十六进制格式）
 	 * @example 'FF3399'
 	 */
 	color?: HexColor
 	/**
-	 * whether to rotate shadow with shape
+	 * 是否随形状旋转阴影
 	 * @default false
 	 */
 	rotateWithShape?: boolean
 }
-// used by: shape, table, text
+// 用于：形状、表格、文本
 export interface ShapeFillProps {
 	/**
-	 * Fill color
-	 * - `HexColor` or `ThemeColor`
-	 * @example 'FF0000' // hex color (red)
-	 * @example pptx.SchemeColor.text1 // Theme color (Text1)
+	 * 填充颜色
+	 * - `HexColor` 或 `ThemeColor`
+	 * @example 'FF0000' // 十六进制颜色（红色）
+	 * @example pptx.SchemeColor.text1 // 主题颜色（Text1）
 	 */
 	color?: Color
 	/**
-	 * Transparency (percent)
-	 * - MS-PPT > Format Shape > Fill & Line > Fill > Transparency
-	 * - range: 0-100
+	 * 透明度（百分比）
+	 * - MS-PPT > 设置形状格式 > 填充与线条 > 填充 > 透明度
+	 * - 范围：0-100
 	 * @default 0
 	 */
 	transparency?: number
 	/**
-	 * Fill type
+	 * 填充类型
 	 * @default 'solid'
 	 */
 	type?: 'none' | 'solid'
 
 	/**
-	 * Transparency (percent)
-	 * @deprecated v3.3.0 - use `transparency`
+	 * 透明度（百分比）
+	 * @deprecated v3.3.0 - 改用 `transparency`
 	 */
 	alpha?: number
 }
 export interface ShapeLineProps extends ShapeFillProps {
 	/**
-	 * Line width (pt)
+	 * 线条宽度（点）
 	 * @default 1
 	 */
 	width?: number
 	/**
-	 * Dash type
+	 * 虚线类型
 	 * @default 'solid'
 	 */
 	dashType?: 'solid' | 'dash' | 'dashDot' | 'lgDash' | 'lgDashDot' | 'lgDashDotDot' | 'sysDash' | 'sysDot'
 	/**
-	 * Begin arrow type
+	 * 起始箭头类型
 	 * @since v3.3.0
 	 */
 	beginArrowType?: 'none' | 'arrow' | 'diamond' | 'oval' | 'stealth' | 'triangle'
 	/**
-	 * End arrow type
+	 * 结束箭头类型
 	 * @since v3.3.0
 	 */
 	endArrowType?: 'none' | 'arrow' | 'diamond' | 'oval' | 'stealth' | 'triangle'
-	// FUTURE: beginArrowSize (1-9)
-	// FUTURE: endArrowSize (1-9)
+	// 未来：beginArrowSize (1-9)
+	// 未来：endArrowSize (1-9)
 
 	/**
-	 * Dash type
-	 * @deprecated v3.3.0 - use `dashType`
+	 * 虚线类型
+	 * @deprecated v3.3.0 - 改用 `dashType`
 	 */
 	lineDash?: 'solid' | 'dash' | 'dashDot' | 'lgDash' | 'lgDashDot' | 'lgDashDotDot' | 'sysDash' | 'sysDot'
 	/**
-	 * @deprecated v3.3.0 - use `beginArrowType`
+	 * @deprecated v3.3.0 - 改用 `beginArrowType`
 	 */
 	lineHead?: 'none' | 'arrow' | 'diamond' | 'oval' | 'stealth' | 'triangle'
 	/**
-	 * @deprecated v3.3.0 - use `endArrowType`
+	 * @deprecated v3.3.0 - 改用 `endArrowType`
 	 */
 	lineTail?: 'none' | 'arrow' | 'diamond' | 'oval' | 'stealth' | 'triangle'
 	/**
-	 * Line width (pt)
-	 * @deprecated v3.3.0 - use `width`
+	 * 线条宽度（点）
+	 * @deprecated v3.3.0 - 改用 `width`
 	 */
 	pt?: number
 	/**
-	 * Line size (pt)
-	 * @deprecated v3.3.0 - use `width`
+	 * 线条大小（点）
+	 * @deprecated v3.3.0 - 改用 `width`
 	 */
 	size?: number
 }
-// used by: chart, slide, table, text
+// 用于：图表、幻灯片、表格、文本
 export interface TextBaseProps {
 	/**
-	 * Horizontal alignment
+	 * 水平对齐方式
 	 * @default 'left'
 	 */
 	align?: HAlign
 	/**
-	 * Bold style
+	 * 粗体样式
 	 * @default false
 	 */
 	bold?: boolean
 	/**
-	 * Add a line-break
+	 * 添加换行符
 	 * @default false
 	 */
 	breakLine?: boolean
 	/**
-	 * Add standard or custom bullet
-	 * - use `true` for standard bullet
-	 * - pass object options for custom bullet
+	 * 添加标准或自定义项目符号
+	 * - 使用 `true` 表示标准项目符号
+	 * - 传递对象选项表示自定义项目符号
 	 * @default false
 	 */
 	bullet?:
 	| boolean
 	| {
 		/**
-		 * Bullet type
+		 * 项目符号类型
 		 * @default bullet
 		 */
 		type?: 'bullet' | 'number'
 		/**
-		 * Bullet character code (unicode)
+		 * 项目符号字符代码（unicode）
 		 * @since v3.3.0
-		 * @example '25BA' // 'BLACK RIGHT-POINTING POINTER' (U+25BA)
+		 * @example '25BA' // '黑色向右指针' (U+25BA)
 		 */
 		characterCode?: string
 		/**
-		 * Indentation (space between bullet and text) (points)
+		 * 缩进（项目符号和文本之间的间距）（点）
 		 * @since v3.3.0
 		 * @default 27 // DEF_BULLET_MARGIN
-		 * @example 10 // Indents text 10 points from bullet
+		 * @example 10 // 将文本从项目符号缩进 10 点
 		 */
 		indent?: number
 		/**
-		 * Number type
+		 * 编号类型
 		 * @since v3.3.0
-		 * @example 'romanLcParenR' // roman numerals lower-case with paranthesis right
+		 * @example 'romanLcParenR' // 带右括号的小写罗马数字
 		 */
 		numberType?:
 		| 'alphaLcParenBoth'
@@ -314,104 +314,104 @@ export interface TextBaseProps {
 		| 'romanUcParenR'
 		| 'romanUcPeriod'
 		/**
-		 * Number bullets start at
+		 * 编号项目符号起始值
 		 * @since v3.3.0
 		 * @default 1
-		 * @example 10 // numbered bullets start with 10
+		 * @example 10 // 编号项目符号从 10 开始
 		 */
 		numberStartAt?: number
 
-		// DEPRECATED
+		// 已废弃
 
 		/**
-		 * Bullet code (unicode)
-		 * @deprecated v3.3.0 - use `characterCode`
+		 * 项目符号代码（unicode）
+		 * @deprecated v3.3.0 - 改用 `characterCode`
 		 */
 		code?: string
 		/**
-		 * Margin between bullet and text
+		 * 项目符号和文本之间的边距
 		 * @since v3.2.1
-		 * @deplrecated v3.3.0 - use `indent`
+		 * @deprecated v3.3.0 - 改用 `indent`
 		 */
 		marginPt?: number
 		/**
-		 * Number to start with (only applies to type:number)
-		 * @deprecated v3.3.0 - use `numberStartAt`
+		 * 起始编号（仅适用于 type:number）
+		 * @deprecated v3.3.0 - 改用 `numberStartAt`
 		 */
 		startAt?: number
 		/**
-		 * Number type
-		 * @deprecated v3.3.0 - use `numberType`
+		 * 编号类型
+		 * @deprecated v3.3.0 - 改用 `numberType`
 		 */
 		style?: string
 	}
 	/**
-	 * Text color
-	 * - `HexColor` or `ThemeColor`
-	 * - MS-PPT > Format Shape > Text Options > Text Fill & Outline > Text Fill > Color
-	 * @example 'FF0000' // hex color (red)
-	 * @example pptx.SchemeColor.text1 // Theme color (Text1)
+	 * 文本颜色
+	 * - `HexColor` 或 `ThemeColor`
+	 * - MS-PPT > 设置形状格式 > 文本选项 > 文本填充与轮廓 > 文本填充 > 颜色
+	 * @example 'FF0000' // 十六进制颜色（红色）
+	 * @example pptx.SchemeColor.text1 // 主题颜色（Text1）
 	 */
 	color?: Color
 	/**
-	 * Font face name
-	 * @example 'Arial' // Arial font
+	 * 字体名称
+	 * @example 'Arial' // Arial 字体
 	 */
 	fontFace?: string
 	/**
-	 * Font size
-	 * @example 12 // Font size 12
+	 * 字体大小
+	 * @example 12 // 字体大小 12
 	 */
 	fontSize?: number
 	/**
-	 * Text highlight color (hex format)
-	 * @example 'FFFF00' // yellow
+	 * 文本高亮颜色（十六进制格式）
+	 * @example 'FFFF00' // 黄色
 	 */
 	highlight?: HexColor
 	/**
-	 * italic style
+	 * 斜体样式
 	 * @default false
 	 */
 	italic?: boolean
 	/**
-	 * language
-	 * - ISO 639-1 standard language code
-	 * @default 'en-US' // english US
-	 * @example 'fr-CA' // french Canadian
+	 * 语言
+	 * - ISO 639-1 标准语言代码
+	 * @default 'en-US' // 英语（美国）
+	 * @example 'fr-CA' // 法语（加拿大）
 	 */
 	lang?: string
 	/**
-	 * Add a soft line-break (shift+enter) before line text content
+	 * 在行文本内容前添加软换行符（shift+enter）
 	 * @default false
 	 * @since v3.5.0
 	 */
 	softBreakBefore?: boolean
 	/**
-	 * tab stops
-	 * - PowerPoint: Paragraph > Tabs > Tab stop position
-	 * @example [{ position:1 }, { position:3 }] // Set first tab stop to 1 inch, set second tab stop to 3 inches
+	 * 制表位
+	 * - PowerPoint：段落 > 制表位 > 制表位位置
+	 * @example [{ position:1 }, { position:3 }] // 将第一个制表位设置为 1 英寸，将第二个制表位设置为 3 英寸
 	 */
 	tabStops?: Array<{ position: number, alignment?: 'l' | 'r' | 'ctr' | 'dec' }>
 	/**
-	 * text direction
-	 * `horz` = horizontal
-	 * `vert` = rotate 90^
-	 * `vert270` = rotate 270^
-	 * `wordArtVert` = stacked
+	 * 文本方向
+	 * `horz` = 水平
+	 * `vert` = 旋转 90 度
+	 * `vert270` = 旋转 270 度
+	 * `wordArtVert` = 堆叠
 	 * @default 'horz'
 	 */
 	textDirection?: 'horz' | 'vert' | 'vert270' | 'wordArtVert'
 	/**
-	 * Transparency (percent)
-	 * - MS-PPT > Format Shape > Text Options > Text Fill & Outline > Text Fill > Transparency
-	 * - range: 0-100
+	 * 透明度（百分比）
+	 * - MS-PPT > 设置形状格式 > 文本选项 > 文本填充与轮廓 > 文本填充 > 透明度
+	 * - 范围：0-100
 	 * @default 0
 	 */
 	transparency?: number
 	/**
-	 * underline properties
-	 * - PowerPoint: Font > Color & Underline > Underline Style/Underline Color
-	 * @default (none)
+	 * 下划线属性
+	 * - PowerPoint：字体 > 颜色与下划线 > 下划线样式/下划线颜色
+	 * @default (无)
 	 */
 	underline?: {
 		style?:
@@ -435,7 +435,7 @@ export interface TextBaseProps {
 		color?: Color
 	}
 	/**
-	 * vertical alignment
+	 * 垂直对齐方式
 	 * @default 'top'
 	 */
 	valign?: VAlign
@@ -444,15 +444,15 @@ export interface PlaceholderProps extends PositionProps, TextBaseProps {
 	name: string
 	type: PLACEHOLDER_TYPE
 	/**
-	 * margin (points)
+	 * 边距（点）
 	 */
 	margin?: Margin
 }
 export interface ObjectNameProps {
 	/**
-	 * Object name
-	 * - used instead of default "Object N" name
-	 * - PowerPoint: Home > Arrange > Selection Pane...
+	 * 对象名称
+	 * - 用于代替默认的"对象 N"名称
+	 * - PowerPoint：开始 > 排列 > 选择窗格...
 	 * @since v3.10.0
 	 * @default 'Object 1'
 	 * @example 'Antenna Design 9'
@@ -461,235 +461,235 @@ export interface ObjectNameProps {
 }
 export interface ThemeProps {
 	/**
-	 * Headings font face name
+	 * 标题字体名称
 	 * @example 'Arial Narrow'
 	 * @default 'Calibri Light'
 	 */
 	headFontFace?: string
 	/**
-	 * Body font face name
+	 * 正文字体名称
 	 * @example 'Arial'
 	 * @default 'Calibri'
 	 */
 	bodyFontFace?: string
 }
 
-// image / media ==================================================================================
+// 图片 / 媒体 ==================================================================================
 export type MediaType = 'audio' | 'online' | 'video'
 
 export interface ImageProps extends PositionProps, DataOrPathProps, ObjectNameProps {
 	/**
-	 * Alt Text value ("How would you describe this object and its contents to someone who is blind?")
-	 * - PowerPoint: [right-click on an image] > "Edit Alt Text..."
+	 * 替代文本值（"您如何向盲人描述此对象及其内容？"）
+	 * - PowerPoint：[右键点击图片] > "编辑替代文本..."
 	 */
 	altText?: string
 	/**
-	 * Flip horizontally?
+	 * 水平翻转？
 	 * @default false
 	 */
 	flipH?: boolean
 	/**
-	 * Flip vertical?
+	 * 垂直翻转？
 	 * @default false
 	 */
 	flipV?: boolean
 	hyperlink?: HyperlinkProps
 	/**
-	 * Placeholder type
-	 * - values: 'body' | 'header' | 'footer' | 'title' | et. al.
+	 * 占位符类型
+	 * - 值：'body' | 'header' | 'footer' | 'title' | 等
 	 * @example 'body'
 	 * @see https://docs.microsoft.com/en-us/office/vba/api/powerpoint.ppplaceholdertype
 	 */
 	placeholder?: string
 	/**
-	 * Image rotation (degrees)
-	 * - range: -360 to 360
+	 * 图片旋转（度）
+	 * - 范围：-360 到 360
 	 * @default 0
-	 * @example 180 // rotate image 180 degrees
+	 * @example 180 // 将图片旋转 180 度
 	 */
 	rotate?: number
 	/**
-	 * Enable image rounding
+	 * 启用图片圆角
 	 * @default false
 	 */
 	rounding?: boolean
 	/**
-	 * Shadow Props
-	 * - MS-PPT > Format Picture > Shadow
+	 * 阴影属性
+	 * - MS-PPT > 设置图片格式 > 阴影
 	 * @example
 	 * { type: 'outer', color: '000000', opacity: 0.5, blur: 20,  offset: 20, angle: 270 }
 	 */
 	shadow?: ShadowProps
 	/**
-	 * Image sizing options
+	 * 图片尺寸选项
 	 */
 	sizing?: {
 		/**
-		 * Sizing type
+		 * 尺寸类型
 		 */
 		type: 'contain' | 'cover' | 'crop'
 		/**
-		 * Image width
-		 * - inches or percentage
-		 * @example 10.25 // position in inches
-		 * @example '75%' // position as percentage of slide size
+		 * 图片宽度
+		 * - 英寸或百分比
+		 * @example 10.25 // 以英寸为单位的位置
+		 * @example '75%' // 以幻灯片大小百分比为单位的位置
 		 */
 		w: Coord
 		/**
-		 * Image height
-		 * - inches or percentage
-		 * @example 10.25 // position in inches
-		 * @example '75%' // position as percentage of slide size
+		 * 图片高度
+		 * - 英寸或百分比
+		 * @example 10.25 // 以英寸为单位的位置
+		 * @example '75%' // 以幻灯片大小百分比为单位的位置
 		 */
 		h: Coord
 		/**
-		 * Offset from left to crop image
-		 * - `crop` only
-		 * - inches or percentage
-		 * @example 10.25 // position in inches
-		 * @example '75%' // position as percentage of slide size
+		 * 从左侧裁剪图片的偏移量
+		 * - 仅限 `crop`
+		 * - 英寸或百分比
+		 * @example 10.25 // 以英寸为单位的位置
+		 * @example '75%' // 以幻灯片大小百分比为单位的位置
 		 */
 		x?: Coord
 		/**
-		 * Offset from top to crop image
-		 * - `crop` only
-		 * - inches or percentage
-		 * @example 10.25 // position in inches
-		 * @example '75%' // position as percentage of slide size
+		 * 从顶部裁剪图片的偏移量
+		 * - 仅限 `crop`
+		 * - 英寸或百分比
+		 * @example 10.25 // 以英寸为单位的位置
+		 * @example '75%' // 以幻灯片大小百分比为单位的位置
 		 */
 		y?: Coord
 	}
 	/**
-	 * Transparency (percent)
-	 * - MS-PPT > Format Picture > Picture > Picture Transparency > Transparency
-	 * - range: 0-100
+	 * 透明度（百分比）
+	 * - MS-PPT > 设置图片格式 > 图片 > 图片透明度 > 透明度
+	 * - 范围：0-100
 	 * @default 0
-	 * @example 25 // 25% transparent
+	 * @example 25 // 25% 透明
 	 */
 	transparency?: number
 }
 /**
- * Add media (audio/video) to slide
- * @requires either `link` or `path`
+ * 向幻灯片添加媒体（音频/视频）
+ * @requires 需要提供 `link` 或 `path`
  */
 export interface MediaProps extends PositionProps, DataOrPathProps, ObjectNameProps {
 	/**
-	 * Media type
-	 * - Use 'online' to embed a YouTube video (only supported in recent versions of PowerPoint)
+	 * 媒体类型
+	 * - 使用 'online' 嵌入 YouTube 视频（仅较新版本的 PowerPoint 支持）
 	 */
 	type: MediaType
 	/**
-	 * Cover image
+	 * 封面图片
 	 * @since 3.9.0
-	 * @default "play button" image, gray background
+	 * @default "播放按钮"图片，灰色背景
 	 */
 	cover?: string
 	/**
-	 * media file extension
-	 * - use when the media file path does not already have an extension, ex: "/folder/SomeSong"
+	 * 媒体文件扩展名
+	 * - 当媒体文件路径没有扩展名时使用，例如："/folder/SomeSong"
 	 * @since 3.9.0
 	 * @default extension from file provided
 	 */
 	extn?: string
 	/**
-	 * video embed link
-	 * - works with YouTube
-	 * - other sites may not show correctly in PowerPoint
-	 * @example 'https://www.youtube.com/embed/Dph6ynRVyUc' // embed a youtube video
+	 * 视频嵌入链接
+	 * - 适用于 YouTube
+	 * - 其他网站可能无法在 PowerPoint 中正确显示
+	 * @example 'https://www.youtube.com/embed/Dph6ynRVyUc' // 嵌入 YouTube 视频
 	 */
 	link?: string
 	/**
-	 * full or local path
-	 * @example 'https://freesounds/simpsons/bart.mp3' // embed mp3 audio clip from server
-	 * @example '/sounds/simpsons_haha.mp3' // embed mp3 audio clip from local directory
+	 * 完整路径或本地路径
+	 * @example 'https://freesounds/simpsons/bart.mp3' // 从服务器嵌入 mp3 音频片段
+	 * @example '/sounds/simpsons_haha.mp3' // 从本地目录嵌入 mp3 音频片段
 	 */
 	path?: string
 }
 
-// formula =========================================================================================
+// 公式 =========================================================================================
 
 /**
- * Add a formula (Office Math / OMML) to slide
+ * 向幻灯片添加公式（Office Math / OMML）
  */
 export interface FormulaProps extends PositionProps, ObjectNameProps {
 	/**
-	 * OMML XML string representing the formula
+	 * 表示公式的 OMML XML 字符串
 	 */
 	omml: string
 	/**
-	 * Font size for the formula (points)
+	 * 公式的字体大小（点）
 	 */
 	fontSize?: number
 	/**
-	 * Font color (hex)
+	 * 字体颜色（十六进制）
 	 */
 	color?: string
 	/**
-	 * Horizontal alignment of the formula: 'left' | 'center' | 'right'
+	 * 公式的水平对齐方式：'left' | 'center' | 'right'
 	 * @default 'center'
 	 */
 	align?: 'left' | 'center' | 'right'
 }
 
-// shapes =========================================================================================
+// 形状 =========================================================================================
 
 export interface ShapeProps extends PositionProps, ObjectNameProps {
 	/**
-	 * Horizontal alignment
+	 * 水平对齐方式
 	 * @default 'left'
 	 */
 	align?: HAlign
 	/**
-	 * Radius (only for pptx.shapes.PIE, pptx.shapes.ARC, pptx.shapes.BLOCK_ARC)
-	 * - In the case of pptx.shapes.BLOCK_ARC you have to setup the arcThicknessRatio
-	 * - values: [0-359, 0-359]
+	 * 角度范围（仅适用于 pptx.shapes.PIE, pptx.shapes.ARC, pptx.shapes.BLOCK_ARC）
+	 * - 对于 pptx.shapes.BLOCK_ARC，您需要设置 arcThicknessRatio
+	 * - 值：[0-359, 0-359]
 	 * @since v3.4.0
 	 * @default [270, 0]
 	 */
 	angleRange?: [number, number]
 	/**
-	 * Radius (only for pptx.shapes.BLOCK_ARC)
-	 * - You have to setup the angleRange values too
-	 * - values: 0.0-1.0
+	 * 弧线厚度比例（仅适用于 pptx.shapes.BLOCK_ARC）
+	 * - 您需要同时设置 angleRange 值
+	 * - 值：0.0-1.0
 	 * @since v3.4.0
 	 * @default 0.5
 	 */
 	arcThicknessRatio?: number
 	/**
-	 * Shape fill color properties
-	 * @example { color:'FF0000' } // hex color (red)
-	 * @example { color:'0088CC', transparency:50 } // hex color, 50% transparent
-	 * @example { color:pptx.SchemeColor.accent1 } // Theme color Accent1
+	 * 形状填充颜色属性
+	 * @example { color:'FF0000' } // 十六进制颜色（红色）
+	 * @example { color:'0088CC', transparency:50 } // 十六进制颜色，50% 透明
+	 * @example { color:pptx.SchemeColor.accent1 } // 主题颜色 Accent1
 	 */
 	fill?: ShapeFillProps
 	/**
-	 * Flip shape horizontally?
+	 * 水平翻转形状？
 	 * @default false
 	 */
 	flipH?: boolean
 	/**
-	 * Flip shape vertical?
+	 * 垂直翻转形状？
 	 * @default false
 	 */
 	flipV?: boolean
 	/**
-	 * Add hyperlink to shape
+	 * 为形状添加超链接
 	 * @example hyperlink: { url: "https://github.com/gitbrent/pptxgenjs", tooltip: "Visit Homepage" },
 	 */
 	hyperlink?: HyperlinkProps
 	/**
-	 * Line options
+	 * 线条选项
 	 */
 	line?: ShapeLineProps
 	/**
-	 * Points (only for pptx.shapes.CUSTOM_GEOMETRY)
+	 * 点（仅适用于 pptx.shapes.CUSTOM_GEOMETRY）
 	 * - type: 'arc'
-	 * - `hR` Shape Arc Height Radius
-	 * - `wR` Shape Arc Width Radius
-	 * - `stAng` Shape Arc Start Angle
-	 * - `swAng` Shape Arc Swing Angle
+	 * - `hR` 形状弧线高度半径
+	 * - `wR` 形状弧线宽度半径
+	 * - `stAng` 形状弧线起始角度
+	 * - `swAng` 形状弧线摆动角度
 	 * @see http://www.datypic.com/sc/ooxml/e-a_arcTo-1.html
-	 * @example [{ x: 0, y: 0 }, { x: 10, y: 10 }] // draw a line between those two points
+	 * @example [{ x: 0, y: 0 }, { x: 10, y: 10 }] // 在这两点之间画一条线
 	 */
 	points?: Array<
 	| { x: Coord, y: Coord, moveTo?: boolean }
@@ -699,21 +699,21 @@ export interface ShapeProps extends PositionProps, ObjectNameProps {
 	| { close: true }
 	>
 	/**
-	 * Rounded rectangle radius (only for pptx.shapes.ROUNDED_RECTANGLE)
-	 * - values: 0.0 to 1.0
+	 * 圆角矩形半径（仅适用于 pptx.shapes.ROUNDED_RECTANGLE）
+	 * - 值：0.0 到 1.0
 	 * @default 0
 	 */
 	rectRadius?: number
 	/**
-	 * Rotation (degrees)
-	 * - range: -360 to 360
+	 * 旋转（度）
+	 * - 范围：-360 到 360
 	 * @default 0
-	 * @example 180 // rotate 180 degrees
+	 * @example 180 // 旋转 180 度
 	 */
 	rotate?: number
 	/**
-	 * Shadow options
-	 * TODO: need new demo.js entry for shape shadow
+	 * 阴影选项
+	 * TODO: 需要为形状阴影添加新的 demo.js 条目
 	 */
 	shadow?: ShadowProps
 
@@ -734,139 +734,139 @@ export interface ShapeProps extends PositionProps, ObjectNameProps {
 	 */
 	lineTail?: 'arrow' | 'diamond' | 'none' | 'oval' | 'stealth' | 'triangle'
 	/**
-	 * Shape name (used instead of default "Shape N" name)
-	 * @deprecated v3.10.0 - use `objectName`
+	 * 形状名称（用于代替默认的"形状 N"名称）
+	 * @deprecated v3.10.0 - 改用 `objectName`
 	 */
 	shapeName?: string
 }
 
-// tables =========================================================================================
+// 表格 =========================================================================================
 
 export interface TableToSlidesProps extends TableProps {
 	_arrObjTabHeadRows?: TableRow[]
 	// _masterSlide?: SlideLayout
 
 	/**
-	 * Add an image to slide(s) created during autopaging
-	 * - `image` prop requires either `path` or `data`
-	 * - see `DataOrPathProps` for details on `image` props
-	 * - see `PositionProps` for details on `options` props
+	 * 在自动分页期间创建的幻灯片添加图片
+	 * - `image` 属性需要提供 `path` 或 `data`
+	 * - 有关 `image` 属性，请参阅 `DataOrPathProps`
+	 * - 有关 `options` 属性，请参阅 `PositionProps`
 	 */
 	addImage?: { image: DataOrPathProps, options: PositionProps }
 	/**
-	 * Add a shape to slide(s) created during autopaging
+	 * 在自动分页期间创建的幻灯片添加形状
 	 */
 	addShape?: { shapeName: SHAPE_NAME, options: ShapeProps }
 	/**
-	 * Add a table to slide(s) created during autopaging
+	 * 在自动分页期间创建的幻灯片添加表格
 	 */
 	addTable?: { rows: TableRow[], options: TableProps }
 	/**
-	 * Add a text object to slide(s) created during autopaging
+	 * 在自动分页期间创建的幻灯片添加文本对象
 	 */
 	addText?: { text: TextProps[], options: TextPropsOptions }
 	/**
-	 * Whether to enable auto-paging
-	 * - auto-paging creates new slides as content overflows a slide
+	 * 是否启用自动分页
+	 * - 自动分页在内容超出幻灯片时创建新幻灯片
 	 * @default true
 	 */
 	autoPage?: boolean
 	/**
-	 * Auto-paging character weight
-	 * - adjusts how many characters are used before lines wrap
-	 * - range: -1.0 to 1.0
+	 * 自动分页字符权重
+	 * - 调整换行前使用的字符数
+	 * - 范围：-1.0 到 1.0
 	 * @see https://gitbrent.github.io/PptxGenJS/docs/api-tables.html
 	 * @default 0.0
-	 * @example 0.5 // lines are longer (increases the number of characters that can fit on a given line)
+	 * @example 0.5 // 行更长（增加给定行可容纳的字符数）
 	 */
 	autoPageCharWeight?: number
 	/**
-	 * Auto-paging line weight
-	 * - adjusts how many lines are used before slides wrap
-	 * - range: -1.0 to 1.0
+	 * 自动分页行权重
+	 * - 调整幻灯片换行前使用的行数
+	 * - 范围：-1.0 到 1.0
 	 * @see https://gitbrent.github.io/PptxGenJS/docs/api-tables.html
 	 * @default 0.0
-	 * @example 0.5 // tables are taller (increases the number of lines that can fit on a given slide)
+	 * @example 0.5 // 表格更高（增加给定幻灯片可容纳的行数）
 	 */
 	autoPageLineWeight?: number
 	/**
-	 * Whether to repeat head row(s) on new tables created by autopaging
+	 * 是否在自动分页创建的新表格上重复标题行
 	 * @since v3.3.0
 	 * @default false
 	 */
 	autoPageRepeatHeader?: boolean
 	/**
-	 * The `y` location to use on subsequent slides created by autopaging
-	 * @default (top margin of Slide)
+	 * 自动分页创建的后续幻灯片使用的 `y` 位置
+	 * @default （幻灯片的顶部边距）
 	 */
 	autoPageSlideStartY?: number
 	/**
-	 * Column widths (inches)
+	 * 列宽（英寸）
 	 */
 	colW?: number | number[]
 	/**
-	 * Master slide name
-	 * - define a master slide to have your auto-paged slides have corporate design, etc.
+	 * 母版幻灯片名称
+	 * - 定义母版幻灯片以使自动分页的幻灯片具有企业设计等
 	 * @see https://gitbrent.github.io/PptxGenJS/docs/masters.html
 	 */
 	masterSlideName?: string
 	/**
-	 * Slide margin
-	 * - this margin will be across all slides created by auto-paging
+	 * 幻灯片边距
+	 * - 此边距将应用于自动分页创建的所有幻灯片
 	 */
 	slideMargin?: Margin
 
 	/**
-	 * @deprecated v3.3.0 - use `autoPageRepeatHeader`
+	 * @deprecated v3.3.0 - 改用 `autoPageRepeatHeader`
 	 */
 	addHeaderToEach?: boolean
 	/**
-	 * @deprecated v3.3.0 - use `autoPageSlideStartY`
+	 * @deprecated v3.3.0 - 改用 `autoPageSlideStartY`
 	 */
 	newSlideStartY?: number
 }
 export interface TableCellProps extends TextBaseProps {
 	/**
-	 * Auto-paging character weight
-	 * - adjusts how many characters are used before lines wrap
-	 * - range: -1.0 to 1.0
+	 * 自动分页字符权重
+	 * - 调整换行前使用的字符数
+	 * - 范围：-1.0 到 1.0
 	 * @see https://gitbrent.github.io/PptxGenJS/docs/api-tables.html
 	 * @default 0.0
-	 * @example 0.5 // lines are longer (increases the number of characters that can fit on a given line)
+	 * @example 0.5 // 行更长（增加给定行可容纳的字符数）
 	 */
 	autoPageCharWeight?: number
 	/**
-	 * Auto-paging line weight
-	 * - adjusts how many lines are used before slides wrap
-	 * - range: -1.0 to 1.0
+	 * 自动分页行权重
+	 * - 调整幻灯片换行前使用的行数
+	 * - 范围：-1.0 到 1.0
 	 * @see https://gitbrent.github.io/PptxGenJS/docs/api-tables.html
 	 * @default 0.0
-	 * @example 0.5 // tables are taller (increases the number of lines that can fit on a given slide)
+	 * @example 0.5 // 表格更高（增加给定幻灯片可容纳的行数）
 	 */
 	autoPageLineWeight?: number
 	/**
-	 * Cell border
+	 * 单元格边框
 	 */
 	border?: BorderProps | [BorderProps, BorderProps, BorderProps, BorderProps]
 	/**
-	 * Cell colspan
+	 * 单元格跨列数
 	 */
 	colspan?: number
 	/**
-	 * Fill color
-	 * @example { color:'FF0000' } // hex color (red)
-	 * @example { color:'0088CC', transparency:50 } // hex color, 50% transparent
-	 * @example { color:pptx.SchemeColor.accent1 } // theme color Accent1
+	 * 填充颜色
+	 * @example { color:'FF0000' } // 十六进制颜色（红色）
+	 * @example { color:'0088CC', transparency:50 } // 十六进制颜色，50% 透明
+	 * @example { color:pptx.SchemeColor.accent1 } // 主题颜色 Accent1
 	 */
 	fill?: ShapeFillProps
 	hyperlink?: HyperlinkProps
 	/**
-	 * Cell margin (inches)
+	 * 单元格边距（英寸）
 	 * @default 0
 	 */
 	margin?: Margin
 	/**
-	 * Cell rowspan
+	 * 单元格跨行数
 	 */
 	rowspan?: number
 }
@@ -874,107 +874,107 @@ export interface TableProps extends PositionProps, TextBaseProps, ObjectNameProp
 	_arrObjTabHeadRows?: TableRow[]
 
 	/**
-	 * Whether to enable auto-paging
-	 * - auto-paging creates new slides as content overflows a slide
+	 * 是否启用自动分页
+	 * - 自动分页在内容超出幻灯片时创建新幻灯片
 	 * @default false
 	 */
 	autoPage?: boolean
 	/**
-	 * Auto-paging character weight
-	 * - adjusts how many characters are used before lines wrap
-	 * - range: -1.0 to 1.0
+	 * 自动分页字符权重
+	 * - 调整换行前使用的字符数
+	 * - 范围：-1.0 到 1.0
 	 * @see https://gitbrent.github.io/PptxGenJS/docs/api-tables.html
 	 * @default 0.0
-	 * @example 0.5 // lines are longer (increases the number of characters that can fit on a given line)
+	 * @example 0.5 // 行更长（增加给定行可容纳的字符数）
 	 */
 	autoPageCharWeight?: number
 	/**
-	 * Auto-paging line weight
-	 * - adjusts how many lines are used before slides wrap
-	 * - range: -1.0 to 1.0
+	 * 自动分页行权重
+	 * - 调整幻灯片换行前使用的行数
+	 * - 范围：-1.0 到 1.0
 	 * @see https://gitbrent.github.io/PptxGenJS/docs/api-tables.html
 	 * @default 0.0
-	 * @example 0.5 // tables are taller (increases the number of lines that can fit on a given slide)
+	 * @example 0.5 // 表格更高（增加给定幻灯片可容纳的行数）
 	 */
 	autoPageLineWeight?: number
 	/**
-	 * Whether table header row(s) should be repeated on each new slide creating by autoPage.
-	 * Use `autoPageHeaderRows` to designate how many rows comprise the table header (1+).
+	 * 表格标题行是否应在 autoPage 创建的每张新幻灯片上重复。
+	 * 使用 `autoPageHeaderRows` 指定表格标题由多少行组成（1+）。
 	 * @default false
 	 * @since v3.3.0
 	 */
 	autoPageRepeatHeader?: boolean
 	/**
-	 * Number of rows that comprise table headers
-	 * - required when `autoPageRepeatHeader` is set to true.
-	 * @example 2 - repeats the first two table rows on each new slide created
+	 * 组成表格标题的行数
+	 * - 当 `autoPageRepeatHeader` 设置为 true 时必需。
+	 * @example 2 - 在创建的每张新幻灯片上重复前两行表格
 	 * @default 1
 	 * @since v3.3.0
 	 */
 	autoPageHeaderRows?: number
 	/**
-	 * The `y` location to use on subsequent slides created by autopaging
-	 * @default (top margin of Slide)
+	 * 自动分页创建的后续幻灯片使用的 `y` 位置
+	 * @default （幻灯片的顶部边距）
 	 */
 	autoPageSlideStartY?: number
 	/**
-	 * Table border
-	 * - single value is applied to all 4 sides
-	 * - array of values in TRBL order for individual sides
+	 * 表格边框
+	 * - 单个值应用于所有 4 个边
+	 * - 数组值按 TRBL 顺序应用于各边
 	 */
 	border?: BorderProps | [BorderProps, BorderProps, BorderProps, BorderProps]
 	/**
-	 * Width of table columns (inches)
-	 * - single value is applied to every column equally based upon `w`
-	 * - array of values in applied to each column in order
-	 * @default columns of equal width based upon `w`
+	 * 表格列宽（英寸）
+	 * - 单个值根据 `w` 平均应用于每列
+	 * - 数组值按顺序应用于每列
+	 * @default 根据 `w` 等宽的列
 	 */
 	colW?: number | number[]
 	/**
-	 * Cell background color
-	 * @example { color:'FF0000' } // hex color (red)
-	 * @example { color:'0088CC', transparency:50 } // hex color, 50% transparent
-	 * @example { color:pptx.SchemeColor.accent1 } // theme color Accent1
+	 * 单元格背景颜色
+	 * @example { color:'FF0000' } // 十六进制颜色（红色）
+	 * @example { color:'0088CC', transparency:50 } // 十六进制颜色，50% 透明
+	 * @example { color:pptx.SchemeColor.accent1 } // 主题颜色 Accent1
 	 */
 	fill?: ShapeFillProps
 	/**
-	 * Cell margin (inches)
-	 * - affects all table cells, is superceded by cell options
+	 * 单元格边距（英寸）
+	 * - 影响所有表格单元格，被单元格选项覆盖
 	 */
 	margin?: Margin
 	/**
-	 * Height of table rows (inches)
-	 * - single value is applied to every row equally based upon `h`
-	 * - array of values in applied to each row in order
-	 * @default rows of equal height based upon `h`
+	 * 表格行高（英寸）
+	 * - 单个值根据 `h` 平均应用于每行
+	 * - 数组值按顺序应用于每行
+	 * @default 根据 `h` 等高的行
 	 */
 	rowH?: number | number[]
 	/**
-	 * DEV TOOL: Verbose Mode (to console)
-	 * - tell the library to provide an almost ridiculous amount of detail during auto-paging calculations
-	 * @default false // obviously
+	 * 开发工具：详细模式（输出到控制台）
+	 * - 让库在自动分页计算期间提供几乎荒谬的详细信息
+	 * @default false // 显然
 	 */
-	verbose?: boolean // Undocumented; shows verbose output
+	verbose?: boolean // 未记录；显示详细输出
 
 	/**
-	 * @deprecated v3.3.0 - use `autoPageSlideStartY`
+	 * @deprecated v3.3.0 - 改用 `autoPageSlideStartY`
 	 */
 	newSlideStartY?: number
 }
 export interface TableCell {
 	_type: SLIDE_OBJECT_TYPES.tablecell
-	/** lines in this cell (autoPage) */
+	/** 此单元格中的行（自动分页） */
 	_lines?: TableCell[][]
-	/** `text` prop but guaranteed to hold "TableCell[]" */
+	/** `text` 属性但保证持有 "TableCell[]" */
 	_tableCells?: TableCell[]
-	/** height in EMU */
+	/** 高度（EMU） */
 	_lineHeight?: number
 	_hmerge?: boolean
 	_vmerge?: boolean
 	_rowContinue?: number
 	_optImp?: any
 
-	text?: string | TableCell[] // TODO: FUTURE: 20210815: ONly allow `TableCell[]` dealing with string|TableCell[] *SUCKS*
+	text?: string | TableCell[] // TODO: 未来：20210815：只允许 `TableCell[]`，处理 string|TableCell[] *很糟糕*
 	options?: TableCellProps
 }
 export interface TableRowSlide {
@@ -982,28 +982,28 @@ export interface TableRowSlide {
 }
 export type TableRow = TableCell[]
 
-// text ===========================================================================================
+// 文本 ===========================================================================================
 export interface TextGlowProps {
 	/**
-	 * Border color (hex format)
+	 * 边框颜色（十六进制格式）
 	 * @example 'FF3399'
 	 */
 	color?: HexColor
 	/**
-	 * opacity (0.0 - 1.0)
+	 * 不透明度（0.0 - 1.0）
 	 * @example 0.5
-	 * 50% opaque
+	 * 50% 不透明
 	 */
 	opacity?: number
 	/**
-	 * size (points)
+	 * 大小（点）
 	 */
 	size: number
 }
 
 export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBaseProps, ObjectNameProps {
 	_bodyProp?: {
-		// Note: Many of these duplicated as user options are transformed to _bodyProp options for XML processing
+		// 注意：其中许多重复，因为用户选项会转换为 _bodyProp 选项以进行 XML 处理
 		autoFit?: boolean
 		align?: TEXT_HALIGN
 		anchor?: TEXT_VALIGN
@@ -1018,39 +1018,39 @@ export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBa
 
 	baseline?: number
 	/**
-	 * Character spacing
+	 * 字符间距
 	 */
 	charSpacing?: number
 	/**
-	 * Text fit options
+	 * 文本适应选项
 	 *
-	 * MS-PPT > Format Shape > Shape Options > Text Box > "[unlabeled group]": [3 options below]
-	 * - 'none' = Do not Autofit
-	 * - 'shrink' = Shrink text on overflow
-	 * - 'resize' = Resize shape to fit text
+	 * MS-PPT > 设置形状格式 > 形状选项 > 文本框 > "[未标记的组]"：[下面 3 个选项]
+	 * - 'none' = 不自动调整
+	 * - 'shrink' = 溢出时缩小文本
+	 * - 'resize' = 调整形状大小以适应文本
 	 *
-	 * **Note** 'shrink' and 'resize' only take effect after editing text/resize shape.
-	 * Both PowerPoint and Word dynamically calculate a scaling factor and apply it when edit/resize occurs.
+	 * **注意** 'shrink' 和 'resize' 仅在编辑文本/调整形状大小后生效。
+	 * PowerPoint 和 Word 都会动态计算缩放因子，并在编辑/调整大小时应用它。
 	 *
-	 * There is no way for this library to trigger that behavior, sorry.
+	 * 此库无法触发该行为，抱歉。
 	 * @since v3.3.0
 	 * @default "none"
 	 */
 	fit?: 'none' | 'shrink' | 'resize'
 	/**
-	 * Shape fill
-	 * @example { color:'FF0000' } // hex color (red)
-	 * @example { color:'0088CC', transparency:50 } // hex color, 50% transparent
-	 * @example { color:pptx.SchemeColor.accent1 } // theme color Accent1
+	 * 形状填充
+	 * @example { color:'FF0000' } // 十六进制颜色（红色）
+	 * @example { color:'0088CC', transparency:50 } // 十六进制颜色，50% 透明
+	 * @example { color:pptx.SchemeColor.accent1 } // 主题颜色 Accent1
 	 */
 	fill?: ShapeFillProps
 	/**
-	 * Flip shape horizontally?
+	 * 水平翻转形状？
 	 * @default false
 	 */
 	flipH?: boolean
 	/**
-	 * Flip shape vertical?
+	 * 垂直翻转形状？
 	 * @default false
 	 */
 	flipV?: boolean
@@ -1060,27 +1060,27 @@ export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBa
 	isTextBox?: boolean
 	line?: ShapeLineProps
 	/**
-	 * Line spacing (pt)
-	 * - PowerPoint: Paragraph > Indents and Spacing > Line Spacing: > "Exactly"
-	 * @example 28 // 28pt
+	 * 行间距（点）
+	 * - PowerPoint：段落 > 缩进和间距 > 行距：> "固定值"
+	 * @example 28 // 28点
 	 */
 	lineSpacing?: number
 	/**
-	 * line spacing multiple (percent)
-	 * - range: 0.0-9.99
-	 * - PowerPoint: Paragraph > Indents and Spacing > Line Spacing: > "Multiple"
-	 * @example 1.5 // 1.5X line spacing
+	 * 行间距倍数（百分比）
+	 * - 范围：0.0-9.99
+	 * - PowerPoint：段落 > 缩进和间距 > 行距：> "多倍行距"
+	 * @example 1.5 // 1.5 倍行距
 	 * @since v3.5.0
 	 */
 	lineSpacingMultiple?: number
-	// TODO: [20220219] powerpoint uses inches but library has always been pt... @future @deprecated - update in v4.0? [range: 0.0-22.0]
+	// TODO: [20220219] powerpoint 使用英寸但库一直使用点... @未来 @废弃 - 在 v4.0 中更新？[范围：0.0-22.0]
 	/**
-	 * Margin (points)
-	 * - PowerPoint: Format Shape > Shape Options > Size & Properties > Text Box > Left/Right/Top/Bottom margin
-	 * @default "Normal" margin in PowerPoint [3.5, 7.0, 3.5, 7.0] // (this library sets no value, but PowerPoint defaults to "Normal" [0.05", 0.1", 0.05", 0.1"])
-	 * @example 0 // Top/Right/Bottom/Left margin 0 [0.0" in powerpoint]
-	 * @example 10 // Top/Right/Bottom/Left margin 10 [0.14" in powerpoint]
-	 * @example [10,5,10,5] // Top margin 10, Right margin 5, Bottom margin 10, Left margin 5
+	 * 边距（点）
+	 * - PowerPoint：设置形状格式 > 形状选项 > 大小与属性 > 文本框 > 左/右/上/下边距
+	 * @default PowerPoint 中的"普通"边距 [3.5, 7.0, 3.5, 7.0] // （此库不设置值，但 PowerPoint 默认为"普通" [0.05", 0.1", 0.05", 0.1"]）
+	 * @example 0 // 上/右/下/左边距 0 [PowerPoint 中为 0.0"]
+	 * @example 10 // 上/右/下/左边距 10 [PowerPoint 中为 0.14"]
+	 * @example [10,5,10,5] // 上边距 10，右边距 5，下边距 10，左边距 5
 	 */
 	margin?: Margin
 	outline?: { color: Color, size: number }
@@ -1088,20 +1088,20 @@ export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBa
 	paraSpaceBefore?: number
 	placeholder?: string
 	/**
-	 * Rounded rectangle radius (only for pptx.shapes.ROUNDED_RECTANGLE)
-	 * - values: 0.0 to 1.0
+	 * 圆角矩形半径（仅适用于 pptx.shapes.ROUNDED_RECTANGLE）
+	 * - 值：0.0 到 1.0
 	 * @default 0
 	 */
 	rectRadius?: number
 	/**
-	 * Rotation (degrees)
-	 * - range: -360 to 360
+	 * 旋转（度）
+	 * - 范围：-360 到 360
 	 * @default 0
-	 * @example 180 // rotate 180 degrees
+	 * @example 180 // 旋转 180 度
 	 */
 	rotate?: number
 	/**
-	 * Whether to enable right-to-left mode
+	 * 是否启用从右到左模式
 	 * @default false
 	 */
 	rtlMode?: boolean
@@ -1111,48 +1111,48 @@ export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBa
 	subscript?: boolean
 	superscript?: boolean
 	/**
-	 * Vertical alignment
+	 * 垂直对齐方式
 	 * @default middle
 	 */
 	valign?: VAlign
 	vert?: 'eaVert' | 'horz' | 'mongolianVert' | 'vert' | 'vert270' | 'wordArtVert' | 'wordArtVertRtl'
 	/**
-	 * Text wrap
+	 * 文本换行
 	 * @since v3.3.0
 	 * @default true
 	 */
 	wrap?: boolean
 
 	/**
-	 * Whether "Fit to Shape?" is enabled
-	 * @deprecated v3.3.0 - use `fit`
+	 * 是否启用"适应形状"
+	 * @deprecated v3.3.0 - 改用 `fit`
 	 */
 	autoFit?: boolean
 	/**
-	 * Whather "Shrink Text on Overflow?" is enabled
-	 * @deprecated v3.3.0 - use `fit`
+	 * 是否启用"溢出时缩小文本"
+	 * @deprecated v3.3.0 - 改用 `fit`
 	 */
 	shrinkText?: boolean
 	/**
-	 * Inset
-	 * @deprecated v3.10.0 - use `margin`
+	 * 内缩
+	 * @deprecated v3.10.0 - 改用 `margin`
 	 */
 	inset?: number
 	/**
-	 * Dash type
-	 * @deprecated v3.3.0 - use `line.dashType`
+	 * 虚线类型
+	 * @deprecated v3.3.0 - 改用 `line.dashType`
 	 */
 	lineDash?: 'solid' | 'dash' | 'dashDot' | 'lgDash' | 'lgDashDot' | 'lgDashDotDot' | 'sysDash' | 'sysDot'
 	/**
-	 * @deprecated v3.3.0 - use `line.beginArrowType`
+	 * @deprecated v3.3.0 - 改用 `line.beginArrowType`
 	 */
 	lineHead?: 'none' | 'arrow' | 'diamond' | 'oval' | 'stealth' | 'triangle'
 	/**
-	 * @deprecated v3.3.0 - use `line.width`
+	 * @deprecated v3.3.0 - 改用 `line.width`
 	 */
 	lineSize?: number
 	/**
-	 * @deprecated v3.3.0 - use `line.endArrowType`
+	 * @deprecated v3.3.0 - 改用 `line.endArrowType`
 	 */
 	lineTail?: 'none' | 'arrow' | 'diamond' | 'oval' | 'stealth' | 'triangle'
 }
@@ -1161,13 +1161,13 @@ export interface TextProps {
 	options?: TextPropsOptions
 }
 
-// charts =========================================================================================
-// FUTURE: BREAKING-CHANGE: (soln: use `OptsDataLabelPosition|string` until 3.5/4.0)
+// 图表 =========================================================================================
+// 未来：破坏性更改：（解决方案：在 3.5/4.0 之前使用 `OptsDataLabelPosition|string`）
 /*
 export interface OptsDataLabelPosition {
 	pie: 'ctr' | 'inEnd' | 'outEnd' | 'bestFit'
 	scatter: 'b' | 'ctr' | 'l' | 'r' | 't'
-	// TODO: add all othere chart types
+	// TODO: 添加所有其他图表类型
 }
 */
 
@@ -1178,58 +1178,58 @@ export interface OptsChartData {
 	_dataIndex?: number
 
 	/**
-	 * category labels
-	 * @example ['Year 2000', 'Year 2010', 'Year 2020'] // single-level category axes labels
-	 * @example [['Year 2000', 'Year 2010', 'Year 2020'], ['Decades', '', '']] // multi-level category axes labels
-	 * @since `labels` string[][] type added v3.11.0
+	 * 类别标签
+	 * @example ['Year 2000', 'Year 2010', 'Year 2020'] // 单层类别轴标签
+	 * @example [['Year 2000', 'Year 2010', 'Year 2020'], ['Decades', '', '']] // 多层类别轴标签
+	 * @since `labels` string[][] 类型在 v3.11.0 中添加
 	 */
 	labels?: string[] | string[][]
 	/**
-	 * series name
+	 * 系列名称
 	 * @example 'Locations'
 	 */
 	name?: string
 	/**
-	 * bubble sizes
+	 * 气泡大小
 	 * @example [5, 1, 5, 1]
 	 */
 	sizes?: number[]
 	/**
-	 * category values
+	 * 类别值
 	 * @example [2000, 2010, 2020]
 	 */
 	values?: number[]
 	/**
-	 * Override `chartColors`
+	 * 覆盖 `chartColors`
 	 */
-	// color?: string // TODO: WIP: (Pull #727)
+	// color?: string // TODO: 进行中：（Pull #727）
 }
-// Used internally, probably shouldn't be used by end users
+// 内部使用，终端用户不应使用
 export interface IOptsChartData extends OptsChartData {
 	labels?: string[][]
 }
 export interface OptsChartGridLine {
 	/**
-	 * MS-PPT > Chart format > Format Major Gridlines > Line > Cap type
-	 * - line cap type
+	 * MS-PPT > 图表格式 > 设置主要网格线格式 > 线条 > 线端类型
+	 * - 线端类型
 	 * @default flat
 	 */
 	cap?: ChartLineCap
 	/**
-	 * Gridline color (hex)
+	 * 网格线颜色（十六进制）
 	 * @example 'FF3399'
 	 */
 	color?: HexColor
 	/**
-	 * Gridline size (points)
+	 * 网格线大小（点）
 	 */
 	size?: number
 	/**
-	 * Gridline style
+	 * 网格线样式
 	 */
 	style?: 'solid' | 'dash' | 'dot' | 'none'
 }
-// TODO: 202008: chart types remain with predicated with "I" in v3.3.0 (ran out of time!)
+// TODO: 202008：图表类型在 v3.3.0 中仍以 "I" 为前缀（时间不够！）
 export interface IChartMulti {
 	type: CHART_NAME
 	data: IOptsChartData[]
@@ -1237,22 +1237,22 @@ export interface IChartMulti {
 }
 export interface IChartPropsFillLine {
 	/**
-	 * PowerPoint: Format Chart Area/Plot > Border ["Line"]
-	 * @example border: {color: 'FF0000', pt: 1} // hex RGB color, 1 pt line
+	 * PowerPoint：设置图表区/绘图区格式 > 边框 ["线条"]
+	 * @example border: {color: 'FF0000', pt: 1} // 十六进制 RGB 颜色，1 点线条
 	 */
 	border?: BorderProps
 	/**
-	 * PowerPoint: Format Chart Area/Plot Area > Fill
-	 * @example fill: {color: '696969'} // hex RGB color value
-	 * @example fill: {color: pptx.SchemeColor.background2} // Theme color value
-	 * @example fill: {transparency: 50} // 50% transparency
+	 * PowerPoint：设置图表区/绘图区格式 > 填充
+	 * @example fill: {color: '696969'} // 十六进制 RGB 颜色值
+	 * @example fill: {color: pptx.SchemeColor.background2} // 主题颜色值
+	 * @example fill: {transparency: 50} // 50% 透明度
 	 */
 	fill?: ShapeFillProps
 }
 export interface IChartAreaProps extends IChartPropsFillLine {
 	/**
-	 * Whether the chart area has rounded corners
-	 * - only applies when either `fill` or `border` is used
+	 * 图表区是否有圆角
+	 * - 仅在使用 `fill` 或 `border` 时适用
 	 * @default true
 	 * @since v3.11
 	 */
@@ -1260,13 +1260,13 @@ export interface IChartAreaProps extends IChartPropsFillLine {
 }
 export interface IChartPropsBase {
 	/**
-	 * Axis position
+	 * 轴位置
 	 */
 	axisPos?: 'b' | 'l' | 'r' | 't'
 	chartColors?: HexColor[]
 	/**
-	 * opacity (0 - 100)
-	 * @example 50 // 50% opaque
+	 * 不透明度（0 - 100）
+	 * @example 50 // 50% 不透明
 	 */
 	chartColorsOpacity?: number
 	dataBorder?: BorderProps

@@ -10,8 +10,8 @@ export interface MouseSelectionProps {
 }
 
 /**
- * Mouse selection component
- * Displays selection rectangle during mouse drag selection
+ * 鼠标选区组件
+ * 在鼠标拖拽选区时显示选区矩形
  */
 export function MouseSelection({
   top,

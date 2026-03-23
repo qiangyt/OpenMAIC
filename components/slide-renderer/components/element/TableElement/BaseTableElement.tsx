@@ -9,7 +9,7 @@ export interface BaseTableElementProps {
 }
 
 /**
- * Base table element for read-only / playback / thumbnail mode
+ * 基础表格元素（只读/播放/缩略图模式）
  */
 export function BaseTableElement({ elementInfo, target }: BaseTableElementProps) {
   return (

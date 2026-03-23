@@ -39,12 +39,12 @@ export function ImageSettings({ selectedProviderId }: ImageSettingsProps) {
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [testMessage, setTestMessage] = useState('');
 
-  // Model dialog state
+  // 模型对话框状态
   const [showModelDialog, setShowModelDialog] = useState(false);
   const [editingModelIndex, setEditingModelIndex] = useState<number | null>(null);
   const [modelForm, setModelForm] = useState({ id: '', name: '' });
 
-  // Reset test state when provider changes (derived state pattern)
+  // 当服务商变更时重置测试状态（派生状态模式）
   const [prevSelectedProviderId, setPrevSelectedProviderId] = useState(selectedProviderId);
   if (selectedProviderId !== prevSelectedProviderId) {
     setPrevSelectedProviderId(selectedProviderId);
@@ -99,7 +99,7 @@ export function ImageSettings({ selectedProviderId }: ImageSettingsProps) {
     }
   };
 
-  // Model CRUD
+  // 模型 CRUD 操作
   const handleOpenAddModel = () => {
     setEditingModelIndex(null);
     setModelForm({ id: '', name: '' });
@@ -141,14 +141,14 @@ export function ImageSettings({ selectedProviderId }: ImageSettingsProps) {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {/* Server-configured notice */}
+      {/* 服务端配置提示 */}
       {isServerConfigured && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30 p-3 text-sm text-blue-700 dark:text-blue-300">
           {t('settings.serverConfiguredNotice')}
         </div>
       )}
 
-      {/* API Key + Test inline */}
+      {/* API 密钥 + 内联测试 */}
       <div className="space-y-2">
         <Label>API Key</Label>
         <div className="flex gap-2">
@@ -245,7 +245,7 @@ export function ImageSettings({ selectedProviderId }: ImageSettingsProps) {
         })()}
       </div>
 
-      {/* Model list */}
+      {/* 模型列表 */}
       <div className="space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <Label className="text-base">{t('settings.models')}</Label>
@@ -256,7 +256,7 @@ export function ImageSettings({ selectedProviderId }: ImageSettingsProps) {
         </div>
 
         <div className="space-y-1.5">
-          {/* Built-in models */}
+          {/* 内置模型 */}
           {builtInModels.map((model) => (
             <div
               key={model.id}
@@ -269,7 +269,7 @@ export function ImageSettings({ selectedProviderId }: ImageSettingsProps) {
             </div>
           ))}
 
-          {/* Custom models */}
+          {/* 自定义模型 */}
           {customModels.map((model, index) => (
             <div
               key={`custom-${index}`}
@@ -304,7 +304,7 @@ export function ImageSettings({ selectedProviderId }: ImageSettingsProps) {
         </div>
       </div>
 
-      {/* Add/Edit Model Dialog */}
+      {/* 添加/编辑模型对话框 */}
       <Dialog open={showModelDialog} onOpenChange={setShowModelDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogTitle>

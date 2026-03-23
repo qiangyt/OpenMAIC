@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import type { PPTElementOutline } from '@/lib/types/slides';
 
 /**
- * Calculate element outline (border) styles
- * Handles default values and stroke dash array for dashed/dotted borders
- * @param outline Outline configuration
+ * 计算元素轮廓（边框）样式
+ * 处理默认值和虚线/点线边框的 stroke dash array
+ * @param outline 轮廓配置
  */
 export function useElementOutline(outline?: PPTElementOutline) {
   const outlineWidth = useMemo(() => outline?.width ?? 0, [outline?.width]);

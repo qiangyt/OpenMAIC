@@ -30,7 +30,7 @@ const log = createLogger('ExportPPTX');
 const DEFAULT_FONT_SIZE = 16;
 const DEFAULT_FONT_FAMILY = 'Microsoft YaHei';
 
-// ── Color formatting ──
+// ── 颜色格式化 ──
 
 function formatColor(_color: string) {
   if (!_color) {
@@ -44,7 +44,7 @@ function formatColor(_color: string) {
 
 type FormatColor = ReturnType<typeof formatColor>;
 
-// ── HTML → pptxgenjs TextProps ──
+// ── HTML → pptxgenjs TextProps 转换 ──
 
 function formatHTML(html: string, ratioPx2Pt: number) {
   const ast = toAST(html);
@@ -177,7 +177,7 @@ function formatHTML(html: string, ratioPx2Pt: number) {
   return slices;
 }
 
-// ── SVG path → pptxgenjs points ──
+// ── SVG 路径 → pptxgenjs 点集 ──
 
 type Points = Array<
   | { x: number; y: number; moveTo?: boolean }
@@ -247,7 +247,7 @@ function formatPoints(points: SvgPoints, ratioPx2Inch: number, scale = { x: 1, y
   });
 }
 
-// ── Shadow config ──
+// ── 阴影配置 ──
 
 function getShadowOption(shadow: PPTElementShadow, ratioPx2Pt: number): pptxgen.ShadowProps {
   const c = formatColor(shadow.color);
@@ -299,7 +299,7 @@ function getShadowOption(shadow: PPTElementShadow, ratioPx2Pt: number): pptxgen.
   };
 }
 
-// ── Outline config ──
+// ── 轮廓配置 ──
 
 const dashTypeMap: Record<string, string> = {
   solid: 'solid',
@@ -317,7 +317,7 @@ function getOutlineOption(outline: PPTElementOutline, ratioPx2Pt: number): pptxg
   };
 }
 
-// ── Link config ──
+// ── 链接配置 ──
 
 function getLinkOption(link: PPTElementLink, slides: Slide[]): pptxgen.HyperlinkProps | null {
   const { type, target } = link;
@@ -329,7 +329,7 @@ function getLinkOption(link: PPTElementLink, slides: Slide[]): pptxgen.Hyperlink
   return null;
 }
 
-// ── Image helpers ──
+// ── 图片辅助函数 ──
 
 function isBase64Image(url: string) {
   return /^data:image\/[^;]+;base64,/.test(url);
@@ -339,13 +339,13 @@ function isSVGImage(url: string) {
   return /^data:image\/svg\+xml;base64,/.test(url) || /\.svg$/.test(url);
 }
 
-// ── Main export hook ──
+// ── 主导出 Hook ──
 
-// ── Build PPTX blob (reused by single-export and resource pack) ──
+// ── 构建 PPTX blob（被单文件导出和资源包导出共用）──
 
 /**
- * Extract speaker notes text from a scene's actions.
- * Concatenates speech text and action labels into plain text.
+ * 从场景的动作中提取演讲者备注文本。
+ * 将语音文本和动作标签拼接为纯文本。
  */
 function buildSpeakerNotes(scene: Scene): string {
   if (!scene.actions || scene.actions.length === 0) return '';
@@ -369,7 +369,7 @@ async function buildPptxBlob(
 ): Promise<Blob> {
   const pptx = new pptxgen();
 
-  // Set layout based on aspect ratio
+  // 根据宽高比设置布局
   if (viewportRatio === 0.625) pptx.layout = 'LAYOUT_16x10';
   else if (viewportRatio === 0.75) pptx.layout = 'LAYOUT_4x3';
   else pptx.layout = 'LAYOUT_16x9';
@@ -378,14 +378,14 @@ async function buildPptxBlob(
     const slide = slides[slideIdx];
     const pptxSlide = pptx.addSlide();
 
-    // ── Speaker Notes ──
+    // ── 演讲者备注 ──
     const scene = slideScenes[slideIdx];
     if (scene) {
       const notes = buildSpeakerNotes(scene);
       if (notes) pptxSlide.addNotes(notes);
     }
 
-    // ── Background ──
+    // ── 背景 ──
     if (slide.background) {
       const bg = slide.background;
       if (bg.type === 'image' && bg.image) {
@@ -423,9 +423,9 @@ async function buildPptxBlob(
 
     if (!slide.elements) continue;
 
-    // ── Elements ──
+    // ── 元素 ──
     for (const el of slide.elements) {
-      // ── TEXT ──
+      // ── 文本 ──
       if (el.type === 'text') {
         const textProps = formatHTML(el.content, ratioPx2Pt);
         const options: pptxgen.TextPropsOptions = {
@@ -465,21 +465,21 @@ async function buildPptxBlob(
         pptxSlide.addText(textProps, options);
       }
 
-      // ── IMAGE ──
+      // ── 图片 ──
       else if (el.type === 'image') {
-        // Resolve placeholder src → actual image data
+        // 解析占位符 src → 实际图片数据
         let resolvedSrc = el.src;
         if (isMediaPlaceholder(el.src)) {
           const task = useMediaGenerationStore.getState().tasks[el.src];
           if (task?.status === 'done' && task.objectUrl) {
             resolvedSrc = task.objectUrl;
           } else {
-            continue; // Media not ready, skip
+            continue; // 媒体未就绪，跳过
           }
         }
 
-        // Fetch and convert to base64 for embedding in PPTX
-        // (blob: URLs and remote URLs won't work in offline PPTX)
+        // 获取并转换为 base64 以嵌入 PPTX
+        // （blob: URL 和远程 URL 在离线 PPTX 中无法工作）
         if (!isBase64Image(resolvedSrc)) {
           try {
             const resp = await fetch(resolvedSrc);
@@ -538,11 +538,11 @@ async function buildPptxBlob(
         pptxSlide.addImage(options);
       }
 
-      // ── SHAPE ──
+      // ── 形状 ──
       else if (el.type === 'shape') {
         if (el.special) {
-          // Special shapes: render as SVG image
-          // Create a temporary SVG element from the path
+          // 特殊形状：渲染为 SVG 图片
+          // 从路径创建临时 SVG 元素
           const svgNS = 'http://www.w3.org/2000/svg';
           const svg = document.createElementNS(svgNS, 'svg');
           svg.setAttribute('xmlns', svgNS);
@@ -618,7 +618,7 @@ async function buildPptxBlob(
           pptxSlide.addShape('custGeom' as pptxgen.ShapeType, shapeOptions);
         }
 
-        // Shape text overlay
+        // 形状文本覆盖层
         if (el.text) {
           const textProps = formatHTML(el.text.content, ratioPx2Pt);
           const textOptions: pptxgen.TextPropsOptions = {
@@ -639,7 +639,7 @@ async function buildPptxBlob(
           pptxSlide.addText(textProps, textOptions);
         }
 
-        // Pattern overlay
+        // 图案覆盖层
         if (el.pattern) {
           const patternOptions: pptxgen.ImageProps = {
             x: el.left / ratioPx2Inch,
@@ -661,7 +661,7 @@ async function buildPptxBlob(
         }
       }
 
-      // ── LINE ──
+      // ── 线条 ──
       else if (el.type === 'line') {
         const path = getLineElementPath(el);
         const points = formatPoints(toPoints(path), ratioPx2Inch);
@@ -688,7 +688,7 @@ async function buildPptxBlob(
         pptxSlide.addShape('custGeom' as pptxgen.ShapeType, lineOptions);
       }
 
-      // ── CHART ──
+      // ── 图表 ──
       else if (el.type === 'chart') {
         const chartData = [];
         for (let i = 0; i < el.data.series.length; i++) {
@@ -788,7 +788,7 @@ async function buildPptxBlob(
         pptxSlide.addChart(type, chartData, chartOptions);
       }
 
-      // ── TABLE ──
+      // ── 表格 ──
       else if (el.type === 'table') {
         const hiddenCells: string[] = [];
         for (let i = 0; i < el.data.length; i++) {
@@ -882,11 +882,13 @@ async function buildPptxBlob(
         pptxSlide.addTable(tableData, tableOptions);
       }
 
-      // ── LATEX ──
+      // ── LaTeX ──
       else if (el.type === 'latex') {
-        // Try native OMML formula first (editable in PowerPoint)
-        // Estimate line count from \\ line breaks to compute a fitting font size.
-        // Formula rendered height ≈ lines * 1.5 * fontSize, so fontSize ≈ boxHeight / (lines * 1.5)
+        // 优先尝试原生 OMML 公式（可在 PowerPoint 中编辑）
+        // 根据 \\ 换行符估算行数以计算合适的字号
+        // 公式渲染高度 ≈ 行数 * 1.5 * 字号，因此字号 ≈ 框高度 / (行数 * 1.5)
+        // 根据 \\ 换行符估算行数以计算合适的字号
+        // 公式渲染高度 ≈ 行数 * 1.5 * 字号，因此字号 ≈ 框高度 / (行数 * 1.5)
         const lineBreaks = (el.latex?.match(/\\\\/g) || []).length;
         const lines = lineBreaks + 1;
         const boxHeightPt = el.height / ratioPx2Pt;
@@ -904,7 +906,7 @@ async function buildPptxBlob(
             align: el.align,
           });
         } else if (el.path) {
-          // Fallback: render as SVG image (non-editable)
+          // 回退方案：渲染为 SVG 图片（不可编辑）
           const range = getSvgPathRange(el.path);
           const sw = el.strokeWidth || 0;
           const vbX = range.minX - sw;
@@ -947,21 +949,21 @@ async function buildPptxBlob(
         }
       }
 
-      // ── VIDEO / AUDIO ──
+      // ── 视频 / 音频 ──
       else if (el.type === 'video' || el.type === 'audio') {
-        // Resolve placeholder src → blob URL from media generation store
+        // 解析占位符 src → 媒体生成存储中的 blob URL
         let resolvedSrc = el.src;
         if (isMediaPlaceholder(el.src)) {
           const task = useMediaGenerationStore.getState().tasks[el.src];
           if (task?.status === 'done' && task.objectUrl) {
             resolvedSrc = task.objectUrl;
           } else {
-            continue; // Media not ready, skip
+            continue; // 媒体未就绪，跳过
           }
         }
 
-        // Fetch blob and convert to base64 for embedding in PPTX
-        // (blob: URLs and remote URLs won't work in offline PPTX)
+        // 获取 blob 并转换为 base64 以嵌入 PPTX
+        // （blob: URL 和远程 URL 在离线 PPTX 中无法工作）
         try {
           const resp = await fetch(resolvedSrc);
           const blob = await resp.blob();
@@ -981,17 +983,17 @@ async function buildPptxBlob(
             type: el.type,
           };
 
-          // Determine file extension
+          // 确定文件扩展名
           const extMatch = resolvedSrc.match(/\.([a-zA-Z0-9]+)(?:[?#]|$)/);
           if (extMatch && extMatch[1]) mediaOptions.extn = extMatch[1];
           else if (el.ext) mediaOptions.extn = el.ext;
           else mediaOptions.extn = el.type === 'video' ? 'mp4' : 'mp3';
 
-          // Generate cover image for video
+          // 为视频生成封面图片
           if (el.type === 'video') {
             let coverBase64: string | undefined;
 
-            // 1. Try poster from element or media generation store
+            // 1. 尝试从元素或媒体生成存储获取海报
             let posterUrl = 'poster' in el && el.poster ? el.poster : undefined;
             if (!posterUrl && isMediaPlaceholder(el.src)) {
               const task = useMediaGenerationStore.getState().tasks[el.src];
@@ -1008,11 +1010,11 @@ async function buildPptxBlob(
                   reader.readAsDataURL(posterBlob);
                 });
               } catch {
-                // Poster fetch failed, fall through to video frame capture
+                // 海报获取失败，回退到视频帧截取
               }
             }
 
-            // 2. Fallback: capture first frame from video via canvas
+            // 2. 回退方案：通过 canvas 截取视频首帧
             if (!coverBase64) {
               try {
                 coverBase64 = await new Promise<string>((resolve, reject) => {
@@ -1035,18 +1037,18 @@ async function buildPptxBlob(
                       } else {
                         reject(new Error('No canvas context'));
                       }
-                      video.src = ''; // Release
+                      video.src = ''; // 释放
                     } catch (e) {
                       reject(e);
                     }
                   };
                   video.onerror = () => reject(new Error('Video load failed'));
-                  // Timeout to avoid hanging
+                  // 超时以避免阻塞
                   setTimeout(() => reject(new Error('Video frame capture timeout')), 10000);
                   video.src = resolvedSrc;
                 });
               } catch {
-                // Frame capture also failed, video will use default play button
+                // 帧截取也失败了，视频将使用默认播放按钮
               }
             }
 
@@ -1064,7 +1066,7 @@ async function buildPptxBlob(
   return (await pptx.write({ outputType: 'blob' })) as Blob;
 }
 
-// ── Hook ──
+// ── Hook 定义 ──
 
 export function useExportPPTX() {
   const [exporting, setExporting] = useState(false);
@@ -1082,7 +1084,7 @@ export function useExportPPTX() {
   const slideScenes = scenes.filter((s) => s.content.type === 'slide');
   const slides = slideScenes.map((s) => (s.content as SlideContent).canvas);
 
-  // Shared guard + state wrapper for export actions
+  // 导出操作的共享守卫和状态包装器
   const withExportGuard = useCallback(
     (action: () => Promise<void>) => {
       if (exportingRef.current || slides.length === 0) return;
@@ -1103,7 +1105,7 @@ export function useExportPPTX() {
     [slides.length, t],
   );
 
-  // ── Export PPTX only ──
+  // ── 仅导出 PPTX ──
   const exportPPTX = useCallback(() => {
     withExportGuard(async () => {
       const fileName = stage?.name || 'slides';
@@ -1130,14 +1132,14 @@ export function useExportPPTX() {
     t,
   ]);
 
-  // ── Export Resource Pack (PPTX + interactive HTML pages as ZIP) ──
+  // ── 导出资源包（PPTX + 交互式 HTML 页面为 ZIP）──
   const exportResourcePack = useCallback(() => {
     withExportGuard(async () => {
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
       const fileName = stage?.name || 'slides';
 
-      // 1. Generate PPTX
+      // 1. 生成 PPTX
       const pptxBlob = await buildPptxBlob(
         slides,
         slideScenes,
@@ -1148,7 +1150,7 @@ export function useExportPPTX() {
       );
       zip.file(`${fileName}.pptx`, pptxBlob);
 
-      // 2. Add interactive HTML pages
+      // 2. 添加交互式 HTML 页面
       let interactiveIndex = 0;
       for (const scene of scenes) {
         if (scene.content.type === 'interactive' && scene.content.html) {
@@ -1159,7 +1161,7 @@ export function useExportPPTX() {
         }
       }
 
-      // 3. Download ZIP
+      // 3. 下载 ZIP
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       saveAs(zipBlob, `${fileName}.zip`);
       toast.success(t('export.exportSuccess'));

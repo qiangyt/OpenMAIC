@@ -3,8 +3,8 @@ import type { PPTImageElement } from '@/lib/types/slides';
 import { CLIPPATHS, ClipPathTypes } from '@/configs/image-clip';
 
 /**
- * Calculate image clip shape and position
- * @param element Image element
+ * 计算图片裁剪形状和位置
+ * @param element 图片元素
  */
 export function useClipImage(element: PPTImageElement) {
   const clipShape = useMemo(() => {

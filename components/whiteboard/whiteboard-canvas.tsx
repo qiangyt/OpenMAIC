@@ -11,7 +11,7 @@ import type { PPTElement } from '@/lib/types/slides';
 import { useI18n } from '@/lib/hooks/use-i18n';
 
 /**
- * Animated element wrapper
+ * 动画元素包装器
  */
 function AnimatedElement({
   element,
@@ -24,9 +24,9 @@ function AnimatedElement({
   isClearing: boolean;
   totalElements: number;
 }) {
-  // Reverse stagger: last-drawn element exits first for a "wipe" cascade
+  // 反向交错：最后绘制的元素最先退出，形成"擦除"级联效果
   const clearDelay = isClearing ? (totalElements - 1 - index) * 0.055 : 0;
-  // Alternate tilt direction for organic feel
+  // 交替倾斜方向，增加自然感
   const clearRotate = isClearing ? (index % 2 === 0 ? 1 : -1) * (2 + index * 0.4) : 0;
 
   return (
@@ -76,14 +76,12 @@ function AnimatedElement({
 }
 
 /**
- * Whiteboard canvas — renders the current whiteboard elements and handles
- * auto-snapshotting so the user can browse/restore previous states.
+ * 白板画布 — 渲染当前白板元素并处理自动快照，
+ * 以便用户可以浏览/恢复之前的状态。
  *
- * The auto-snapshot logic watches for "content replacement" events —
- * i.e. when AI replaces the whiteboard content with new elements.  It
- * debounces by 2 seconds so that one-by-one element additions don't
- * spam the history store.  The `restoredKey` one-shot guard prevents a
- * restore action from itself triggering a new snapshot.
+ * 自动快照逻辑监控"内容替换"事件 — 即 AI 用新元素替换白板内容时。
+ * 它进行 2 秒防抖，以免逐个添加元素时刷屏历史存储。
+ * `restoredKey` 一次性守卫防止恢复操作本身触发新快照。
  */
 export function WhiteboardCanvas() {
   const { t } = useI18n();
@@ -92,15 +90,14 @@ export function WhiteboardCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
-  // Get whiteboard elements
+  // 获取白板元素
   const whiteboard = stage?.whiteboard?.[0];
   const rawElements = whiteboard?.elements;
   const elements = useMemo(() => rawElements ?? [], [rawElements]);
 
-  // ── Auto-snapshot logic ──────────────────────────────────────────
-  // Saves a snapshot of the CURRENT state after elements have been stable
-  // (unchanged) for 2 seconds.  This ensures the complete "finished" result
-  // appears in history, not just intermediate build-up states.
+  // ── 自动快照逻辑 ──────────────────────────────────────────
+  // 在元素稳定（未变化）2 秒后保存当前状态的快照。
+  // 这确保完整的"完成"结果出现在历史中，而不仅仅是中间构建状态。
   const elementsKey = useMemo(() => elementFingerprint(elements), [elements]);
   const elementsRef = useRef(elements);
   useEffect(() => {
@@ -109,18 +106,18 @@ export function WhiteboardCanvas() {
   const snapshotTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Cancel any pending timer whenever elements change
+    // 每当元素变化时取消任何待处理的计时器
     if (snapshotTimerRef.current) {
       clearTimeout(snapshotTimerRef.current);
       snapshotTimerRef.current = null;
     }
 
-    // Don't snapshot empty states or during clearing animation
+    // 不对空状态或清除动画期间进行快照
     if (elements.length === 0 || isClearing) return;
 
-    // If this state matches a just-restored snapshot, skip and clear the flag.
-    // This check uses fingerprint comparison (reviewer point #5) rather than
-    // a fragile boolean flag, eliminating timing dependencies entirely.
+    // 如果此状态与刚恢复的快照匹配，则跳过并清除标志。
+    // 此检查使用指纹比较（评审点 #5）而非脆弱的布尔标志，
+    // 完全消除了时序依赖性。
     const { restoredKey } = useWhiteboardHistoryStore.getState();
     if (restoredKey && elementsKey === restoredKey) {
       useWhiteboardHistoryStore.getState().setRestoredKey(null);
@@ -128,7 +125,7 @@ export function WhiteboardCanvas() {
     }
 
     snapshotTimerRef.current = setTimeout(() => {
-      // Save the CURRENT stable state (not the previous one)
+      // 保存当前稳定状态（而非之前的状态）
       const current = elementsRef.current;
       if (current.length > 0) {
         useWhiteboardHistoryStore.getState().pushSnapshot(current);
@@ -143,7 +140,7 @@ export function WhiteboardCanvas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [elementsKey, isClearing]);
 
-  // ── Layout: whiteboard fixed size 1000 x 562.5 (16:9) ─────────
+  // ── 布局：白板固定尺寸 1000 x 562.5 (16:9) ─────────
   const canvasWidth = 1000;
   const canvasHeight = 562.5;
 
@@ -165,13 +162,13 @@ export function WhiteboardCanvas() {
     return () => observer.disconnect();
   }, [updateScale]);
 
-  // ── Render ──────────────────────────────────────────────────────
+  // ── 渲染 ──────────────────────────────────────────────────────
   return (
     <div
       ref={containerRef}
       className="w-full h-full flex items-center justify-center overflow-hidden"
     >
-      {/* Layout wrapper: its size matches the scaled visual size so flex centering works correctly */}
+      {/* 布局包装器：其尺寸与缩放后的视觉尺寸匹配，以便 flex 居中正常工作 */}
       <div style={{ width: canvasWidth * scale, height: canvasHeight * scale }}>
         <div
           className="relative bg-white shadow-2xl rounded-lg overflow-hidden"
@@ -182,7 +179,7 @@ export function WhiteboardCanvas() {
             transformOrigin: 'top left',
           }}
         >
-          {/* Placeholder when empty and not mid-clear */}
+          {/* 空白且未在清除中时显示占位符 */}
           <AnimatePresence>
             {elements.length === 0 && !isClearing && (
               <motion.div
@@ -203,7 +200,7 @@ export function WhiteboardCanvas() {
             )}
           </AnimatePresence>
 
-          {/* Elements — always rendered so AnimatePresence can track exits */}
+          {/* 元素 — 始终渲染以便 AnimatePresence 可以跟踪退出 */}
           <AnimatePresence mode="popLayout">
             {elements.map((element, index) => (
               <AnimatedElement

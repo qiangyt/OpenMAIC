@@ -40,7 +40,7 @@ const Temporary = ({
 };
 
 const getHandleCoordsByPosition = (node: InternalNode<Node>, handlePosition: Position) => {
-  // Choose the handle type based on position - Left is for target, Right is for source
+  // 根据位置选择手柄类型 - 左侧用于目标，右侧用于源
   const handleType = handlePosition === Position.Left ? 'target' : 'source';
 
   const handle = node.internals.handleBounds?.[handleType]?.find(
@@ -54,9 +54,9 @@ const getHandleCoordsByPosition = (node: InternalNode<Node>, handlePosition: Pos
   let offsetX = handle.width / 2;
   let offsetY = handle.height / 2;
 
-  // this is a tiny detail to make the markerEnd of an edge visible.
-  // The handle position that gets calculated has the origin top-left, so depending which side we are using, we add a little offset
-  // when the handlePosition is Position.Right for example, we need to add an offset as big as the handle itself in order to get the correct position
+  // 这是一个小细节，用于让边的 markerEnd 可见。
+  // 计算出的手柄位置原点在左上角，所以根据我们使用的边，需要添加一点偏移
+  // 例如当 handlePosition 为 Position.Right 时，我们需要添加与手柄本身一样大的偏移才能获得正确的位置
   switch (handlePosition) {
     case Position.Left:
       offsetX = 0;

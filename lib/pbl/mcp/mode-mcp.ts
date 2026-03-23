@@ -1,7 +1,7 @@
 /**
- * Mode MCP - Controls the current workflow mode during PBL generation.
+ * Mode MCP - 控制 PBL 生成过程中的当前工作流模式。
  *
- * Migrated from PBL-Nano. Simplified: no list_tools(), pure method calls.
+ * 从 PBL-Nano 迁移而来。简化版：无 list_tools()，纯方法调用。
  */
 
 import type { PBLMode, PBLToolResult } from '../types';

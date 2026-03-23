@@ -1,6 +1,6 @@
 /**
- * Stage 1: Generate scene outlines from user requirements.
- * Also contains outline fallback logic.
+ * 阶段 1: 从用户需求生成场景大纲。
+ * 也包含大纲回退逻辑。
  */
 
 import { nanoid } from 'nanoid';
@@ -20,8 +20,8 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('Generation');
 
 /**
- * Generate scene outlines from user requirements
- * Now uses simplified UserRequirements with just requirement text and language
+ * 从用户需求生成场景大纲
+ * 现在使用简化的 UserRequirements，仅包含需求文本和语言
  */
 export async function generateSceneOutlinesFromRequirements(
   requirements: UserRequirements,
@@ -38,14 +38,14 @@ export async function generateSceneOutlinesFromRequirements(
     teacherContext?: string;
   },
 ): Promise<GenerationResult<SceneOutline[]>> {
-  // Build available images description for the prompt
+  // 为提示词构建可用图片描述
   let availableImagesText =
     requirements.language === 'zh-CN' ? '无可用图片' : 'No images available';
   let visionImages: Array<{ id: string; src: string }> | undefined;
 
   if (pdfImages && pdfImages.length > 0) {
     if (options?.visionEnabled && options?.imageMapping) {
-      // Vision mode: split into vision images (first N) and text-only (rest)
+      // 视觉模式: 分为视觉图片（前 N 张）和仅文本（其余）
       const allWithSrc = pdfImages.filter((img) => options.imageMapping![img.id]);
       const visionSlice = allWithSrc.slice(0, MAX_VISION_IMAGES);
       const textOnlySlice = allWithSrc.slice(MAX_VISION_IMAGES);
@@ -66,20 +66,20 @@ export async function generateSceneOutlinesFromRequirements(
         height: img.height,
       }));
     } else {
-      // Text-only mode: full descriptions
+      // 纯文本模式: 完整描述
       availableImagesText = pdfImages
         .map((img) => formatImageDescription(img, requirements.language))
         .join('\n');
     }
   }
 
-  // Build user profile string for prompt injection
+  // 构建用于提示词注入的用户画像字符串
   const userProfileText =
     requirements.userNickname || requirements.userBio
       ? `## Student Profile\n\nStudent: ${requirements.userNickname || 'Unknown'}${requirements.userBio ? ` — ${requirements.userBio}` : ''}\n\nConsider this student's background when designing the course. Adapt difficulty, examples, and teaching approach accordingly.\n\n---`
       : '';
 
-  // Build media generation policy based on enabled flags
+  // 根据启用的标志构建媒体生成策略
   const imageEnabled = options?.imageGenerationEnabled ?? false;
   const videoEnabled = options?.videoGenerationEnabled ?? false;
   let mediaGenerationPolicy = '';
@@ -94,9 +94,9 @@ export async function generateSceneOutlinesFromRequirements(
       '**IMPORTANT: Do NOT include any video mediaGenerations (type: "video") in the outlines. Video generation is disabled. Image generation is allowed.**';
   }
 
-  // Use simplified prompt variables
+  // 使用简化的提示词变量
   const prompts = buildPrompt(PROMPT_IDS.REQUIREMENTS_TO_OUTLINES, {
-    // New simplified variables
+    // 新的简化变量
     requirement: requirements.requirement,
     language: requirements.language,
     pdfContent: pdfText
@@ -109,7 +109,7 @@ export async function generateSceneOutlinesFromRequirements(
     mediaGenerationPolicy,
     researchContext:
       options?.researchContext || (requirements.language === 'zh-CN' ? '无' : 'None'),
-    // Server-side generation populates this via options; client-side populates via formatTeacherPersonaForPrompt
+    // 服务端生成通过 options 填充；客户端通过 formatTeacherPersonaForPrompt 填充
     teacherContext: options?.teacherContext || '',
   });
 
@@ -136,7 +136,7 @@ export async function generateSceneOutlinesFromRequirements(
         error: 'Failed to parse scene outlines response',
       };
     }
-    // Ensure IDs, order, and language
+    // 确保 ID、顺序和语言
     const enriched = outlines.map((outline, index) => ({
       ...outline,
       id: outline.id || nanoid(),
@@ -144,7 +144,7 @@ export async function generateSceneOutlinesFromRequirements(
       language: requirements.language,
     }));
 
-    // Replace sequential gen_img_N/gen_vid_N with globally unique IDs
+    // 将顺序的 gen_img_N/gen_vid_N 替换为全局唯一 ID
     const result = uniquifyMediaElementIds(enriched);
 
     callbacks?.onProgress?.({
@@ -163,9 +163,9 @@ export async function generateSceneOutlinesFromRequirements(
 }
 
 /**
- * Apply type fallbacks for outlines that can't be generated as their declared type.
- * - interactive without interactiveConfig → slide
- * - pbl without pblConfig or languageModel → slide
+ * 对无法按声明类型生成的大纲应用类型回退。
+ * - interactive 缺少 interactiveConfig → slide
+ * - pbl 缺少 pblConfig 或 languageModel → slide
  */
 export function applyOutlineFallbacks(
   outline: SceneOutline,

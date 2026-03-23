@@ -1,23 +1,23 @@
 /**
- * Interactive HTML Post-Processor
+ * 互动 HTML 后处理器
  *
- * Ported from Python's PostProcessor class (learn-your-way/concept_to_html.py:287-385)
+ * 移植自 Python 的 PostProcessor 类 (learn-your-way/concept_to_html.py:287-385)
  *
- * Handles:
- * - LaTeX delimiter conversion ($$...$$ -> \[...\], $...$ -> \(...\))
- * - KaTeX CSS/JS injection with auto-render and MutationObserver
- * - Script tag protection during LaTeX conversion
+ * 处理:
+ * - LaTeX 分隔符转换 ($$...$$ -> \[...\], $...$ -> \(...\))
+ * - KaTeX CSS/JS 注入，包含自动渲染和 MutationObserver
+ * - LaTeX 转换期间的 script 标签保护
  */
 
 /**
- * Main entry point: post-process generated interactive HTML
- * Converts LaTeX delimiters and injects KaTeX rendering resources.
+ * 主入口点: 后处理生成的互动 HTML
+ * 转换 LaTeX 分隔符并注入 KaTeX 渲染资源。
  */
 export function postProcessInteractiveHtml(html: string): string {
-  // Convert LaTeX delimiters while protecting script tags
+  // 转换 LaTeX 分隔符，同时保护 script 标签
   let processed = convertLatexDelimiters(html);
 
-  // Inject KaTeX resources if not already present
+  // 如果尚未存在 KaTeX 资源，则注入
   if (!processed.toLowerCase().includes('katex')) {
     processed = injectKatex(processed);
   }
@@ -26,32 +26,32 @@ export function postProcessInteractiveHtml(html: string): string {
 }
 
 /**
- * Convert LaTeX delimiters while protecting <script> tags.
+ * 转换 LaTeX 分隔符，同时保护 <script> 标签。
  *
- * - Protects script blocks from modification
- * - Converts $$...$$ to \[...\] (display math)
- * - Converts $...$ to \(...\) (inline math)
- * - Restores script blocks after conversion
+ * - 保护 script 块不被修改
+ * - 将 $$...$$ 转换为 \[...\]（展示公式）
+ * - 将 $...$ 转换为 \(...\)（行内公式）
+ * - 转换后恢复 script 块
  */
 function convertLatexDelimiters(html: string): string {
   const scriptBlocks: string[] = [];
 
-  // Protect script tags by replacing them with placeholders
+  // 通过用占位符替换 script 标签来保护它们
   let processed = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, (match) => {
     scriptBlocks.push(match);
     return `__SCRIPT_BLOCK_${scriptBlocks.length - 1}__`;
   });
 
-  // Convert display math: $$...$$ -> \[...\]
+  // 转换展示公式: $$...$$ -> \[...\]
   processed = processed.replace(/\$\$([^$]+)\$\$/g, '\\[$1\\]');
 
-  // Convert inline math: $...$ -> \(...\)
-  // Use non-greedy match and exclude newlines to avoid false positives
+  // 转换行内公式: $...$ -> \(...\)
+  // 使用非贪婪匹配并排除换行符以避免误匹配
   processed = processed.replace(/\$([^$\n]+?)\$/g, '\\($1\\)');
 
-  // Restore script blocks using indexOf + substring (not .replace())
-  // because script content may contain $ characters that .replace()
-  // would interpret as special substitution patterns.
+  // 使用 indexOf + substring 恢复 script 块（而不是 .replace()）
+  // 因为 script 内容可能包含 $ 字符，.replace() 会将它们
+  // 解释为特殊的替换模式。
   for (let i = 0; i < scriptBlocks.length; i++) {
     const placeholder = `__SCRIPT_BLOCK_${i}__`;
     const idx = processed.indexOf(placeholder);
@@ -67,8 +67,8 @@ function convertLatexDelimiters(html: string): string {
 }
 
 /**
- * Inject KaTeX CSS, JS, auto-render, and MutationObserver before </head>.
- * Falls back to appending at end if </head> is not found.
+ * 在 </head> 之前注入 KaTeX CSS、JS、auto-render 和 MutationObserver。
+ * 如果找不到 </head>，则回退到追加到末尾。
  */
 function injectKatex(html: string): string {
   const katexInjection = `
@@ -131,9 +131,9 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>`;
 
-  // Use indexOf + substring instead of String.replace() because the
-  // katexInjection string contains '$' characters that .replace() would
-  // interpret as special substitution patterns ($$ → $, $' → post-match text).
+  // 使用 indexOf + substring 而不是 String.replace()，因为
+  // katexInjection 字符串包含 '$' 字符，.replace() 会
+  // 将其解释为特殊的替换模式（$$ → $, $' → 匹配后的文本）。
   const headCloseIdx = html.indexOf('</head>');
   if (headCloseIdx !== -1) {
     return (
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function() {
     );
   }
 
-  // Fallback: inject before </body> if </head> is missing
+  // 回退: 如果缺少 </head>，则注入到 </body> 之前
   const bodyCloseIdx = html.indexOf('</body>');
   if (bodyCloseIdx !== -1) {
     return (
@@ -155,6 +155,6 @@ document.addEventListener("DOMContentLoaded", function() {
     );
   }
 
-  // Last resort: append at end
+  // 最后手段: 追加到末尾
   return html + katexInjection;
 }

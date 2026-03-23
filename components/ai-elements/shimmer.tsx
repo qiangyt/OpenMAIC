@@ -16,7 +16,7 @@ export type TextShimmerProps = {
   spread?: number;
 };
 
-/* eslint-disable react-hooks/refs -- Ref-based cache for motion.create component identity */
+/* eslint-disable react-hooks/refs -- 基于引用的缓存用于 motion.create 组件标识 */
 const ShimmerComponent = ({
   children,
   as: Component = 'p',

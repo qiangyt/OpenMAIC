@@ -1,27 +1,27 @@
 /**
- * Seedance (ByteDance / Doubao / Ark) Video Generation Adapter
+ * Seedance（字节跳动 / 豆包 / 方舟）视频生成适配器
  *
- * Uses async task pattern: submit task → poll until succeeded → get video URL.
- * Endpoint: https://ark.cn-beijing.volces.com/api/v3/contents/generations/tasks
+ * 使用异步任务模式：提交任务 → 轮询直到成功 → 获取视频 URL。
+ * 端点：https://ark.cn-beijing.volces.com/api/v3/contents/generations/tasks
  *
- * Request format (text-to-video):
+ * 请求格式（文本生成视频）：
  *   POST /api/v3/contents/generations/tasks
  *   {
  *     "model": "doubao-seedance-1-5-pro-251215",
- *     "content": [{ "type": "text", "text": "prompt here" }],
+ *     "content": [{ "type": "text", "text": "提示词" }],
  *     "ratio": "16:9",
  *     "duration": 5,
  *     "resolution": "1080p",
  *     "watermark": false
  *   }
  *
- * Supported models:
- * - doubao-seedance-1-5-pro-251215     (latest, 4~12s)
- * - doubao-seedance-1-0-pro-250528     (stable, 2~12s)
- * - doubao-seedance-1-0-pro-fast-251015 (faster, 2~12s)
- * - doubao-seedance-1-0-lite-t2v-250428 (lightweight, 2~12s)
+ * 支持的模型：
+ * - doubao-seedance-1-5-pro-251215（最新，4~12秒）
+ * - doubao-seedance-1-0-pro-250528（稳定，2~12秒）
+ * - doubao-seedance-1-0-pro-fast-251015（更快，2~12秒）
+ * - doubao-seedance-1-0-lite-t2v-250428（轻量，2~12秒）
  *
- * API docs: https://www.volcengine.com/docs/6492/2165104
+ * API 文档：https://www.volcengine.com/docs/6492/2165104
  */
 
 import type {
@@ -35,12 +35,12 @@ const DEFAULT_BASE_URL = 'https://ark.cn-beijing.volces.com';
 const POLL_INTERVAL_MS = 5000;
 const MAX_POLL_ATTEMPTS = 60; // 5 minutes max
 
-/** Response shape for task creation (only returns id) */
+/** 任务创建的响应结构（仅返回 id） */
 interface SeedanceSubmitResponse {
   id: string;
 }
 
-/** Response shape for task polling */
+/** 任务轮询的响应结构 */
 interface SeedancePollResponse {
   id: string;
   model: string;
@@ -59,8 +59,8 @@ interface SeedancePollResponse {
 }
 
 /**
- * Map aspect ratio to Seedance ratio format.
- * Seedance uses the same "W:H" format we already have.
+ * 将宽高比映射到 Seedance 的 ratio 格式。
+ * Seedance 使用与我们相同的 "W:H" 格式。
  */
 function toSeedanceRatio(aspectRatio?: string): string | undefined {
   if (!aspectRatio) return undefined;
@@ -68,8 +68,8 @@ function toSeedanceRatio(aspectRatio?: string): string | undefined {
 }
 
 /**
- * Map resolution to Seedance format.
- * Seedance expects "480p", "720p", "1080p".
+ * 将分辨率映射到 Seedance 格式。
+ * Seedance 期望 "480p"、"720p"、"1080p"。
  */
 function toSeedanceResolution(resolution?: string): string | undefined {
   if (!resolution) return undefined;
@@ -77,7 +77,7 @@ function toSeedanceResolution(resolution?: string): string | undefined {
 }
 
 /**
- * Estimate video dimensions from ratio and resolution for the result.
+ * 根据宽高比和分辨率估算结果的视频尺寸。
  */
 function estimateDimensions(
   ratio?: string,
@@ -97,13 +97,12 @@ function estimateDimensions(
 }
 
 /**
- * Submit a video generation task to Seedance API.
- * Returns the task ID for polling.
+ * 向 Seedance API 提交视频生成任务。
+ * 返回用于轮询的任务 ID。
  */
 /**
- * Lightweight connectivity test — validates API key by making a GET request
- * to poll a non-existent task. If auth fails we get 401/403; if auth succeeds
- * we get 404 (task not found), confirming the key is valid.
+ * 轻量级连接测试 —— 通过 GET 请求轮询不存在的任务来验证 API 密钥。
+ * 如果认证失败返回 401/403；如果认证成功返回 404（任务未找到），确认密钥有效。
  */
 export async function testSeedanceConnectivity(
   config: VideoGenerationConfig,
@@ -117,7 +116,7 @@ export async function testSeedanceConnectivity(
         headers: { Authorization: `Bearer ${config.apiKey}` },
       },
     );
-    // 401/403 means key invalid; anything else (404, 400, 200) means key works
+    // 401/403 表示密钥无效；任何其他状态（404、400、200）表示密钥有效
     if (response.status === 401 || response.status === 403) {
       const text = await response.text();
       return {
@@ -179,9 +178,9 @@ export async function submitSeedanceTask(
 }
 
 /**
- * Poll the status of a Seedance video generation task.
- * Returns the result if complete, null if still running.
- * Throws on failure.
+ * 轮询 Seedance 视频生成任务的状态。
+ * 如完成则返回结果，如仍在运行则返回 null。
+ * 失败时抛出异常。
  */
 export async function pollSeedanceTask(
   config: VideoGenerationConfig,
@@ -220,12 +219,12 @@ export async function pollSeedanceTask(
     throw new Error(`Seedance video generation failed: ${data.error?.message || 'Unknown error'}`);
   }
 
-  // queued or running
+  // 排队中或运行中
   return null;
 }
 
 /**
- * Generate a video using Seedance: submit task + poll until complete.
+ * 使用 Seedance 生成视频：提交任务 + 轮询直到完成。
  */
 export async function generateWithSeedance(
   config: VideoGenerationConfig,

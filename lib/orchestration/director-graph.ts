@@ -1,20 +1,19 @@
 /**
- * Director Graph — LangGraph StateGraph for Multi-Agent Orchestration
+ * 导演图 — 用于多智能体编排的 LangGraph 状态图
  *
- * Unified graph topology (same for single and multi-agent):
+ * 统一的图拓扑结构（单智能体和多智能体相同）：
  *
  *   START → director ──(end)──→ END
  *              │
- *              └─(next)→ agent_generate ──→ director (loop)
+ *              └─(next)→ agent_generate ──→ director (循环)
  *
- * The director node adapts its strategy based on agent count:
- *   - Single agent: pure code logic (no LLM). Dispatches the agent on
- *     turn 0, then cues the user on subsequent turns.
- *   - Multi agent: LLM-based decision (with code fast-paths for turn 0
- *     trigger agent and turn limits).
+ * 导演节点根据智能体数量调整其策略：
+ *   - 单智能体：纯代码逻辑（无 LLM）。在第 0 轮调度该智能体，
+ *     然后在后续轮次中提示用户。
+ *   - 多智能体：基于 LLM 的决策（第 0 轮触发智能体和轮次限制有代码快速路径）。
  *
- * Uses LangGraph's custom stream mode: each node pushes StatelessEvent
- * chunks via config.writer() for real-time SSE delivery.
+ * 使用 LangGraph 的自定义流模式：每个节点通过 config.writer()
+ * 推送 StatelessEvent 块，用于实时 SSE 传输。
  */
 
 import { Annotation, StateGraph, START, END } from '@langchain/langgraph';
@@ -41,13 +40,13 @@ import { createLogger } from '@/lib/logger';
 
 const log = createLogger('DirectorGraph');
 
-// ==================== State Definition ====================
+// ==================== 状态定义 ====================
 
 /**
- * LangGraph state annotation for the orchestration graph
+ * 编排图的 LangGraph 状态注解
  */
 const OrchestratorState = Annotation.Root({
-  // Input (set once at graph entry)
+  // 输入（在图入口处设置一次）
   messages: Annotation<StatelessChatRequest['messages']>,
   storeState: Annotation<StatelessChatRequest['storeState']>,
   availableAgentIds: Annotation<string[]>,
@@ -57,10 +56,10 @@ const OrchestratorState = Annotation.Root({
   discussionContext: Annotation<{ topic: string; prompt?: string } | null>,
   triggerAgentId: Annotation<string | null>,
   userProfile: Annotation<{ nickname?: string; bio?: string } | null>,
-  /** Request-scoped agent configs for generated agents (not in the default registry) */
+  /** 请求作用域的智能体配置，用于生成的智能体（不在默认注册表中） */
   agentConfigOverrides: Annotation<Record<string, AgentConfig>>,
 
-  // Mutable (updated by nodes)
+  // 可变（由节点更新）
   currentAgentId: Annotation<string | null>,
   turnCount: Annotation<number>,
   agentResponses: Annotation<AgentTurnSummary[]>({
@@ -78,26 +77,26 @@ const OrchestratorState = Annotation.Root({
 type OrchestratorStateType = typeof OrchestratorState.State;
 
 /**
- * Look up an agent config: request-scoped overrides first, then global registry.
- * This keeps the server stateless — generated agent configs travel with the request.
+ * 查找智能体配置：优先使用请求作用域的覆盖，然后是全局注册表。
+ * 这使服务器保持无状态 — 生成的智能体配置随请求传递。
  */
 function resolveAgent(state: OrchestratorStateType, agentId: string): AgentConfig | undefined {
   return state.agentConfigOverrides[agentId] ?? useAgentRegistry.getState().getAgent(agentId);
 }
 
-// ==================== Director Node ====================
+// ==================== 导演节点 ====================
 
 /**
- * Unified director: decides which agent speaks next.
+ * 统一的导演：决定下一个发言的智能体。
  *
- * Strategy varies by agent count:
- *   Single agent — pure code logic, zero LLM calls:
- *     turn 0: dispatch the sole agent
- *     turn 1+: cue user to speak (keeps session active for follow-ups)
+ * 策略根据智能体数量变化：
+ *   单智能体 — 纯代码逻辑，零 LLM 调用：
+ *     第 0 轮：调度唯一的智能体
+ *     第 1+ 轮：提示用户发言（保持会话活跃以便后续跟进）
  *
- *   Multi agent — LLM-based with code fast-paths:
- *     turn 0 + triggerAgentId: dispatch trigger agent (skip LLM)
- *     otherwise: LLM decides next agent / USER / END
+ *   多智能体 — 基于 LLM，带有代码快速路径：
+ *     第 0 轮 + triggerAgentId：调度触发智能体（跳过 LLM）
+ *     其他情况：LLM 决定下一个智能体 / USER / END
  */
 async function directorNode(
   state: OrchestratorStateType,
@@ -108,35 +107,35 @@ async function directorNode(
     try {
       rawWrite(chunk);
     } catch {
-      /* controller closed after abort */
+      /* 中止后控制器已关闭 */
     }
   };
   const isSingleAgent = state.availableAgentIds.length <= 1;
 
-  // ── Turn limit check (applies to both single & multi) ──
+  // ── 轮次限制检查（适用于单智能体和多智能体） ──
   if (state.turnCount >= state.maxTurns) {
     log.info(`[Director] Turn limit reached (${state.turnCount}/${state.maxTurns}), ending`);
     return { shouldEnd: true };
   }
 
-  // ── Single agent: code-only director ──
+  // ── 单智能体：纯代码导演 ──
   if (isSingleAgent) {
     const agentId = state.availableAgentIds[0] || 'default-1';
 
     if (state.turnCount === 0) {
-      // First turn: dispatch the agent
+      // 第一轮：调度智能体
       log.info(`[Director] Single agent: dispatching "${agentId}"`);
       write({ type: 'thinking', data: { stage: 'agent_loading', agentId } });
       return { currentAgentId: agentId, shouldEnd: false };
     }
 
-    // Agent already responded: cue user for follow-up
+    // 智能体已响应：提示用户进行后续跟进
     log.info(`[Director] Single agent: cueing user after "${agentId}"`);
     write({ type: 'cue_user', data: { fromAgentId: agentId } });
     return { shouldEnd: true };
   }
 
-  // ── Multi agent: fast-path for first turn with trigger ──
+  // ── 多智能体：第 0 轮带触发器的快速路径 ──
   if (state.turnCount === 0 && state.triggerAgentId) {
     const triggerId = state.triggerAgentId;
     if (state.availableAgentIds.includes(triggerId)) {
@@ -152,7 +151,7 @@ async function directorNode(
     );
   }
 
-  // ── Multi agent: LLM-based decision ──
+  // ── 多智能体：基于 LLM 的决策 ──
   const agents: AgentConfig[] = state.availableAgentIds
     .map((id) => resolveAgent(state, id))
     .filter((a): a is AgentConfig => a != null);
@@ -182,7 +181,7 @@ async function directorNode(
 
   try {
     const result = await adapter._generate(
-      [new SystemMessage(prompt), new HumanMessage('Decide which agent should speak next.')],
+      [new SystemMessage(prompt), new HumanMessage('Decide which agent should speak next.')], // 中文：决定哪个智能体应该接下来发言
       { signal: config.signal } as Record<string, unknown>,
     );
 
@@ -231,11 +230,11 @@ function directorCondition(state: OrchestratorStateType): 'agent_generate' | typ
   return state.shouldEnd ? END : 'agent_generate';
 }
 
-// ==================== Agent Generate Node ====================
+// ==================== 智能体生成节点 ====================
 
 /**
- * Run generation for one agent. Streams agent_start, text_delta,
- * action, and agent_end events via config.writer().
+ * 为一个智能体运行生成。通过 config.writer() 流式传输
+ * agent_start、text_delta、action 和 agent_end 事件。
  */
 async function runAgentGeneration(
   state: OrchestratorStateType,
@@ -272,8 +271,8 @@ async function runAgentGeneration(
     },
   });
 
-  // Compute effective actions: filter by scene type for defense-in-depth
-  // e.g. spotlight/laser stripped for non-slide scenes even if in static allowedActions
+  // 计算有效动作：按场景类型过滤以实现纵深防御
+  // 例如，对于非幻灯片场景，即使静态 allowedActions 中包含，也会移除 spotlight/laser
   const currentScene = state.storeState.currentSceneId
     ? state.storeState.scenes.find((s) => s.id === state.storeState.currentSceneId)
     : undefined;
@@ -299,15 +298,15 @@ async function runAgentGeneration(
     ),
   ];
 
-  // Ensure the message list ends with a HumanMessage.
-  // After agent-aware role mapping, other agents' messages become user role,
-  // so trailing AIMessage is less likely. But guard against edge cases
-  // (e.g. agent's own previous response is last in history).
+  // 确保消息列表以 HumanMessage 结尾。
+  // 在智能体感知的角色映射后，其他智能体的消息变为 user 角色，
+  // 所以末尾是 AIMessage 的可能性较小。但仍需防范边缘情况
+  //（例如智能体自己之前的响应是历史记录中的最后一条）。
   const lastMsg = lcMessages[lcMessages.length - 1];
   if (!lcMessages.some((m) => m instanceof HumanMessage)) {
-    lcMessages.push(new HumanMessage('Please begin.'));
+    lcMessages.push(new HumanMessage('Please begin.')); // 中文：请开始
   } else if (lastMsg instanceof AIMessage) {
-    lcMessages.push(new HumanMessage("It's your turn to speak. Respond from your perspective."));
+    lcMessages.push(new HumanMessage("It's your turn to speak. Respond from your perspective.")); // 中文：轮到你发言了。从你的角度回应
   }
 
   const parserState = createParserState();
@@ -322,9 +321,9 @@ async function runAgentGeneration(
       if (chunk.type === 'delta') {
         const parseResult = parseStructuredChunk(chunk.content, parserState);
 
-        // Emit events in original interleaved order via the `ordered` array.
-        // The ordered array tracks complete items from Step 5 of the parser;
-        // trailing partial text deltas (Step 6) are in textChunks but not in ordered.
+        // 通过 `ordered` 数组按原始交错顺序发送事件。
+        // ordered 数组跟踪解析器第 5 步的完整项目；
+        // 尾部的部分文本增量（第 6 步）在 textChunks 中但不在 ordered 中。
         let emittedTextCount = 0;
         if (parseResult.ordered.length > 0 || parseResult.textChunks.length > 0) {
           log.debug(
@@ -358,7 +357,7 @@ async function runAgentGeneration(
               continue;
             }
             actionCount++;
-            // Record whiteboard actions to the ledger
+            // 将白板操作记录到账本
             if (ac.actionName.startsWith('wb_')) {
               whiteboardActions.push({
                 actionName: ac.actionName as WhiteboardActionRecord['actionName'],
@@ -380,7 +379,7 @@ async function runAgentGeneration(
           }
         }
 
-        // Emit trailing partial text deltas not covered by ordered
+        // 发送 ordered 未覆盖的尾部部分文本增量
         for (let i = emittedTextCount; i < parseResult.textChunks.length; i++) {
           const rawText = parseResult.textChunks[i];
           if (!rawText) continue;
@@ -395,7 +394,7 @@ async function runAgentGeneration(
       }
     }
 
-    // Finalize: emit any remaining content if the model didn't produce valid JSON
+    // 完成：如果模型未产生有效 JSON，则发送剩余内容
     const finalResult = finalizeParser(parserState);
     for (const entry of finalResult.ordered) {
       if (entry.type === 'text') {
@@ -434,7 +433,7 @@ async function runAgentGeneration(
 }
 
 /**
- * Agent generate node — runs one agent, then loops back to director.
+ * 智能体生成节点 — 运行一个智能体，然后循环回导演节点。
  */
 async function agentGenerateNode(
   state: OrchestratorStateType,
@@ -471,15 +470,15 @@ async function agentGenerateNode(
   };
 }
 
-// ==================== Graph Construction ====================
+// ==================== 图构建 ====================
 
 /**
- * Create the orchestration LangGraph StateGraph.
+ * 创建编排 LangGraph 状态图。
  *
- * Topology:
+ * 拓扑结构：
  *   START → director ──(end)──→ END
  *              │
- *              └─(next)→ agent_generate ──→ director (loop)
+ *              └─(next)→ agent_generate ──→ director (循环)
  */
 export function createOrchestrationGraph() {
   const graph = new StateGraph(OrchestratorState)
@@ -496,16 +495,16 @@ export function createOrchestrationGraph() {
 }
 
 /**
- * Build initial state for the orchestration graph from a StatelessChatRequest
- * and a pre-created LanguageModel instance.
+ * 从 StatelessChatRequest 和预创建的 LanguageModel 实例
+ * 构建编排图的初始状态。
  */
 export function buildInitialState(
   request: StatelessChatRequest,
   languageModel: LanguageModel,
   thinkingConfig?: ThinkingConfig,
 ): typeof OrchestratorState.State {
-  // Build request-scoped agent config overrides for generated agents.
-  // These travel with each request — no server-side persistence needed.
+  // 为生成的智能体构建请求作用域的配置覆盖。
+  // 这些随每个请求传递 — 无需服务器端持久化。
   const agentConfigOverrides: Record<string, AgentConfig> = {};
   if (request.config.agentConfigs?.length) {
     for (const cfg of request.config.agentConfigs) {
@@ -532,7 +531,7 @@ export function buildInitialState(
     messages: request.messages,
     storeState: request.storeState,
     availableAgentIds: request.config.agentIds,
-    maxTurns: turnCount + 1, // Allow exactly one more director→agent cycle
+    maxTurns: turnCount + 1, // 恰好允许再多一个 director→agent 循环
     languageModel,
     thinkingConfig: thinkingConfig ?? null,
     discussionContext,

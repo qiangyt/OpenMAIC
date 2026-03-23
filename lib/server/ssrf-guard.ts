@@ -1,11 +1,11 @@
 /**
- * SSRF (Server-Side Request Forgery) protection utilities.
+ * SSRF（服务端请求伪造）防护工具。
  *
- * Validates URLs to prevent requests to internal/private network addresses.
- * Used by any API route that fetches a user-supplied URL server-side.
+ * 验证 URL 以防止请求内部/私有网络地址。
+ * 供任何在服务端获取用户提供的 URL 的 API 路由使用。
  */
 
-/** Check if hostname is in the 172.16.0.0 - 172.31.255.255 private range */
+/** 检查主机名是否在 172.16.0.0 - 172.31.255.255 私有地址范围内 */
 function isPrivate172(hostname: string): boolean {
   if (!hostname.startsWith('172.')) return false;
   const second = parseInt(hostname.split('.')[1], 10);
@@ -13,8 +13,8 @@ function isPrivate172(hostname: string): boolean {
 }
 
 /**
- * Validate a URL against SSRF attacks.
- * Returns null if the URL is safe, or an error message string if blocked.
+ * 验证 URL 以防止 SSRF 攻击。
+ * 如果 URL 安全则返回 null，如果被阻止则返回错误信息字符串。
  */
 export function validateUrlForSSRF(url: string): string | null {
   let parsed: URL;

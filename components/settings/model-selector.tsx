@@ -45,15 +45,15 @@ export function ModelSelector({
   const selectedModelRef = useRef<HTMLButtonElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Helper function to get translated provider name
+  // 获取翻译后服务商名称的辅助函数
   const getProviderDisplayName = (pid: ProviderId, name: string) => {
     const translationKey = `settings.providerNames.${pid}`;
     const translated = t(translationKey);
-    // If translation exists (not equal to key), use it; otherwise fallback to name
+    // 如果翻译存在（不等于 key），使用它；否则回退到 name
     return translated !== translationKey ? translated : name;
   };
 
-  // Helper function for model count with proper plural form
+  // 获取模型数量的辅助函数，支持正确的复数形式
   const getModelCountText = (count: number) => {
     const key = count === 1 ? 'settings.modelSingular' : 'settings.modelCount';
     return `${count} ${t(key)}`;
@@ -64,10 +64,10 @@ export function ModelSelector({
     return `${filtered}/${total} ${t(key)}`;
   };
 
-  // Get all providers that are ready to use:
-  // - (Doesn't require API key OR has API key configured OR server has key)
-  // - Has at least one model
-  // - Has baseUrl or defaultBaseUrl configured
+  // 获取所有可用的服务商：
+  // - (不需要 API 密钥 或 已配置 API 密钥 或 服务端有密钥)
+  // - 至少有一个模型
+  // - 已配置 baseUrl 或 defaultBaseUrl
   const configuredProviders = Object.entries(providersConfig)
     .filter(
       ([, config]) =>
@@ -86,11 +86,11 @@ export function ModelSelector({
     onModelChange(pid, mid);
   };
 
-  // Filter models across all providers by search query and server model restrictions
+  // 根据搜索查询和服务端模型限制，过滤所有服务商的模型
   const getFilteredModelsForProvider = (pid: ProviderId) => {
     const config = providersConfig[pid];
     let models = config?.models || [];
-    // When using server config without own key, restrict to server-allowed models
+    // 当使用服务端配置且没有自己的密钥时，限制为服务端允许的模型
     if (config?.isServerConfigured && !config.apiKey && config.serverModels?.length) {
       const allowed = new Set(config.serverModels);
       models = models.filter((m) => allowed.has(m.id));
@@ -103,19 +103,19 @@ export function ModelSelector({
     );
   };
 
-  // Sync activeProvider with providerId prop changes
+  // 将 activeProvider 与 providerId prop 变更同步
   useEffect(() => {
     setActiveProvider(providerId);
   }, [providerId]);
 
-  // Fallback: if activeProvider is not in configured providers, use the first configured one
+  // 回退：如果 activeProvider 不在已配置的服务商中，使用第一个已配置的
   const effectiveProvider = configuredProviders.some((p) => p.id === activeProvider)
     ? activeProvider
     : (configuredProviders[0]?.id ?? activeProvider);
 
   const filteredModels = getFilteredModelsForProvider(effectiveProvider);
 
-  // Auto scroll to selected model when opening
+  // 打开时自动滚动到选中的模型
   useEffect(() => {
     if (selectedModelRef.current) {
       selectedModelRef.current.scrollIntoView({
@@ -125,21 +125,21 @@ export function ModelSelector({
     }
   }, [effectiveProvider]);
 
-  // Auto focus search input when expanded
+  // 展开时自动聚焦搜索输入框
   useEffect(() => {
     if (searchExpanded && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [searchExpanded]);
 
-  // Test model function
+  // 测试模型函数
   const handleTestModel = useCallback(
     async (pid: ProviderId, mid: string) => {
       const providerConfig = providersConfig[pid];
       if (!providerConfig) return;
 
       const apiKey = providerConfig.apiKey;
-      // Only send user-entered baseUrl; let server resolve fallback
+      // 仅发送用户输入的 baseUrl；让服务端解析回退
       const baseUrl = providerConfig.baseUrl;
 
       if (providerConfig.requiresApiKey && !apiKey && !providerConfig.isServerConfigured) {
@@ -194,7 +194,7 @@ export function ModelSelector({
   return (
     <div className="border rounded-lg overflow-hidden flex flex-col h-[420px] relative">
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        {/* Left: Provider List */}
+        {/* 左侧：服务商列表 */}
         <div className="w-48 border-r bg-muted/30 overflow-y-auto shrink-0">
           {configuredProviders.map((provider) => {
             const filteredCount = getFilteredModelsForProvider(provider.id).length;
@@ -249,9 +249,9 @@ export function ModelSelector({
           })}
         </div>
 
-        {/* Right: Model List */}
+        {/* 右侧：模型列表 */}
         <div className="flex-1 flex flex-col relative">
-          {/* Floating Search Button - Bottom Right */}
+          {/* 浮动搜索按钮 - 右下角 */}
           <div className="absolute bottom-4 right-4 z-10">
             {searchExpanded ? (
               <div className="relative w-64 animate-in fade-in slide-in-from-bottom-2 duration-200">
@@ -281,7 +281,7 @@ export function ModelSelector({
             )}
           </div>
 
-          {/* Model Items */}
+          {/* 模型项 */}
           <div className="flex-1 overflow-y-auto">
             {filteredModels.length === 0 ? (
               <div className="p-6 text-center text-sm text-muted-foreground">
@@ -313,7 +313,7 @@ export function ModelSelector({
                           </div>
                           {(model.capabilities || model.contextWindow || model.outputWindow) && (
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              {/* Capabilities */}
+                              {/* 能力 */}
                               <div className="flex items-center gap-1">
                                 {model.capabilities?.vision && (
                                   <div title={t('settings.capabilities.vision')}>
@@ -331,7 +331,7 @@ export function ModelSelector({
                                   </div>
                                 )}
                               </div>
-                              {/* Context Window */}
+                              {/* 上下文窗口 */}
                               {model.contextWindow && (
                                 <span className="flex items-center gap-0.5">
                                   <FileText className="h-3 w-3" />
@@ -340,7 +340,7 @@ export function ModelSelector({
                                   </span>
                                 </span>
                               )}
-                              {/* Output Window */}
+                              {/* 输出窗口 */}
                               {model.outputWindow && (
                                 <span className="flex items-center gap-0.5">
                                   <Send className="h-3 w-3" />

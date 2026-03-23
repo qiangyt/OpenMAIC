@@ -1,7 +1,7 @@
 /**
- * PBL (Project-Based Learning) Type Definitions
+ * PBL（项目式学习）类型定义
  *
- * Migrated from PBL-Nano with PBL prefix to avoid conflicts with MAIC-OSS types.
+ * 从 PBL-Nano 迁移而来，使用 PBL 前缀以避免与 MAIC-OSS 类型冲突。
  */
 
 export type PBLMode = 'project_info' | 'agent' | 'issueboard' | 'idle';
@@ -69,7 +69,7 @@ export interface PBLProjectConfig {
 }
 
 /**
- * MCP tool result (shared by all MCP classes)
+ * MCP 工具结果（所有 MCP 类共享）
  */
 export interface PBLToolResult {
   success: boolean;

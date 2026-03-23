@@ -1,16 +1,16 @@
 /**
- * Video Generation API
+ * 视频生成 API
  *
- * Generates a video from a text prompt using the specified provider.
- * Uses async task pattern (submit → poll) so maxDuration is set to 5 minutes.
+ * 使用指定提供商从文本提示生成视频。
+ * 使用异步任务模式（提交 → 轮询），因此 maxDuration 设置为 5 分钟。
  *
  * POST /api/generate/video
  *
  * Headers:
- *   x-video-provider: VideoProviderId (default: 'seedance')
- *   x-video-model: string (optional model override)
- *   x-api-key: string (optional, server fallback)
- *   x-base-url: string (optional, server fallback)
+ *   x-video-provider: VideoProviderId (默认: 'seedance')
+ *   x-video-model: string (可选模型覆盖)
+ *   x-api-key: string (可选，服务器备用)
+ *   x-base-url: string (可选，服务器备用)
  *
  * Body: { prompt, duration?, aspectRatio?, resolution? }
  * Response: { success: boolean, result?: VideoGenerationResult, error?: string }
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = clientBaseUrl ? clientBaseUrl : resolveVideoBaseUrl(providerId, clientBaseUrl);
 
-    // Normalize options against provider capabilities
+    // 根据提供商能力规范化选项
     const options = normalizeVideoOptions(providerId, body);
 
     log.info(
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     return apiSuccess({ result });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    // Detect content safety filter rejections (e.g. Seedance SensitiveContent errors)
+    // 检测内容安全过滤器拒绝（例如 Seedance SensitiveContent 错误）
     if (message.includes('SensitiveContent') || message.includes('sensitive information')) {
       log.warn(`Video blocked by content safety filter: ${message}`);
       return apiError('CONTENT_SENSITIVE', 400, message);

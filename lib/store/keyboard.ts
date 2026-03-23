@@ -15,18 +15,18 @@ export interface KeyboardState {
 }
 
 export const useKeyboardStore = create<KeyboardState>((set, get) => ({
-  // Initial state
-  ctrlKeyState: false, // Ctrl key pressed state
-  shiftKeyState: false, // Shift key pressed state
-  spaceKeyState: false, // Space key pressed state
+  // 初始状态
+  ctrlKeyState: false, // Ctrl 键按下状态
+  shiftKeyState: false, // Shift 键按下状态
+  spaceKeyState: false, // 空格键按下状态
 
-  // Getters
+  // 获取器
   ctrlOrShiftKeyActive: () => {
     const state = get();
     return state.ctrlKeyState || state.shiftKeyState;
   },
 
-  // Actions
+  // 操作
   setCtrlKeyState: (active) => set({ ctrlKeyState: active }),
   setShiftKeyState: (active) => set({ shiftKeyState: active }),
   setSpaceKeyState: (active) => set({ spaceKeyState: active }),

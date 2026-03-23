@@ -1,10 +1,10 @@
 /**
- * Playback Engine - Unified state machine for lecture playback and live discussion
+ * 播放引擎 - 用于讲稿播放和实时讨论的统一状态机
  *
- * Consumes Scene.actions[] directly via ActionEngine.
- * No intermediate compile step — actions are executed as-is.
+ * 通过 ActionEngine 直接消费 Scene.actions[]。
+ * 无需中间编译步骤 — 动作原样执行。
  *
- * State machine:
+ * 状态机:
  *
  *                  start()                  pause()
  *   idle ──────────────────→ playing ──────────────→ paused
@@ -42,9 +42,9 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('PlaybackEngine');
 
 /**
- * If more than 30% of characters are CJK, treat the text as Chinese.
- * Intentionally low: mixed Chinese text often contains punctuation,
- * numbers, and short Latin fragments (e.g. "AI课堂").
+ * 如果超过 30% 的字符是 CJK 字符，则将文本视为中文。
+ * 故意设置得较低：混合中文文本通常包含标点符号、数字和简短的
+ * 拉丁字母片段（例如 "AI课堂"）。
  */
 const CJK_LANG_THRESHOLD = 0.3;
 
@@ -55,33 +55,33 @@ export class PlaybackEngine {
   private mode: EngineMode = 'idle';
   private consumedDiscussions: Set<string> = new Set();
 
-  // Discussion state save
+  // 讨论状态保存
   private savedSceneIndex: number | null = null;
   private savedActionIndex: number | null = null;
 
-  // Discussion topic state
+  // 讨论主题状态
   private currentTopicState: TopicState | null = null;
 
-  // Dependencies
+  // 依赖项
   private audioPlayer: AudioPlayer;
   private actionEngine: ActionEngine;
   private callbacks: PlaybackEngineCallbacks;
 
-  // Scene identity (for snapshot validation)
+  // 场景标识（用于快照验证）
   private sceneId: string | undefined;
 
-  // Internal state
+  // 内部状态
   private currentTrigger: TriggerEvent | null = null;
   private triggerDelayTimer: ReturnType<typeof setTimeout> | null = null;
-  // Reading-time timer for speech actions without pre-generated audio (TTS disabled)
+  // 用于无预生成音频的语音动作的阅读时间计时器（TTS 已禁用）
   private speechTimer: ReturnType<typeof setTimeout> | null = null;
-  private speechTimerStart: number = 0; // Date.now() when timer was scheduled
-  // Browser-native TTS state (Web Speech API)
+  private speechTimerStart: number = 0; // 计时器调度时的 Date.now()
+  // 浏览器原生 TTS 状态（Web Speech API）
   private browserTTSActive: boolean = false;
-  private browserTTSChunks: string[] = []; // sentence-level chunks for sequential playback
-  private browserTTSChunkIndex: number = 0; // current chunk being spoken
-  private browserTTSPausedChunks: string[] = []; // remaining chunks saved on pause (for cancel+re-speak)
-  private speechTimerRemaining: number = 0; // remaining ms (set on pause)
+  private browserTTSChunks: string[] = []; // 句子级别的分块，用于顺序播放
+  private browserTTSChunkIndex: number = 0; // 当前正在朗读的分块
+  private browserTTSPausedChunks: string[] = []; // 暂停时保存的剩余分块（用于取消+重新朗读）
+  private speechTimerRemaining: number = 0; // 剩余毫秒数（暂停时设置）
 
   constructor(
     scenes: Scene[],
@@ -96,14 +96,14 @@ export class PlaybackEngine {
     this.callbacks = callbacks;
   }
 
-  // ==================== Public API ====================
+  // ==================== 公共 API ====================
 
-  /** Get the current engine mode */
+  /** 获取当前引擎模式 */
   getMode(): EngineMode {
     return this.mode;
   }
 
-  /** Export a serializable playback snapshot */
+  /** 导出可序列化的播放快照 */
   getSnapshot(): PlaybackSnapshot {
     return {
       sceneIndex: this.sceneIndex,
@@ -113,14 +113,14 @@ export class PlaybackEngine {
     };
   }
 
-  /** Restore playback position from a snapshot */
+  /** 从快照恢复播放位置 */
   restoreFromSnapshot(snapshot: PlaybackSnapshot): void {
     this.sceneIndex = snapshot.sceneIndex;
     this.actionIndex = snapshot.actionIndex;
     this.consumedDiscussions = new Set(snapshot.consumedDiscussions);
   }
 
-  /** idle → playing (from beginning) */
+  /** idle → playing（从头开始） */
   start(): void {
     if (this.mode !== 'idle') {
       log.warn('Cannot start: not idle, current mode:', this.mode);
@@ -133,7 +133,7 @@ export class PlaybackEngine {
     this.processNext();
   }
 
-  /** idle → playing (continue from current position, e.g. after discussion end) */
+  /** idle → playing（从当前位置继续，例如讨论结束后） */
   continuePlayback(): void {
     if (this.mode !== 'idle') {
       log.warn('Cannot continue: not idle, current mode:', this.mode);
@@ -143,16 +143,16 @@ export class PlaybackEngine {
     this.processNext();
   }
 
-  /** playing → paused | live → paused (abort SSE, truncate, topic pending) */
+  /** playing → paused | live → paused（中止 SSE、截断、主题待定） */
   pause(): void {
     if (this.mode === 'playing') {
-      // Cancel pending timers
+      // 取消待处理的计时器
       if (this.triggerDelayTimer) {
         clearTimeout(this.triggerDelayTimer);
         this.triggerDelayTimer = null;
       }
       if (this.speechTimer) {
-        // Save remaining time so resume() can reschedule
+        // 保存剩余时间以便 resume() 重新调度
         this.speechTimerRemaining = Math.max(
           0,
           this.speechTimerRemaining - (Date.now() - this.speechTimerStart),
@@ -161,15 +161,15 @@ export class PlaybackEngine {
         this.speechTimer = null;
       }
       this.setMode('paused');
-      // Freeze TTS — but skip if waiting on ProactiveCard (no active speech)
+      // 冻结 TTS — 但如果正在等待 ProactiveCard 则跳过（没有活动的语音）
       if (!this.currentTrigger) {
         if (this.browserTTSActive) {
-          // Cancel+re-speak pattern: save remaining chunks for resume.
-          // speechSynthesis.pause()/resume() is broken on Firefox, so we
-          // cancel now and re-speak from current chunk onward on resume.
+          // 取消+重新朗读模式：保存剩余分块以便恢复。
+          // speechSynthesis.pause()/resume() 在 Firefox 上有问题，
+          // 所以我们现在取消并在恢复时从当前分块开始重新朗读。
           this.browserTTSPausedChunks = this.browserTTSChunks.slice(this.browserTTSChunkIndex);
           window.speechSynthesis?.cancel();
-          // Note: cancel fires onerror('canceled'), which we ignore (see playBrowserTTSChunk)
+          // 注意：cancel 会触发 onerror('canceled')，我们忽略它（见 playBrowserTTSChunk）
         } else if (this.audioPlayer.isPlaying()) {
           this.audioPlayer.pause();
         }
@@ -177,13 +177,13 @@ export class PlaybackEngine {
     } else if (this.mode === 'live') {
       this.setMode('paused');
       this.currentTopicState = 'pending';
-      // Caller is responsible for aborting SSE
+      // 调用者负责中止 SSE
     } else {
       log.warn('Cannot pause: mode is', this.mode);
     }
   }
 
-  /** paused → playing (TTS resume) | paused (in discussion) → live */
+  /** paused → playing（TTS 恢复） | paused（讨论中）→ live */
   resume(): void {
     if (this.mode !== 'paused') {
       log.warn('Cannot resume: not paused, mode is', this.mode);
@@ -191,27 +191,27 @@ export class PlaybackEngine {
     }
 
     if (this.currentTopicState === 'pending') {
-      // Resume discussion → live
+      // 恢复讨论 → live
       this.currentTopicState = 'active';
       this.setMode('live');
     } else if (this.currentTrigger) {
-      // Waiting on ProactiveCard — just resume mode, don't touch audio
+      // 正在等待 ProactiveCard — 只恢复模式，不操作音频
       this.setMode('playing');
     } else {
-      // Resume lecture
+      // 恢复讲稿
       this.setMode('playing');
       if (this.browserTTSPausedChunks.length > 0) {
-        // Browser TTS was paused via cancel — re-speak remaining chunks
+        // 浏览器 TTS 通过取消暂停 — 重新朗读剩余分块
         this.browserTTSActive = true;
         this.browserTTSChunks = this.browserTTSPausedChunks;
         this.browserTTSChunkIndex = 0;
         this.browserTTSPausedChunks = [];
         this.playBrowserTTSChunk();
       } else if (this.audioPlayer.hasActiveAudio()) {
-        // Audio is paused — resume it; TTS onend will call processNext
+        // 音频已暂停 — 恢复它；TTS onend 会调用 processNext
         this.audioPlayer.resume();
       } else if (this.speechTimerRemaining > 0) {
-        // Reading timer was paused — reschedule with remaining time
+        // 阅读计时器已暂停 — 用剩余时间重新调度
         this.speechTimerStart = Date.now();
         this.speechTimer = setTimeout(() => {
           this.speechTimer = null;
@@ -220,7 +220,7 @@ export class PlaybackEngine {
           if (this.mode === 'playing') this.processNext();
         }, this.speechTimerRemaining);
       } else {
-        // TTS finished while paused, continue to next event
+        // TTS 在暂停期间已完成，继续下一个事件
         this.processNext();
       }
     }
@@ -228,8 +228,8 @@ export class PlaybackEngine {
 
   /** → idle */
   stop(): void {
-    // Set mode BEFORE stopping audio to prevent spurious processNext from
-    // synchronous onend callbacks (see handleUserInterrupt for details).
+    // 在停止音频之前设置模式，以防止来自同步 onend 回调的
+    // 错误 processNext（详见 handleUserInterrupt）。
     this.setMode('idle');
     this.audioPlayer.stop();
     this.cancelBrowserTTS();
@@ -251,27 +251,27 @@ export class PlaybackEngine {
     this.currentTrigger = null;
   }
 
-  /** User clicks "Join" on ProactiveCard → save cursor → live */
+  /** 用户点击 ProactiveCard 上的"参与" → 保存游标 → live */
   confirmDiscussion(): void {
     if (!this.currentTrigger) {
       log.warn('confirmDiscussion called but no trigger');
       return;
     }
 
-    // Mark consumed so it won't re-trigger on replay
+    // 标记为已消费，这样重播时不会再次触发
     this.consumedDiscussions.add(this.currentTrigger.id);
 
-    // Save lecture state — keep actionIndex as-is (past the discussion).
-    // Discussions are placed after all speech actions, so the preceding
-    // speech was already fully played; no need to replay it.
+    // 保存讲稿状态 — 保持 actionIndex 不变（已过讨论点）。
+    // 讨论放置在所有语音动作之后，所以前面的语音已经完全播放；
+    // 无需重播它。
     this.savedSceneIndex = this.sceneIndex;
     this.savedActionIndex = this.actionIndex;
 
-    // Enter live mode
+    // 进入实时模式
     this.currentTopicState = 'active';
     this.setMode('live');
 
-    // Notify callbacks
+    // 通知回调
     this.callbacks.onProactiveHide?.();
     this.callbacks.onDiscussionConfirmed?.(
       this.currentTrigger.question,
@@ -281,7 +281,7 @@ export class PlaybackEngine {
     this.currentTrigger = null;
   }
 
-  /** User clicks "Skip" on ProactiveCard → consumed → processNext */
+  /** 用户点击 ProactiveCard 上的"跳过" → 已消费 → processNext */
   skipDiscussion(): void {
     if (this.currentTrigger) {
       this.consumedDiscussions.add(this.currentTrigger.id);
@@ -294,17 +294,17 @@ export class PlaybackEngine {
     }
   }
 
-  /** End discussion → restore lecture → idle (user clicks "start" to continue) */
+  /** 结束讨论 → 恢复讲稿 → idle（用户点击"开始"继续） */
   handleEndDiscussion(): void {
     this.actionEngine.clearEffects();
     this.currentTopicState = 'closed';
 
-    // Close whiteboard if it was open during the discussion
+    // 如果讨论期间白板已打开，关闭它
     useCanvasStore.getState().setWhiteboardOpen(false);
 
     this.callbacks.onDiscussionEnd?.();
 
-    // Restore lecture state
+    // 恢复讲稿状态
     if (this.savedSceneIndex !== null && this.savedActionIndex !== null) {
       this.sceneIndex = this.savedSceneIndex;
       this.actionIndex = this.savedActionIndex;
@@ -315,29 +315,28 @@ export class PlaybackEngine {
     this.setMode('idle');
   }
 
-  /** User sends a message during playback → interrupt → live mode */
+  /** 用户在播放期间发送消息 → 中断 → live 模式 */
   handleUserInterrupt(text: string): void {
     if (this.mode === 'playing' || this.mode === 'paused') {
-      // Save lecture state BEFORE stopping audio — actionIndex was already
-      // incremented by processNext, so subtract 1 to replay the interrupted
-      // sentence when resuming.  Guard against overwriting a previously saved
-      // position (e.g. live → paused → new message).
+      // 在停止音频之前保存讲稿状态 — actionIndex 已经由 processNext
+      // 递增，所以减 1 以便恢复时重播被中断的句子。
+      // 防止覆盖之前保存的位置（例如 live → paused → 新消息）。
       if (this.savedSceneIndex === null) {
         this.savedSceneIndex = this.sceneIndex;
         this.savedActionIndex = Math.max(0, this.actionIndex - 1);
       }
 
-      // Cancel pending trigger delay
+      // 取消待处理的触发延迟
       if (this.triggerDelayTimer) {
         clearTimeout(this.triggerDelayTimer);
         this.triggerDelayTimer = null;
       }
     }
 
-    // Set mode BEFORE stopping audio — speechSynthesis.cancel() may fire the
-    // onend callback synchronously, and the processNext guard checks
-    // `this.mode === 'playing'`.  Setting mode first prevents a spurious
-    // processNext that would advance actionIndex past the interrupted speech.
+    // 在停止音频之前设置模式 — speechSynthesis.cancel() 可能同步
+    // 触发 onend 回调，而 processNext 守卫检查 `this.mode === 'playing'`。
+    // 先设置模式可以防止错误的 processNext 将 actionIndex 推进到
+    // 被中断语音之后。
     this.currentTopicState = 'active';
     this.setMode('live');
     this.audioPlayer.stop();
@@ -345,7 +344,7 @@ export class PlaybackEngine {
     this.callbacks.onUserInterrupt?.(text);
   }
 
-  /** Whether all remaining actions have been consumed (no speech left to play) */
+  /** 是否所有剩余动作都已被消费（没有语音可播放） */
   isExhausted(): boolean {
     let si = this.sceneIndex;
     let ai = this.actionIndex;
@@ -353,7 +352,7 @@ export class PlaybackEngine {
       const actions = this.scenes[si].actions || [];
       while (ai < actions.length) {
         const action = actions[ai];
-        // Consumed discussions don't count as remaining work
+        // 已消费的讨论不计入剩余工作
         if (action.type === 'discussion' && this.consumedDiscussions.has(action.id)) {
           ai++;
           continue;
@@ -366,7 +365,7 @@ export class PlaybackEngine {
     return true;
   }
 
-  // ==================== Private ====================
+  // ==================== 私有方法 ====================
 
   private setMode(mode: EngineMode): void {
     if (this.mode === mode) return;
@@ -375,8 +374,8 @@ export class PlaybackEngine {
   }
 
   /**
-   * Get the current action, or null if playback is complete.
-   * Advances sceneIndex automatically when a scene's actions are exhausted.
+   * 获取当前动作，如果播放完成则返回 null。
+   * 当场景的动作耗尽时自动推进 sceneIndex。
    */
   private getCurrentAction(): { action: Action; sceneId: string } | null {
     while (this.sceneIndex < this.scenes.length) {
@@ -387,7 +386,7 @@ export class PlaybackEngine {
         return { action: actions[this.actionIndex], sceneId: scene.id };
       }
 
-      // Move to next scene
+      // 移动到下一个场景
       this.sceneIndex++;
       this.actionIndex = 0;
     }
@@ -395,12 +394,12 @@ export class PlaybackEngine {
   }
 
   /**
-   * Core processing loop: consume the next action.
+   * 核心处理循环：消费下一个动作。
    */
   private async processNext(): Promise<void> {
     if (this.mode !== 'playing') return;
 
-    // Check for scene boundary (fire scene change callback at start of each new scene)
+    // 检查场景边界（在每个新场景开始时触发场景变更回调）
     if (this.actionIndex === 0 && this.sceneIndex < this.scenes.length) {
       const scene = this.scenes[this.sceneIndex];
       this.actionEngine.clearEffects();
@@ -410,7 +409,7 @@ export class PlaybackEngine {
 
     const current = this.getCurrentAction();
     if (!current) {
-      // All scenes complete
+      // 所有场景完成
       this.actionEngine.clearEffects();
       this.setMode('idle');
       this.callbacks.onComplete?.();
@@ -419,9 +418,9 @@ export class PlaybackEngine {
 
     const { action } = current;
 
-    // Notify progress BEFORE advancing the cursor so the snapshot points at
-    // the current action.  On restore the same action will be replayed — this
-    // is the desired behaviour for speech (user may have only heard half).
+    // 在推进游标之前通知进度，这样快照指向当前动作。
+    // 恢复时将重播同一动作 — 这是语音的期望行为
+    // （用户可能只听了一半）。
     this.callbacks.onProgress?.(this.getSnapshot());
 
     this.actionIndex++;
@@ -431,7 +430,7 @@ export class PlaybackEngine {
         const speechAction = action as SpeechAction;
         this.callbacks.onSpeechStart?.(speechAction.text);
 
-        // onEnded → processNext; if paused, resume() will call processNext
+        // onEnded → processNext；如果暂停，resume() 会调用 processNext
         this.audioPlayer.onEnded(() => {
           this.callbacks.onSpeechEnd?.();
           if (this.mode === 'playing') {
@@ -439,10 +438,10 @@ export class PlaybackEngine {
           }
         });
 
-        // Estimated reading time when no pre-generated audio (TTS disabled).
-        // CJK text: ~150ms/char (one char ≈ one word).
-        // Non-CJK text: ~240ms/word (≈250 WPM).
-        // Min 2s. Cancelled on pause; resume() calls processNext directly.
+        // 无预生成音频时的预估阅读时间（TTS 已禁用）。
+        // CJK 文本：约 150ms/字符（一个字符约等于一个词）。
+        // 非 CJK 文本：约 240ms/词（约 250 WPM）。
+        // 最小 2 秒。暂停时取消；resume() 直接调用 processNext。
         const scheduleReadingTimer = () => {
           const text = speechAction.text;
           const cjkCount = (
@@ -468,7 +467,7 @@ export class PlaybackEngine {
           .play(speechAction.audioId || '', speechAction.audioUrl)
           .then((audioStarted) => {
             if (!audioStarted) {
-              // No pre-generated audio — try browser-native TTS if selected
+              // 无预生成音频 — 如果选中了浏览器原生 TTS 则尝试使用
               const settings = useSettingsStore.getState();
               if (
                 settings.ttsEnabled &&
@@ -491,7 +490,7 @@ export class PlaybackEngine {
 
       case 'spotlight':
       case 'laser': {
-        // Fire-and-forget visual effects via ActionEngine
+        // 通过 ActionEngine 执行即发即弃的视觉效果
         this.actionEngine.execute(action);
         this.callbacks.onEffectFire?.({
           kind: action.type,
@@ -500,19 +499,19 @@ export class PlaybackEngine {
             ? { dimOpacity: action.dimOpacity }
             : { color: action.color }),
         } as Effect);
-        // Don't block — continue immediately
+        // 不阻塞 — 立即继续
         this.processNext();
         break;
       }
 
       case 'discussion': {
         const discussionAction = action as DiscussionAction;
-        // Check if already consumed
+        // 检查是否已消费
         if (this.consumedDiscussions.has(discussionAction.id)) {
           this.processNext();
           return;
         }
-        // Skip if the discussion's agent isn't in the user's selected list
+        // 如果讨论的智能体不在用户选择的列表中则跳过
         if (
           discussionAction.agentId &&
           this.callbacks.isAgentSelected &&
@@ -523,7 +522,7 @@ export class PlaybackEngine {
           return;
         }
 
-        // 3s delay before showing ProactiveCard (allows previous speech to finish naturally)
+        // 显示 ProactiveCard 前延迟 3 秒（让前面的语音自然结束）
         const trigger: TriggerEvent = {
           id: discussionAction.id,
           question: discussionAction.topic,
@@ -533,10 +532,10 @@ export class PlaybackEngine {
 
         this.triggerDelayTimer = setTimeout(() => {
           this.triggerDelayTimer = null;
-          if (this.mode !== 'playing') return; // Cancelled if user paused/stopped
+          if (this.mode !== 'playing') return; // 如果用户暂停/停止则取消
           this.currentTrigger = trigger;
           this.callbacks.onProactiveShow?.(trigger);
-          // Engine pauses here — user calls confirmDiscussion() or skipDiscussion()
+          // 引擎在此暂停 — 用户调用 confirmDiscussion() 或 skipDiscussion()
         }, 3000);
         break;
       }
@@ -551,7 +550,7 @@ export class PlaybackEngine {
       case 'wb_clear':
       case 'wb_delete':
       case 'wb_close': {
-        // Synchronous whiteboard actions — await completion, then continue
+        // 同步白板动作 — 等待完成后继续
         await this.actionEngine.execute(action);
         if (this.mode === 'playing') {
           this.processNext();
@@ -560,33 +559,33 @@ export class PlaybackEngine {
       }
 
       default:
-        // Unknown action, skip
+        // 未知动作，跳过
         this.processNext();
         break;
     }
   }
 
-  // ==================== Browser Native TTS ====================
+  // ==================== 浏览器原生 TTS ====================
 
   /**
-   * Split text into sentence-level chunks for sequential playback.
-   * Chrome has a bug where utterances >~15s are silently cut off and onend
-   * never fires, causing the engine to hang. Chunking avoids this.
+   * 将文本拆分为句子级别的分块以便顺序播放。
+   * Chrome 有一个 bug，超过约 15 秒的语音会被静默截断且 onend
+   * 永远不会触发，导致引擎挂起。分块可以避免这个问题。
    */
   private splitIntoChunks(text: string): string[] {
-    // Split on sentence-ending punctuation (Latin + CJK) and newlines
+    // 按句子结束标点（拉丁 + CJK）和换行符拆分
     const chunks = text
       .split(/(?<=[.!?。！？\n])\s*/)
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
-    // If splitting produced nothing (no punctuation), return the original text
+    // 如果拆分没有产生任何结果（没有标点），返回原始文本
     return chunks.length > 0 ? chunks : [text];
   }
 
   /**
-   * Play text using the Web Speech API (browser-native TTS).
-   * Splits text into sentence-level chunks to avoid Chrome's ~15s cutoff.
-   * Uses cancel+re-speak for pause/resume (Firefox compatibility).
+   * 使用 Web Speech API（浏览器原生 TTS）播放文本。
+   * 将文本拆分为句子级别的分块以避免 Chrome 的约 15 秒截断。
+   * 使用取消+重新朗读实现暂停/恢复（Firefox 兼容性）。
    */
   private playBrowserTTS(speechAction: SpeechAction): void {
     this.browserTTSChunks = this.splitIntoChunks(speechAction.text);
@@ -596,10 +595,10 @@ export class PlaybackEngine {
     this.playBrowserTTSChunk();
   }
 
-  /** Speak the current chunk; on completion, advance to next or finish. */
+  /** 朗读当前分块；完成后推进到下一个或结束。 */
   private async playBrowserTTSChunk(): Promise<void> {
     if (this.browserTTSChunkIndex >= this.browserTTSChunks.length) {
-      // All chunks done
+      // 所有分块完成
       this.browserTTSActive = false;
       this.browserTTSChunks = [];
       this.callbacks.onSpeechEnd?.();
@@ -611,15 +610,15 @@ export class PlaybackEngine {
     const chunkText = this.browserTTSChunks[this.browserTTSChunkIndex];
     const utterance = new SpeechSynthesisUtterance(chunkText);
 
-    // Apply settings
+    // 应用设置
     const speed = this.callbacks.getPlaybackSpeed?.() ?? 1;
     utterance.rate = (settings.ttsSpeed ?? 1) * speed;
     utterance.volume = settings.ttsMuted ? 0 : (settings.ttsVolume ?? 1);
 
-    // Ensure voices are loaded (Chrome loads them asynchronously)
+    // 确保语音已加载（Chrome 异步加载）
     const voices = await this.ensureVoicesLoaded();
 
-    // Set voice: try user's configured voice, fall back to auto-detect language
+    // 设置语音：尝试用户配置的语音，回退到自动检测语言
     let voiceFound = false;
     if (settings.ttsVoice && settings.ttsVoice !== 'default') {
       const voice = voices.find((v) => v.voiceURI === settings.ttsVoice);
@@ -630,8 +629,8 @@ export class PlaybackEngine {
       }
     }
     if (!voiceFound) {
-      // No usable voice configured — detect text language so the browser
-      // auto-selects an appropriate voice.
+      // 没有可用的已配置语音 — 检测文本语言以便浏览器
+      // 自动选择合适的语音。
       const cjkRatio =
         (chunkText.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length / chunkText.length;
       utterance.lang = cjkRatio > CJK_LANG_THRESHOLD ? 'zh-CN' : 'en-US';
@@ -640,29 +639,29 @@ export class PlaybackEngine {
     utterance.onend = () => {
       this.browserTTSChunkIndex++;
       if (this.mode === 'playing') {
-        this.playBrowserTTSChunk(); // next chunk
+        this.playBrowserTTSChunk(); // 下一个分块
       }
     };
 
     utterance.onerror = (event) => {
-      // 'canceled' is expected when stop/pause is called — not a real error
+      // 'canceled' 是调用 stop/pause 时的预期行为 — 不是真正的错误
       if (event.error !== 'canceled') {
         log.warn('Browser TTS chunk error:', event.error);
-        // Skip failed chunk, try next
+        // 跳过失败的分块，尝试下一个
         this.browserTTSChunkIndex++;
         if (this.mode === 'playing') {
           this.playBrowserTTSChunk();
         }
       }
-      // On 'canceled': do nothing — pause handler already saved state
+      // 对于 'canceled'：什么也不做 — 暂停处理器已保存状态
     };
 
     window.speechSynthesis.speak(utterance);
   }
 
   /**
-   * Wait for speechSynthesis voices to load (Chrome loads them asynchronously).
-   * Caches result so subsequent calls return immediately.
+   * 等待 speechSynthesis 语音加载（Chrome 异步加载）。
+   * 缓存结果以便后续调用立即返回。
    */
   private cachedVoices: SpeechSynthesisVoice[] | null = null;
   private async ensureVoicesLoaded(): Promise<SpeechSynthesisVoice[]> {
@@ -676,14 +675,14 @@ export class PlaybackEngine {
       return voices;
     }
 
-    // Chrome: voices load asynchronously — wait for the voiceschanged event
+    // Chrome：语音异步加载 — 等待 voiceschanged 事件
     await new Promise<void>((resolve) => {
       const onVoicesChanged = () => {
         window.speechSynthesis.removeEventListener('voiceschanged', onVoicesChanged);
         resolve();
       };
       window.speechSynthesis.addEventListener('voiceschanged', onVoicesChanged);
-      // Timeout after 2s to avoid hanging
+      // 2 秒后超时以避免挂起
       setTimeout(() => {
         window.speechSynthesis.removeEventListener('voiceschanged', onVoicesChanged);
         resolve();
@@ -695,7 +694,7 @@ export class PlaybackEngine {
     return voices;
   }
 
-  /** Cancel any active browser-native TTS */
+  /** 取消任何活动的浏览器原生 TTS */
   private cancelBrowserTTS(): void {
     if (this.browserTTSActive) {
       this.browserTTSActive = false;

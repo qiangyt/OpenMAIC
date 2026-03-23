@@ -1,5 +1,5 @@
 /**
- * Shared TTS utilities used by both client-side and server-side generation.
+ * 客户端和服务器端生成共用的 TTS 工具函数。
  */
 
 import type { TTSProviderId } from './types';
@@ -8,15 +8,15 @@ import { createLogger } from '@/lib/logger';
 
 const log = createLogger('TTS');
 
-/** Provider-specific max text length limits. */
+/** 各提供商的文本最大长度限制。 */
 export const TTS_MAX_TEXT_LENGTH: Partial<Record<TTSProviderId, number>> = {
   'glm-tts': 1024,
 };
 
 /**
- * Split long text into chunks that respect sentence boundaries.
- * Tries splitting at sentence-ending punctuation first, then clause-level
- * punctuation, and finally hard-splits at maxLength as a last resort.
+ * 将长文本按句子边界拆分为块。
+ * 首先尝试在句子结束标点处拆分，然后在从句级标点处拆分，
+ * 最后作为兜底方案在 maxLength 处强制拆分。
  */
 export function splitLongSpeechText(text: string, maxLength: number): string[] {
   const normalized = text.trim();
@@ -75,9 +75,8 @@ export function splitLongSpeechText(text: string, maxLength: number): string[] {
 }
 
 /**
- * Split long speech actions into multiple shorter actions so each stays
- * within the TTS provider's text length limit. Each sub-action gets its
- * own independent audio file — no byte concatenation needed.
+ * 将长语音动作拆分为多个较短的动作，使每个动作保持在 TTS 提供商的文本长度限制内。
+ * 每个子动作获得独立的音频文件 —— 无需字节拼接。
  */
 export function splitLongSpeechActions(actions: Action[], providerId: TTSProviderId): Action[] {
   const maxLength = TTS_MAX_TEXT_LENGTH[providerId];

@@ -18,7 +18,7 @@ export interface BaseImageElementProps {
 }
 
 /**
- * Base image element component for read-only display
+ * 基础图片元素组件（只读显示）
  */
 export function BaseImageElement({ elementInfo }: BaseImageElementProps) {
   const { t } = useI18n();
@@ -27,8 +27,8 @@ export function BaseImageElement({ elementInfo }: BaseImageElementProps) {
   const { clipShape, imgPosition } = useClipImage(elementInfo);
   const { filter } = useFilter(elementInfo.filters);
 
-  // Only subscribe to media store when inside a classroom (stageId provided via context).
-  // Homepage thumbnails have no stageId context → skip store to prevent cross-course contamination.
+  // 仅在课堂内部订阅媒体 store（通过 context 提供 stageId）。
+  // 首页缩略图没有 stageId context → 跳过 store 以防止跨课程污染。
   const stageId = useMediaStageId();
   const isPlaceholder = !!stageId && isMediaPlaceholder(elementInfo.src);
   const task = useMediaGenerationStore((s) => {
@@ -40,7 +40,7 @@ export function BaseImageElement({ elementInfo }: BaseImageElementProps) {
   });
 
   const imageGenerationEnabled = useSettingsStore((s) => s.imageGenerationEnabled);
-  // Resolve actual src: use objectUrl from store if available, otherwise original src
+  // 解析实际 src：如果 store 中有 objectUrl 则使用，否则使用原始 src
   const resolvedSrc = task?.status === 'done' && task.objectUrl ? task.objectUrl : elementInfo.src;
   const showDisabled = isPlaceholder && !task && !imageGenerationEnabled;
   const showSkeleton =

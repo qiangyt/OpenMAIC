@@ -1,6 +1,6 @@
 /**
- * Standalone scene building and element normalization.
- * Does NOT depend on store — returns complete Scene objects.
+ * 独立的场景构建和元素规范化。
+ * 不依赖 store — 返回完整的 Scene 对象。
  */
 
 import { nanoid } from 'nanoid';
@@ -24,17 +24,17 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('Generation');
 
 /**
- * Replace sequential gen_img_N / gen_vid_N IDs in outlines with globally unique IDs.
+ * 将大纲中的顺序 gen_img_N / gen_vid_N ID 替换为全局唯一 ID。
  *
- * The LLM generates sequential placeholder IDs (gen_img_1, gen_img_2, ...) which are
- * only unique within a single course. Since the media store uses elementId as key
- * without stageId scoping, identical IDs across different courses cause thumbnail
- * contamination on the homepage. Using nanoid-based IDs ensures global uniqueness.
+ * LLM 生成的顺序占位符 ID（gen_img_1、gen_img_2...）仅在
+ * 单个课程内唯一。由于媒体存储使用 elementId 作为键
+ * 而没有 stageId 作用域，不同课程间的相同 ID 会导致
+ * 首页上的缩略图污染。使用基于 nanoid 的 ID 可确保全局唯一性。
  */
 export function uniquifyMediaElementIds(outlines: SceneOutline[]): SceneOutline[] {
   const idMap = new Map<string, string>();
 
-  // First pass: collect all sequential media IDs and assign unique replacements
+  // 第一遍: 收集所有顺序媒体 ID 并分配唯一替换
   for (const outline of outlines) {
     if (!outline.mediaGenerations) continue;
     for (const mg of outline.mediaGenerations) {
@@ -47,7 +47,7 @@ export function uniquifyMediaElementIds(outlines: SceneOutline[]): SceneOutline[
 
   if (idMap.size === 0) return outlines;
 
-  // Second pass: replace IDs in mediaGenerations
+  // 第二遍: 替换 mediaGenerations 中的 ID
   return outlines.map((outline) => {
     if (!outline.mediaGenerations) return outline;
     return {
@@ -61,8 +61,8 @@ export function uniquifyMediaElementIds(outlines: SceneOutline[]): SceneOutline[
 }
 
 /**
- * Build a complete Scene object from an outline (for SSE streaming)
- * This function does NOT depend on store - it returns a complete Scene object
+ * 从大纲构建完整的 Scene 对象（用于 SSE 流式传输）
+ * 此函数不依赖 store - 它返回完整的 Scene 对象
  */
 export async function buildSceneFromOutline(
   outline: SceneOutline,
@@ -77,10 +77,10 @@ export async function buildSceneFromOutline(
   onPhaseChange?: (phase: 'content' | 'actions') => void,
   userProfile?: string,
 ): Promise<Scene | null> {
-  // Apply type fallbacks
+  // 应用类型回退
   outline = applyOutlineFallbacks(outline, !!languageModel);
 
-  // Step 1: Generate content (with images if available)
+  // 步骤 1: 生成内容（如果有可用图片）
   onPhaseChange?.('content');
   log.debug(`Step 1: Generating content for: ${outline.title}`);
   if (assignedImages && assignedImages.length > 0) {
@@ -106,18 +106,18 @@ export async function buildSceneFromOutline(
     return null;
   }
 
-  // Step 2: Generate Actions
+  // 步骤 2: 生成动作
   onPhaseChange?.('actions');
   log.debug(`Step 2: Generating actions for: ${outline.title}`);
   const actions = await generateSceneActions(outline, content, aiCall, ctx, agents, userProfile);
   log.debug(`Generated ${actions.length} actions for: ${outline.title}`);
 
-  // Build complete Scene object
+  // 构建完整的 Scene 对象
   return buildCompleteScene(outline, content, actions, stageId);
 }
 
 /**
- * Build complete Scene object (without API/store)
+ * 构建完整的 Scene 对象（不使用 API/store）
  */
 export function buildCompleteScene(
   outline: SceneOutline,
@@ -132,7 +132,7 @@ export function buildCompleteScene(
   const sceneId = nanoid();
 
   if (outline.type === 'slide' && 'elements' in content) {
-    // Build Slide object
+    // 构建 Slide 对象
     const defaultTheme: SlideTheme = {
       backgroundColor: '#ffffff',
       themeColors: ['#5b9bd5', '#ed7d31', '#a5a5a5', '#ffc000', '#4472c4'],

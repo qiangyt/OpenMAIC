@@ -31,7 +31,7 @@ export function createLogger(tag: string) {
 
     const line = formatLine(level, tag, args);
 
-    // Console output
+    // 控制台输出
     const fn =
       level === 'debug'
         ? console.debug

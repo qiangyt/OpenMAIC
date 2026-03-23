@@ -20,8 +20,8 @@ export interface TextElementProps {
 }
 
 /**
- * Editable text element component
- * Includes auto-height adjustment and empty text cleanup
+ * 可编辑文本元素组件
+ * 包含自动高度调整和空文本清理功能
  */
 export function TextElement({ elementInfo, selectElement }: TextElementProps) {
   const handleElementId = useCanvasStore.use.handleElementId();
@@ -41,10 +41,10 @@ export function TextElement({ elementInfo, selectElement }: TextElementProps) {
     selectElement?.(e, elementInfo, canMove);
   };
 
-  // Check if element is being handled
+  // 检查元素是否正在被操作
   const isHandleElement = handleElementId === elementInfo.id;
 
-  // Update element height/width when scaling ends
+  // 缩放结束时更新元素高度/宽度
   useEffect(() => {
     if (handleElementId !== elementInfo.id) return;
 
@@ -54,7 +54,7 @@ export function TextElement({ elementInfo, selectElement }: TextElementProps) {
           id: elementInfo.id,
           props: { height: realHeightCache },
         });
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM measurement requires effect
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM 测量需要在 effect 中进行
         setRealHeightCache(-1);
       }
       if (elementInfo.vertical && realWidthCache !== -1) {
@@ -76,7 +76,7 @@ export function TextElement({ elementInfo, selectElement }: TextElementProps) {
     updateElement,
   ]);
 
-  // Monitor text element size changes
+  // 监听文本元素尺寸变化
   const updateTextElementHeight = useCallback(
     (entries: ResizeObserverEntry[]) => {
       const contentRect = entries[0].contentRect;
@@ -116,7 +116,7 @@ export function TextElement({ elementInfo, selectElement }: TextElementProps) {
     ],
   );
 
-  // ResizeObserver setup
+  // ResizeObserver 设置
   useEffect(() => {
     const el = elementRef.current;
     const resizeObserver = new ResizeObserver(updateTextElementHeight);
@@ -130,7 +130,7 @@ export function TextElement({ elementInfo, selectElement }: TextElementProps) {
     };
   }, [updateTextElementHeight]);
 
-  // Update content
+  // 更新内容
   const updateContent = useCallback(
     (content: string, ignore = false) => {
       updateElement({
@@ -143,7 +143,7 @@ export function TextElement({ elementInfo, selectElement }: TextElementProps) {
     [elementInfo.id, updateElement, addHistorySnapshot],
   );
 
-  // Check and delete empty text
+  // 检查并删除空文本
   const checkEmptyText = useCallback(() => {
     const debouncedCheck = debounce(
       () => {
@@ -156,7 +156,7 @@ export function TextElement({ elementInfo, selectElement }: TextElementProps) {
     debouncedCheck();
   }, [elementInfo.content, elementInfo.id, deleteElement]);
 
-  // Check empty text when element is no longer handled
+  // 当元素不再被操作时检查空文本
   useEffect(() => {
     if (!isHandleElement) {
       checkEmptyText();
@@ -215,7 +215,7 @@ export function TextElement({ elementInfo, selectElement }: TextElementProps) {
             />
           </div>
 
-          {/* Drag handlers for better interaction when text overflows */}
+          {/* 拖拽手柄，用于文本溢出时更好的交互 */}
           <div className="drag-handler top absolute left-0 right-0 h-[10px] top-0" />
           <div className="drag-handler bottom absolute left-0 right-0 h-[10px] bottom-0" />
         </div>

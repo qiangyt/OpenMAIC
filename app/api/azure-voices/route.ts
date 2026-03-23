@@ -7,8 +7,8 @@ const log = createLogger('Azure Voices');
 export const maxDuration = 30;
 
 /**
- * Azure TTS Voice List API
- * Fetches available voices from Azure Speech Services
+ * Azure TTS 语音列表 API
+ * 从 Azure 语音服务获取可用语音列表
  */
 export async function POST(req: NextRequest) {
   try {
@@ -22,13 +22,13 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Base URL is required');
     }
 
-    // Validate baseUrl against SSRF
+    // 验证 baseUrl 以防止 SSRF 攻击
     const ssrfError = validateUrlForSSRF(baseUrl);
     if (ssrfError) {
       return apiError('INVALID_URL', 403, ssrfError);
     }
 
-    // Call Azure voices list endpoint; disable redirect following to prevent SSRF via redirect
+    // 调用 Azure 语音列表端点；禁用重定向跟随以防止通过重定向进行 SSRF 攻击
     const response = await fetch(`${baseUrl}/cognitiveservices/voices/list`, {
       method: 'GET',
       headers: {

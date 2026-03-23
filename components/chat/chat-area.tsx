@@ -105,8 +105,8 @@ export const ChatArea = forwardRef<ChatAreaRef, ChatAreaProps>(
     const [isDragging, setIsDragging] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
 
-    // Derive lecture notes directly from scenes — updates reactively as scenes stream in
-    // Preserves action order so spotlight/laser badges appear inline between speech texts
+    // 直接从场景派生课程笔记 —— 随场景流式输入响应式更新
+    // 保留动作顺序，使聚光灯/激光笔标签内联显示在语音文本之间
     const lectureNotes: LectureNoteEntry[] = useMemo(
       () =>
         scenes
@@ -143,16 +143,16 @@ export const ChatArea = forwardRef<ChatAreaRef, ChatAreaProps>(
       [scenes],
     );
 
-    // Filter out lecture sessions for the Chat tab
+    // 过滤掉 Chat 标签页中的课程会话
     const chatSessions = useMemo(() => sessions.filter((s) => s.type !== 'lecture'), [sessions]);
 
-    // Whether there's an active discussion/QA session (for amber dot on Chat tab)
+    // 是否有活动的讨论/问答会话（用于 Chat 标签页上的琥珀色圆点）
     const hasActiveChatSession = useMemo(
       () => chatSessions.some((s) => s.status === 'active'),
       [chatSessions],
     );
 
-    // Wrap endSession for QA/Discussion: also notify parent for engine cleanup
+    // 为问答/讨论包装 endSession：同时通知父组件进行引擎清理
     const handleEndSession = useCallback(
       async (sessionId: string) => {
         await endSession(sessionId);
@@ -183,7 +183,7 @@ export const ChatArea = forwardRef<ChatAreaRef, ChatAreaProps>(
       switchToTab,
     }));
 
-    // Drag-to-resize
+    // 拖拽调整大小
     const handleDragStart = useCallback(
       (e: React.MouseEvent) => {
         e.preventDefault();
@@ -228,7 +228,7 @@ export const ChatArea = forwardRef<ChatAreaRef, ChatAreaProps>(
           className,
         )}
       >
-        {/* Drag handle */}
+        {/* 拖拽手柄 */}
         {!collapsed && (
           <div
             onMouseDown={handleDragStart}
@@ -244,7 +244,7 @@ export const ChatArea = forwardRef<ChatAreaRef, ChatAreaProps>(
             onValueChange={(v) => setActiveTab(v as 'lecture' | 'chat')}
             className="flex flex-col h-full gap-0"
           >
-            {/* Tab header row */}
+            {/* 标签页头部行 */}
             <div className="h-10 flex items-center gap-1 shrink-0 mt-3 mb-1 px-3">
               <TabsList variant="line" className="h-full flex-1 w-0">
                 <TabsTrigger value="lecture" className="text-xs gap-1 flex-1">
@@ -254,7 +254,7 @@ export const ChatArea = forwardRef<ChatAreaRef, ChatAreaProps>(
                 <TabsTrigger value="chat" className="text-xs gap-1 flex-1 relative">
                   <MessageSquare className="w-3.5 h-3.5" />
                   {t('chat.tabs.chat')}
-                  {/* Amber pulse dot when there's an active chat session and user is on Notes tab */}
+                  {/* 当有活动的聊天会话且用户在笔记标签页时显示琥珀色脉冲圆点 */}
                   {hasActiveChatSession && activeTab === 'lecture' && (
                     <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
@@ -274,12 +274,12 @@ export const ChatArea = forwardRef<ChatAreaRef, ChatAreaProps>(
               )}
             </div>
 
-            {/* Notes Tab */}
+            {/* 笔记标签页 */}
             <TabsContent value="lecture" className="flex-1 overflow-hidden flex flex-col">
               <LectureNotesView notes={lectureNotes} currentSceneId={currentSceneId} />
             </TabsContent>
 
-            {/* Chat Tab */}
+            {/* 聊天标签页 */}
             <TabsContent value="chat" className="flex-1 overflow-hidden flex flex-col">
               <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-2 scrollbar-hide">
                 {chatSessions.length === 0 ? (

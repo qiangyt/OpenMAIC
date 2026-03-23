@@ -1,16 +1,16 @@
 /**
- * Seedream (ByteDance / Doubao / Ark) Image Generation Adapter
+ * Seedream（字节跳动 / 豆包 / 方舟）图像生成适配器
  *
- * Uses OpenAI-compatible synchronous API format.
- * Endpoint: https://ark.cn-beijing.volces.com/api/v3/images/generations
+ * 使用 OpenAI 兼容的同步 API 格式。
+ * 端点：https://ark.cn-beijing.volces.com/api/v3/images/generations
  *
- * Supported models:
- * - doubao-seedream-5-0-260128  (latest / Lite, text2img + img2img + multi-ref + group)
+ * 支持的模型：
+ * - doubao-seedream-5-0-260128（最新 / Lite，text2img + img2img + multi-ref + group）
  * - doubao-seedream-4-5-251128
  * - doubao-seedream-4-0-250828
  * - doubao-seedream-3-0-t2i-250415
  *
- * API docs: https://www.volcengine.com/docs/6791/1399028
+ * API 文档：https://www.volcengine.com/docs/6791/1399028
  */
 
 import type {
@@ -23,36 +23,36 @@ const DEFAULT_MODEL = 'doubao-seedream-5-0-260128';
 const DEFAULT_BASE_URL = 'https://ark.cn-beijing.volces.com';
 
 /**
- * Map our aspect ratio + size to Seedream size format "WxH".
- * Seedream requires minimum 3,686,400 pixels total.
- * Common sizes: 2048x2048 (2K), 2560x1440 (16:9), 1920x1920.
+ * 将我们的宽高比 + 尺寸映射到 Seedream 尺寸格式 "WxH"。
+ * Seedream 要求最少 3,686,400 像素。
+ * 常用尺寸：2048x2048 (2K)、2560x1440 (16:9)、1920x1920。
  */
 function resolveSeedreamSize(options: ImageGenerationOptions): string {
   if (options.width && options.height) {
-    // Ensure minimum pixel count (3,686,400)
+    // 确保最小像素数（3,686,400）
     const pixels = options.width * options.height;
     if (pixels < 3_686_400) {
-      // Scale up proportionally
+      // 按比例放大
       const scale = Math.ceil(Math.sqrt(3_686_400 / pixels));
       return `${options.width * scale}x${options.height * scale}`;
     }
     return `${options.width}x${options.height}`;
   }
-  // Default to 2K for quality
+  // 默认使用 2K 以保证质量
   return '2K';
 }
 
 /**
- * Lightweight connectivity test — validates API key by making a minimal
- * request that triggers auth check. 401/403 means key invalid.
+ * 轻量级连接测试 —— 通过发送最小请求验证 API 密钥以触发认证检查。
+ * 401/403 表示密钥无效。
  */
 export async function testSeedreamConnectivity(
   config: ImageGenerationConfig,
 ): Promise<{ success: boolean; message: string }> {
   const baseUrl = config.baseUrl || DEFAULT_BASE_URL;
   try {
-    // Send a request with empty prompt — auth failure (401/403) means bad key,
-    // any other error (400) means key is valid but request is intentionally bad
+    // 发送空提示词请求 —— 认证失败（401/403）表示密钥无效，
+    // 任何其他错误（400）表示密钥有效但请求故意错误
     const response = await fetch(`${baseUrl}/api/v3/images/generations`, {
       method: 'POST',
       headers: {
@@ -105,7 +105,7 @@ export async function generateWithSeedream(
 
   const data = await response.json();
 
-  // OpenAI-compatible response format: { data: [{ url, b64_json, ... }] }
+  // OpenAI 兼容的响应格式：{ data: [{ url, b64_json, ... }] }
   const imageData = data.data?.[0];
   if (!imageData) {
     throw new Error('Seedream returned empty response');

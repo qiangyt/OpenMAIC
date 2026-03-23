@@ -13,7 +13,7 @@ interface PBLRoleSelectionProps {
 export function PBLRoleSelection({ projectInfo, agents, onSelectRole }: PBLRoleSelectionProps) {
   const { t } = useI18n();
 
-  // Only show non-system development roles
+  // 只显示非系统的开发角色
   const selectableAgents = agents.filter(
     (a) => !a.is_system_agent && a.role_division === 'development',
   );
@@ -21,13 +21,13 @@ export function PBLRoleSelection({ projectInfo, agents, onSelectRole }: PBLRoleS
   return (
     <div className="flex flex-col items-center h-full overflow-y-auto p-8 bg-gradient-to-b from-background to-muted/30">
       <div className="max-w-2xl w-full space-y-8 my-auto">
-        {/* Project Info */}
+        {/* 项目信息 */}
         <div className="text-center space-y-3">
           <h1 className="text-3xl font-bold tracking-tight">{projectInfo.title}</h1>
           <p className="text-muted-foreground text-lg">{projectInfo.description}</p>
         </div>
 
-        {/* Role Selection */}
+        {/* 角色选择 */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-center">{t('pbl.roleSelection.title')}</h2>
           <p className="text-sm text-muted-foreground text-center">
@@ -55,7 +55,7 @@ export function PBLRoleSelection({ projectInfo, agents, onSelectRole }: PBLRoleS
           </div>
         </div>
 
-        {/* How it works guide */}
+        {/* 使用指南 */}
         <PBLGuideInline />
       </div>
     </div>

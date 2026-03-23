@@ -1,9 +1,9 @@
 /**
- * Scene Content Generation API
+ * 场景内容生成 API
  *
- * Generates scene content (slides/quiz/interactive/pbl) from an outline.
- * This is the first half of the two-step scene generation pipeline.
- * Does NOT generate actions — use /api/generate/scene-actions for that.
+ * 从大纲生成场景内容（幻灯片/测验/互动/PBL）。
+ * 这是两步场景生成流水线的第一步。
+ * 不生成动作 — 请使用 /api/generate/scene-actions。
  */
 
 import { NextRequest } from 'next/server';
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       agents?: AgentInfo[];
     };
 
-    // Validate required fields
+    // 验证必填字段
     if (!rawOutline) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'outline is required');
     }
@@ -64,19 +64,19 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'stageId is required');
     }
 
-    // Ensure outline has language from stageInfo (fallback for older outlines)
+    // 确保大纲具有来自 stageInfo 的语言（旧版大纲的回退）
     const outline: SceneOutline = {
       ...rawOutline,
       language: rawOutline.language || (stageInfo?.language as 'zh-CN' | 'en-US') || 'zh-CN',
     };
 
-    // ── Model resolution from request headers ──
+    // ── 从请求 headers 解析模型 ──
     const { model: languageModel, modelInfo, modelString } = resolveModelFromHeaders(req);
 
-    // Detect vision capability
+    // 检测视觉能力
     const hasVision = !!modelInfo?.capabilities?.vision;
 
-    // Vision-aware AI call function
+    // 支持视觉的 AI 调用函数
     const aiCall = async (
       systemPrompt: string,
       userPrompt: string,
@@ -111,10 +111,10 @@ export async function POST(req: NextRequest) {
       return result.text;
     };
 
-    // ── Apply fallbacks ──
+    // ── 应用回退 ──
     const effectiveOutline = applyOutlineFallbacks(outline, !!languageModel);
 
-    // ── Filter images assigned to this outline ──
+    // ── 筛选分配给此大纲的图片 ──
     let assignedImages: PdfImage[] | undefined;
     if (
       pdfImages &&
@@ -126,12 +126,12 @@ export async function POST(req: NextRequest) {
       assignedImages = pdfImages.filter((img) => suggestedIds.has(img.id));
     }
 
-    // ── Media generation is handled client-side in parallel (media-orchestrator.ts) ──
-    // The content generator receives placeholder IDs (gen_img_1, gen_vid_1) as-is.
-    // resolveImageIds() in generation-pipeline.ts will keep these placeholders in elements.
+    // ── 媒体生成在客户端并行处理 (media-orchestrator.ts) ──
+    // 内容生成器按原样接收占位符 ID（gen_img_1, gen_vid_1）。
+    // generation-pipeline.ts 中的 resolveImageIds() 将在元素中保留这些占位符。
     const generatedMediaMapping: ImageMapping = {};
 
-    // ── Generate content ──
+    // ── 生成内容 ──
     log.info(
       `Generating content: "${effectiveOutline.title}" (${effectiveOutline.type}) [model=${modelString}]`,
     );

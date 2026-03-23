@@ -2,7 +2,7 @@ import { walker } from '../walker.js'
 
 export function mmultiscripts(element, targetParent, previousSibling, nextSibling, ancestors) {
   if (element.children.length === 0) {
-    // Don't use
+    // 不使用
     return
   }
 
@@ -123,5 +123,5 @@ export function mmultiscripts(element, targetParent, previousSibling, nextSiblin
     topTarget = topPreTarget
   }
   targetParent.children.push(topTarget)
-  // Don't iterate over children in the usual way.
+  // 不要以常规方式遍历子元素。
 }

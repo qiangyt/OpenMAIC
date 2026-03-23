@@ -1,11 +1,10 @@
 /**
- * Whiteboard History Store
+ * 白板历史记录 Store
  *
- * Lightweight in-memory store that saves snapshots of whiteboard elements
- * before destructive operations (clear, replace). Allows users to browse
- * and restore previous whiteboard states.
+ * 轻量级内存存储，在破坏性操作（清除、替换）之前
+ * 保存白板元素的快照。允许用户浏览和恢复之前的白板状态。
  *
- * History is per-session (not persisted to IndexedDB) to keep things simple.
+ * 历史记录是会话级别的（不持久化到 IndexedDB），以保持简单。
  */
 
 import { create } from 'zustand';
@@ -13,32 +12,32 @@ import type { PPTElement } from '@/lib/types/slides';
 import { elementFingerprint } from '@/lib/utils/element-fingerprint';
 
 export interface WhiteboardSnapshot {
-  /** Deep copy of whiteboard elements at the time of capture */
+  /** 捕获时白板元素的深拷贝 */
   elements: PPTElement[];
-  /** Timestamp when the snapshot was taken */
+  /** 快照拍摄的时间戳 */
   timestamp: number;
-  /** Human-readable label shown in the history panel */
+  /** 在历史面板中显示的可读标签 */
   label?: string;
-  /** Cached fingerprint used for deduplication and no-op restore checks */
+  /** 缓存的指纹，用于去重和空操作恢复检查 */
   fingerprint: string;
 }
 
 interface WhiteboardHistoryState {
-  /** Stack of snapshots, newest last */
+  /** 快照栈，最新的在最后 */
   snapshots: WhiteboardSnapshot[];
-  /** Maximum number of snapshots to keep */
+  /** 保留的最大快照数量 */
   maxSnapshots: number;
-  /** elementsKey of a just-restored snapshot; used to skip auto-snapshot once */
+  /** 刚恢复的快照的 elementsKey；用于跳过一次自动快照 */
   restoredKey: string | null;
 
-  // Actions
-  /** Save a snapshot of the current whiteboard elements */
+  // 操作
+  /** 保存当前白板元素的快照 */
   pushSnapshot: (elements: PPTElement[], label?: string) => void;
-  /** Get a snapshot by index */
+  /** 根据索引获取快照 */
   getSnapshot: (index: number) => WhiteboardSnapshot | null;
-  /** Clear all history */
+  /** 清除所有历史 */
   clearHistory: () => void;
-  /** Set the restored key (elementsKey of the snapshot being restored) */
+  /** 设置恢复的键（正在恢复的快照的 elementsKey） */
   setRestoredKey: (key: string | null) => void;
 }
 
@@ -48,7 +47,7 @@ export const useWhiteboardHistoryStore = create<WhiteboardHistoryState>((set, ge
   restoredKey: null,
 
   pushSnapshot: (elements, label) => {
-    // Don't save empty snapshots
+    // 不保存空快照
     if (!elements || elements.length === 0) return;
 
     const { snapshots } = get();
@@ -58,7 +57,7 @@ export const useWhiteboardHistoryStore = create<WhiteboardHistoryState>((set, ge
     }
 
     const snapshot: WhiteboardSnapshot = {
-      elements: JSON.parse(JSON.stringify(elements)), // Deep copy
+      elements: JSON.parse(JSON.stringify(elements)), // 深拷贝
       timestamp: Date.now(),
       label,
       fingerprint: newFingerprint,
@@ -66,7 +65,7 @@ export const useWhiteboardHistoryStore = create<WhiteboardHistoryState>((set, ge
 
     set((state) => {
       const newSnapshots = [...state.snapshots, snapshot];
-      // Enforce limit: drop oldest snapshots first.
+      // 执行限制：先丢弃最旧的快照。
       if (newSnapshots.length > state.maxSnapshots) {
         return { snapshots: newSnapshots.slice(-state.maxSnapshots) };
       }

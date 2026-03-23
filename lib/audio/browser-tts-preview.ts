@@ -27,7 +27,7 @@ export function isBrowserTTSAbortError(error: unknown): boolean {
   return error instanceof Error && error.name === 'AbortError';
 }
 
-/** Wait for browser voices to load, with a 2s timeout fallback. */
+/** 等待浏览器语音加载完成，带 2 秒超时回退。 */
 export async function ensureVoicesLoaded(): Promise<SpeechSynthesisVoice[]> {
   if (typeof window === 'undefined' || !window.speechSynthesis) {
     return [];
@@ -68,7 +68,7 @@ export async function ensureVoicesLoaded(): Promise<SpeechSynthesisVoice[]> {
   });
 }
 
-/** Resolve a browser voice by voiceURI, name, or lang, with language fallback by text. */
+/** 通过 voiceURI、名称或语言解析浏览器语音，并根据文本回退到默认语言。 */
 export function resolveBrowserVoice(
   voices: SpeechSynthesisVoice[],
   voiceNameOrLang: string,
@@ -89,12 +89,11 @@ export function resolveBrowserVoice(
 }
 
 /**
- * Play a short browser-native TTS preview.
+ * 播放简短的浏览器原生 TTS 预览。
  *
- * Notes:
- * - Uses the global speechSynthesis queue, so it must cancel queued utterances
- *   before starting a new preview.
- * - Resolves only after the utterance has started and then ended successfully.
+ * 注意：
+ * - 使用全局 speechSynthesis 队列，因此在开始新的预览之前必须取消排队的语音。
+ * - 仅在语音开始并成功结束后才解析。
  */
 export function playBrowserTTSPreview(options: PlayBrowserTTSPreviewOptions): {
   promise: Promise<void>;

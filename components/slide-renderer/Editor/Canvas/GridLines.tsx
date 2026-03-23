@@ -12,16 +12,16 @@ export function GridLines() {
     (content) => content.canvas.background,
   );
 
-  // Calculate grid line color to avoid blending with background
+  // 计算网格线颜色以避免与背景混合
   const gridColor = useMemo(() => {
     const bgColor = background?.color || '#fff';
-    // Simplified version: choose black or white based on background brightness
+    // 简化版本：根据背景亮度选择黑色或白色
     const isLight = bgColor === '#fff' || bgColor.startsWith('#f') || bgColor.startsWith('#e');
     const baseColor = isLight ? '0, 0, 0' : '255, 255, 255';
     return `rgba(${baseColor}, 0.5)`;
   }, [background]);
 
-  // Grid path
+  // 网格路径
   const path = useMemo(() => {
     const maxX = viewportSize;
     const maxY = viewportSize * viewportRatio;

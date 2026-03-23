@@ -79,7 +79,7 @@ export function ShapeCreateCanvas({ onCreated }: ShapeCreateCanvasProps) {
     const { x, y } = shapeCanvasRef.current.getBoundingClientRect();
     setOffset({ x, y });
 
-    // Show instruction toast
+    // 显示提示信息
     toast.info(
       'Click to draw any shape, close the path to finish, press ESC or right-click to cancel, press ENTER to finish early',
     );

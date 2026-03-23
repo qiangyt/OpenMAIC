@@ -7,15 +7,15 @@ import { createLogger } from '@/lib/logger';
 
 const log = createLogger('StageStore');
 
-/** Virtual scene ID used when the user navigates to a page still being generated */
+/** 当用户导航到正在生成的页面时使用的虚拟场景 ID */
 export const PENDING_SCENE_ID = '__pending__';
 
-// ==================== Debounce Helper ====================
+// ==================== 防抖辅助函数 ====================
 
 /**
- * Debounce function to limit how often a function is called
- * @param func Function to debounce
- * @param delay Delay in milliseconds
+ * 防抖函数，用于限制函数调用频率
+ * @param func 要防抖的函数
+ * @param delay 延迟时间（毫秒）
  */
 function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
   func: T,
@@ -37,29 +37,29 @@ function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
 type ToolbarState = 'design' | 'ai';
 
 interface StageState {
-  // Stage info
+  // 舞台信息
   stage: Stage | null;
 
-  // Scenes
+  // 场景
   scenes: Scene[];
   currentSceneId: string | null;
 
-  // Chats
+  // 聊天
   chats: ChatSession[];
 
-  // Mode
+  // 模式
   mode: StageMode;
 
-  // UI state
+  // UI 状态
   toolbarState: ToolbarState;
 
-  // Transient generation state (not persisted)
+  // 临时生成状态（不持久化）
   generatingOutlines: SceneOutline[];
 
-  // Persisted outlines for resume-on-refresh
+  // 持久化的大纲，用于刷新后恢复
   outlines: SceneOutline[];
 
-  // Transient generation tracking (not persisted)
+  // 临时生成跟踪（不持久化）
   generationEpoch: number;
   generationStatus: 'idle' | 'generating' | 'paused' | 'completed' | 'error';
   currentGeneratingOrder: number;
@@ -84,19 +84,19 @@ interface StageState {
   clearFailedOutlines: () => void;
   retryFailedOutline: (outlineId: string) => void;
 
-  // Getters
+  // 获取器
   getCurrentScene: () => Scene | null;
   getSceneById: (sceneId: string) => Scene | null;
   getSceneIndex: (sceneId: string) => number;
 
-  // Storage
+  // 存储
   saveToStorage: () => Promise<void>;
   loadFromStorage: (stageId: string) => Promise<void>;
   clearStore: () => void;
 }
 
 const useStageStoreBase = create<StageState>()((set, get) => ({
-  // Initial state
+  // 初始状态
   stage: null,
   scenes: [],
   currentSceneId: null,
@@ -110,7 +110,7 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
   currentGeneratingOrder: -1,
   failedOutlines: [],
 
-  // Actions
+  // 操作
   setStage: (stage) => {
     set((s) => ({
       stage,
@@ -124,7 +124,7 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
 
   setScenes: (scenes) => {
     set({ scenes });
-    // Auto-select first scene if no current scene
+    // 如果没有当前场景，自动选择第一个场景
     if (!get().currentSceneId && scenes.length > 0) {
       set({ currentSceneId: scenes[0].id });
     }
@@ -133,7 +133,7 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
 
   addScene: (scene) => {
     const currentStage = get().stage;
-    // Ignore scenes from different stages (prevents race condition during generation)
+    // 忽略来自不同舞台的场景（防止生成期间的竞态条件）
     if (!currentStage || scene.stageId !== currentStage.id) {
       log.warn(
         `Ignoring scene "${scene.title}" - stageId mismatch (scene: ${scene.stageId}, current: ${currentStage?.id})`,
@@ -141,9 +141,9 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
       return;
     }
     const scenes = [...get().scenes, scene];
-    // Remove the matching outline from generatingOutlines (match by order)
+    // 从 generatingOutlines 中移除匹配的大纲（按 order 匹配）
     const generatingOutlines = get().generatingOutlines.filter((o) => o.order !== scene.order);
-    // Auto-switch from pending page to the newly generated scene
+    // 自动从待处理页面切换到新生成的场景
     const shouldSwitch = get().currentSceneId === PENDING_SCENE_ID;
     set({
       scenes,
@@ -165,7 +165,7 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
     const scenes = get().scenes.filter((scene) => scene.id !== sceneId);
     const currentSceneId = get().currentSceneId;
 
-    // If deleted scene was current, select next or previous
+    // 如果删除的场景是当前场景，选择下一个或上一个
     if (currentSceneId === sceneId) {
       const index = get().getSceneIndex(sceneId);
       const newIndex = index < scenes.length ? index : scenes.length - 1;
@@ -197,7 +197,7 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
 
   setOutlines: (outlines) => {
     set({ outlines });
-    // Persist outlines to IndexedDB
+    // 将大纲持久化到 IndexedDB
     const stageId = get().stage?.id;
     if (stageId) {
       import('@/lib/utils/database').then(({ db }) => {
@@ -231,7 +231,7 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
     });
   },
 
-  // Getters
+  // 获取器
   getCurrentScene: () => {
     const { scenes, currentSceneId } = get();
     if (!currentSceneId) return null;
@@ -246,7 +246,7 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
     return get().scenes.findIndex((s) => s.id === sceneId);
   },
 
-  // Storage methods
+  // 存储方法
   saveToStorage: async () => {
     const { stage, scenes, currentSceneId, chats } = get();
     if (!stage?.id) {
@@ -269,8 +269,8 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
 
   loadFromStorage: async (stageId: string) => {
     try {
-      // Skip IndexedDB load if the store already has this stage with scenes
-      // (e.g. navigated from generation-preview with fresh in-memory data)
+      // 如果 store 已经有此舞台及其场景，则跳过 IndexedDB 加载
+      //（例如从 generation-preview 导航时带有新的内存数据）
       const currentState = get();
       if (currentState.stage?.id === stageId && currentState.scenes.length > 0) {
         log.info('Stage already loaded in memory, skipping IndexedDB load:', stageId);
@@ -280,7 +280,7 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
       const { loadStageData } = await import('@/lib/utils/stage-storage');
       const data = await loadStageData(stageId);
 
-      // Load outlines for resume-on-refresh
+      // 加载大纲用于刷新后恢复
       const { db } = await import('@/lib/utils/database');
       const outlinesRecord = await db.stageOutlines.get(stageId);
       const outlines = outlinesRecord?.outlines || [];
@@ -292,7 +292,7 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
           currentSceneId: data.currentSceneId,
           chats: data.chats,
           outlines,
-          // Compute generatingOutlines from persisted outlines minus completed scenes
+          // 从持久化的大纲中减去已完成的场景，计算 generatingOutlines
           generatingOutlines: outlines.filter((o) => !data.scenes.some((s) => s.order === o.order)),
         });
         log.info('Loaded from storage:', stageId);
@@ -324,11 +324,11 @@ const useStageStoreBase = create<StageState>()((set, get) => ({
 
 export const useStageStore = createSelectors(useStageStoreBase);
 
-// ==================== Debounced Save ====================
+// ==================== 防抖保存 ====================
 
 /**
- * Debounced version of saveToStorage to prevent excessive writes
- * Waits 500ms after the last change before saving
+ * saveToStorage 的防抖版本，防止过多写入
+ * 在最后一次更改后等待 500ms 再保存
  */
 const debouncedSave = debounce(() => {
   useStageStore.getState().saveToStorage();

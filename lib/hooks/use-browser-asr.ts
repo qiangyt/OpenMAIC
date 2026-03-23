@@ -1,7 +1,7 @@
 /**
- * Browser Native ASR (Speech Recognition) Hook
- * Uses Web Speech API for client-side speech recognition
- * Completely free, no API key required
+ * 浏览器原生 ASR（语音识别）Hook
+ * 使用 Web Speech API 进行客户端语音识别
+ * 完全免费，无需 API 密钥
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
@@ -9,7 +9,7 @@ import { createLogger } from '@/lib/logger';
 
 const log = createLogger('BrowserASR');
 
-// Note: Window.SpeechRecognition declaration is in components/ai-elements/prompt-input.tsx
+// 注意：Window.SpeechRecognition 声明在 components/ai-elements/prompt-input.tsx 中
 
 export type ASRErrorCode =
   | 'not-supported'
@@ -42,7 +42,7 @@ export function useBrowserASR(options: UseBrowserASROptions = {}) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Web Speech API SpeechRecognition not typed
   const recognitionRef = useRef<any>(null);
 
-  // Use refs for callbacks to avoid stale closures in recognition event handlers
+  // 使用 ref 存储回调以避免识别事件处理程序中的闭包过期问题
   const onTranscriptionRef = useRef(onTranscription);
   const onErrorRef = useRef(onError);
 
@@ -51,7 +51,7 @@ export function useBrowserASR(options: UseBrowserASROptions = {}) {
     onErrorRef.current = onError;
   }, [onTranscription, onError]);
 
-  // SSR-safe support detection
+  // SSR 安全的支持检测
   const [isSupported] = useState(
     () =>
       typeof window !== 'undefined' &&
@@ -59,7 +59,7 @@ export function useBrowserASR(options: UseBrowserASROptions = {}) {
   );
 
   const startListening = useCallback(() => {
-    // Check if Speech Recognition is supported
+    // 检查是否支持语音识别
     if (
       typeof window === 'undefined' ||
       (!window.SpeechRecognition && !window.webkitSpeechRecognition)
@@ -68,7 +68,7 @@ export function useBrowserASR(options: UseBrowserASROptions = {}) {
       return;
     }
 
-    // Create Speech Recognition instance
+    // 创建语音识别实例
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
 

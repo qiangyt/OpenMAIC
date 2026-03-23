@@ -23,7 +23,7 @@ export function SpeechButton({
 }: SpeechButtonProps) {
   const { t } = useI18n();
 
-  // Ref to always call the latest onTranscription, avoiding stale closures
+  // 引用始终调用最新的 onTranscription，避免闭包过时
   const onTranscriptionRef = useRef(onTranscription);
   useEffect(() => {
     onTranscriptionRef.current = onTranscription;
@@ -74,7 +74,7 @@ export function SpeechButton({
             className,
           )}
         >
-          {/* Breathing ring when recording */}
+          {/* 录音时的呼吸环 */}
           {isRecording && (
             <span
               className="absolute inset-[-4px] rounded-[10px] border border-violet-400/40 dark:border-violet-400/25"
@@ -87,7 +87,7 @@ export function SpeechButton({
           {isProcessing ? (
             <Loader2 className={cn(iconSize, 'animate-spin')} />
           ) : isRecording ? (
-            /* Mini equalizer bars */
+            /* 迷你均衡器条形 */}
             <span className="flex items-center gap-[2.5px] relative z-10">
               {[0, 1, 2].map((i) => (
                 <span
@@ -105,7 +105,7 @@ export function SpeechButton({
             <Mic className={cn(iconSize, 'relative z-10')} />
           )}
 
-          {/* Injected keyframes */}
+          {/* 注入的关键帧 */}
           <style jsx>{`
             @keyframes speech-bar {
               0% {

@@ -1,5 +1,5 @@
 export function mglyph(element, targetParent, previousSibling, nextSibling, ancestors) {
-  // No support in omml. Output alt text.
+  // omml 不支持。输出 alt 文本。
   if (element.attribs?.alt) {
     targetParent.children.push({
       type: 'text',

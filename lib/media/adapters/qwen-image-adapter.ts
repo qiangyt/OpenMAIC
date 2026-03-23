@@ -1,14 +1,14 @@
 /**
- * Qwen Image (Alibaba Cloud / DashScope) Image Generation Adapter
+ * Qwen Image（阿里云 / DashScope）图像生成适配器
  *
- * Uses DashScope multimodal generation API (synchronous, no polling needed).
- * Endpoint: https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation
+ * 使用 DashScope 多模态生成 API（同步，无需轮询）。
+ * 端点：https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation
  *
- * Supported models:
- * - qwen-image-max     (highest quality)
- * - z-image-turbo      (fast, good quality)
+ * 支持的模型：
+ * - qwen-image-max（最高质量）
+ * - z-image-turbo（快速，质量好）
  *
- * API docs: https://help.aliyun.com/zh/model-studio/developer-reference/text-to-image
+ * API 文档：https://help.aliyun.com/zh/model-studio/developer-reference/text-to-image
  */
 
 import type {
@@ -21,8 +21,8 @@ const DEFAULT_MODEL = 'qwen-image-max';
 const DEFAULT_BASE_URL = 'https://dashscope.aliyuncs.com';
 
 /**
- * Map our width x height to DashScope size format "WxH".
- * Common sizes: 1024*1024, 1280*720, 1664*928, 1120*1440, etc.
+ * 将我们的 width x height 映射到 DashScope 的 size 格式 "WxH"。
+ * 常用尺寸：1024*1024、1280*720、1664*928、1120*1440 等。
  */
 function resolveDashScopeSize(options: ImageGenerationOptions): string {
   const w = options.width || 1024;
@@ -31,8 +31,8 @@ function resolveDashScopeSize(options: ImageGenerationOptions): string {
 }
 
 /**
- * Lightweight connectivity test — validates API key by making a minimal
- * request. 401/403 means key invalid; other errors mean key is valid.
+ * 轻量级连接测试 —— 通过发送最小请求验证 API 密钥。
+ * 401/403 表示密钥无效；其他错误表示密钥有效。
  */
 export async function testQwenImageConnectivity(
   config: ImageGenerationConfig,
@@ -109,11 +109,11 @@ export async function generateWithQwenImage(
 
   const data = await response.json();
 
-  // DashScope multimodal generation response format:
+  // DashScope 多模态生成响应格式：
   // { output: { choices: [{ message: { content: [{ image: "url" }] } }] } }
   const choices = data.output?.choices;
   if (!choices || choices.length === 0) {
-    // Check for error in response
+    // 检查响应中的错误
     if (data.code || data.message) {
       throw new Error(`Qwen Image error: ${data.code} - ${data.message}`);
     }

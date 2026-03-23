@@ -25,13 +25,13 @@ export function AgentBar() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const allAgents = listAgents();
-  // In preset mode, only show default (non-generated) agents
+  // 在预设模式下，只显示默认（非生成）的智能体
   const agents = allAgents.filter((a) => !a.isGenerated);
   const teacherAgent = agents.find((a) => a.role === 'teacher');
   const selectedAgents = agents.filter((a) => selectedAgentIds.includes(a.id));
   const nonTeacherSelected = selectedAgents.filter((a) => a.role !== 'teacher');
 
-  // Click-outside to collapse
+  // 点击外部收起
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -46,7 +46,7 @@ export function AgentBar() {
   const handleModeChange = (mode: 'preset' | 'auto') => {
     setAgentMode(mode);
     if (mode === 'preset') {
-      // Ensure a teacher is always selected in preset mode
+      // 确保在预设模式下始终选中一位教师
       const hasTeacherSelected = selectedAgentIds.some((id) => {
         const a = agents.find((agent) => agent.id === id);
         return a?.role === 'teacher';
@@ -59,7 +59,7 @@ export function AgentBar() {
 
   const toggleAgent = (agentId: string) => {
     const agent = agents.find((a) => a.id === agentId);
-    if (agent?.role === 'teacher') return; // teacher is always selected
+    if (agent?.role === 'teacher') return; // 教师始终被选中
     if (selectedAgentIds.includes(agentId)) {
       setSelectedAgentIds(selectedAgentIds.filter((id) => id !== agentId));
     } else {
@@ -79,10 +79,10 @@ export function AgentBar() {
     return translated !== key ? translated : agent.role;
   };
 
-  /* ── Shared avatar row — always visible on the right side ── */
+  /* ── 共享头像行 — 始终在右侧可见 ── */
   const avatarRow = (
     <div className="flex items-center gap-1.5 shrink-0">
-      {/* Teacher avatar — always shown */}
+      {/* 教师头像 — 始终显示 */}
       {teacherAgent && (
         <div className="size-8 rounded-full overflow-hidden ring-2 ring-blue-400/40 dark:ring-blue-500/30 shrink-0">
           <img
@@ -95,7 +95,7 @@ export function AgentBar() {
 
       {agentMode === 'auto' ? (
         <>
-          {/* In auto mode: show assistant avatar + shuffle indicator */}
+          {/* 在自动模式下：显示助手头像 + 随机指示器 */}
           <div className="flex -space-x-2">
             {agents.find((a) => a.role === 'assistant') && (
               <div className="size-6 rounded-full overflow-hidden ring-[1.5px] ring-background">
@@ -111,7 +111,7 @@ export function AgentBar() {
         </>
       ) : (
         <>
-          {/* In preset mode: show selected non-teacher agents */}
+          {/* 在预设模式下：显示选中的非教师智能体 */}
           {nonTeacherSelected.length > 0 && (
             <div className="flex -space-x-2">
               {nonTeacherSelected.slice(0, 4).map((agent) => (
@@ -142,7 +142,7 @@ export function AgentBar() {
 
   return (
     <div ref={containerRef} className="relative w-80">
-      {/* ── Header row — always in document flow ── */}
+      {/* ── 头部行 — 始终在文档流中 ── */}
       <Tooltip>
         <TooltipTrigger asChild>
           <button
@@ -152,15 +152,15 @@ export function AgentBar() {
             )}
             onClick={() => setOpen(!open)}
           >
-            {/* Left side — text changes based on open/close */}
+            {/* 左侧 — 文本根据展开/收起状态变化 */}
             <span className="text-xs text-muted-foreground/60 group-hover:text-muted-foreground transition-colors hidden sm:block font-medium flex-1 text-left">
               {open ? t('agentBar.expandedTitle') : t('agentBar.readyToLearn')}
             </span>
 
-            {/* Right side — avatars always visible */}
+            {/* 右侧 — 头像始终可见 */}
             {avatarRow}
 
-            {/* Chevron */}
+            {/* 箭头图标 */}
             {open ? (
               <ChevronUp className="size-3 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
             ) : (
@@ -175,7 +175,7 @@ export function AgentBar() {
         )}
       </Tooltip>
 
-      {/* ── Expanded panel (absolute, floating below the header) ── */}
+      {/* ── 展开面板（绝对定位，浮动在头部下方） ── */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -186,7 +186,7 @@ export function AgentBar() {
             className="absolute right-0 top-full mt-1 z-50 w-80"
           >
             <div className="rounded-2xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06] shadow-[0_1px_8px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_8px_-2px_rgba(0,0,0,0.3)] px-2.5 py-2">
-              {/* Mode tabs — full width, 50/50 */}
+              {/* 模式标签页 — 全宽，50/50 */}
               <div className="flex rounded-lg border bg-muted/30 p-0.5 mb-2.5">
                 <button
                   onClick={() => handleModeChange('preset')}
@@ -214,7 +214,7 @@ export function AgentBar() {
               </div>
 
               {agentMode === 'preset' ? (
-                /* Agent list — teacher is always selected, no need to show */
+                /* 智能体列表 — 教师始终被选中，无需显示 */
                 <div className="max-h-72 overflow-y-auto -mx-1">
                   {agents
                     .filter((a) => a.role !== 'teacher')
@@ -264,15 +264,15 @@ export function AgentBar() {
                     })}
                 </div>
               ) : (
-                /* Auto-generate mode */
+                /* 自动生成模式 */
                 <div className="flex flex-col items-center pt-6 pb-2 gap-8">
-                  {/* Shuffle icon with ambient animation */}
+                  {/* 随机图标带环境动画 */}
                   <div className="relative flex items-center justify-center">
-                    {/* Ping ripple */}
+                    {/* 脉冲涟漪 */}
                     <div className="absolute size-12 rounded-full bg-violet-400/10 dark:bg-violet-400/15 animate-ping [animation-duration:3s]" />
-                    {/* Soft glow ring */}
+                    {/* 柔和发光环 */}
                     <div className="absolute size-14 rounded-full bg-violet-400/5 dark:bg-violet-400/10 animate-pulse [animation-duration:2.5s]" />
-                    {/* Icon */}
+                    {/* 图标 */}
                     <Shuffle className="relative size-7 text-violet-400 dark:text-violet-500" />
                   </div>
                   <p className="text-xs text-muted-foreground text-center">
@@ -281,7 +281,7 @@ export function AgentBar() {
                 </div>
               )}
 
-              {/* Max turns — always visible */}
+              {/* 最大轮数 — 始终可见 */}
               <div className="pt-2.5 mt-2.5 border-t flex items-center gap-3">
                 <span className="text-xs text-muted-foreground shrink-0">
                   {t('settings.maxTurns')}

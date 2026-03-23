@@ -2,9 +2,9 @@ import type { PPTElement } from '@/lib/types/slides';
 
 export function useOrderElement() {
   /**
-   * Get the z-order range of grouped elements
-   * @param elementList All elements on the page
-   * @param combineElementList Grouped elements list
+   * 获取分组元素的 z 轴顺序范围
+   * @param elementList 页面上的所有元素
+   * @param combineElementList 分组元素列表
    */
   const getCombineElementLevelRange = (
     elementList: PPTElement[],
@@ -19,22 +19,22 @@ export function useOrderElement() {
   };
 
   /**
-   * Move up one layer
-   * @param elementList All elements on the page
-   * @param element The element being operated on
+   * 上移一层
+   * @param elementList 页面上的所有元素
+   * @param element 正在操作的元素
    */
   const moveUpElement = (elementList: PPTElement[], element: PPTElement) => {
     const copyOfElementList: PPTElement[] = JSON.parse(JSON.stringify(elementList));
 
-    // If the element is a group member, all group members must be moved together
+    // 如果元素是分组成员，所有分组成员必须一起移动
     if (element.groupId) {
-      // Get all group members and their z-order range
+      // 获取所有分组成员及其 z 轴顺序范围
       const combineElementList = copyOfElementList.filter(
         (_element) => _element.groupId === element.groupId,
       );
       const { minLevel, maxLevel } = getCombineElementLevelRange(elementList, combineElementList);
 
-      // Already at the top level, cannot move further
+      // 已在顶层，无法继续移动
       const nextElement = copyOfElementList[maxLevel + 1];
       const movedElementList = copyOfElementList.splice(minLevel, combineElementList.length);
 
@@ -46,17 +46,17 @@ export function useOrderElement() {
       } else copyOfElementList.splice(minLevel + 1, 0, ...movedElementList);
     }
 
-    // If the element is not a group member
+    // 如果元素不是分组成员
     else {
-      // Get the element's z-level in the list
+      // 获取元素在列表中的 z 轴层级
       const level = elementList.findIndex((item) => item.id === element.id);
 
-      // Already at the top level, cannot move further
+      // 已在顶层，无法继续移动
       if (level === elementList.length - 1) return;
 
-      // Get the element above, remove this element from the list (cache removed element).
-      // If the above element is in a group, insert above that group.
-      // If the above element is not in any group, insert above that element.
+      // 获取上方的元素，从列表中移除此元素（缓存移除的元素）。
+      // 如果上方元素在分组中，插入到该分组上方。
+      // 如果上方元素不在任何分组中，插入到该元素上方。
       const nextElement = copyOfElementList[level + 1];
       const [movedElement] = copyOfElementList.splice(level, 1);
       if (nextElement.groupId) {
@@ -71,9 +71,9 @@ export function useOrderElement() {
   };
 
   /**
-   * Move down one layer, same approach as move up
-   * @param elementList All elements on the page
-   * @param element The element being operated on
+   * 下移一层，与上移方法相同
+   * @param elementList 页面上的所有元素
+   * @param element 正在操作的元素
    */
   const moveDownElement = (elementList: PPTElement[], element: PPTElement) => {
     const copyOfElementList: PPTElement[] = JSON.parse(JSON.stringify(elementList));
@@ -113,38 +113,38 @@ export function useOrderElement() {
   };
 
   /**
-   * Bring to front
-   * @param elementList All elements on the page
-   * @param element The element being operated on
+   * 置于顶层
+   * @param elementList 页面上的所有元素
+   * @param element 正在操作的元素
    */
   const moveTopElement = (elementList: PPTElement[], element: PPTElement) => {
     const copyOfElementList: PPTElement[] = JSON.parse(JSON.stringify(elementList));
 
-    // If the element is a group member, all group members must be moved together
+    // 如果元素是分组成员，所有分组成员必须一起移动
     if (element.groupId) {
-      // Get all group members and their z-order range
+      // 获取所有分组成员及其 z 轴顺序范围
       const combineElementList = copyOfElementList.filter(
         (_element) => _element.groupId === element.groupId,
       );
       const { minLevel, maxLevel } = getCombineElementLevelRange(elementList, combineElementList);
 
-      // Already at the top level, cannot move further
+      // 已在顶层，无法继续移动
       if (maxLevel === elementList.length - 1) return null;
 
-      // Remove the group from the list, then append removed elements to the top
+      // 从列表中移除分组，然后将移除的元素追加到顶部
       const movedElementList = copyOfElementList.splice(minLevel, combineElementList.length);
       copyOfElementList.push(...movedElementList);
     }
 
-    // If the element is not a group member
+    // 如果元素不是分组成员
     else {
-      // Get the element's z-level in the list
+      // 获取元素在列表中的 z 轴层级
       const level = elementList.findIndex((item) => item.id === element.id);
 
-      // Already at the top level, cannot move further
+      // 已在顶层，无法继续移动
       if (level === elementList.length - 1) return null;
 
-      // Remove the element from the list, then append it to the top
+      // 从列表中移除元素，然后将其追加到顶部
       copyOfElementList.splice(level, 1);
       copyOfElementList.push(element);
     }
@@ -153,9 +153,9 @@ export function useOrderElement() {
   };
 
   /**
-   * Send to back, same approach as bring to front
-   * @param elementList All elements on the page
-   * @param element The element being operated on
+   * 置于底层，与置于顶层方法相同
+   * @param elementList 页面上的所有元素
+   * @param element 正在操作的元素
    */
   const moveBottomElement = (elementList: PPTElement[], element: PPTElement) => {
     const copyOfElementList: PPTElement[] = JSON.parse(JSON.stringify(elementList));

@@ -56,9 +56,9 @@ export function CanvasArea({
   const handleSlideClick = useCallback(
     (e: React.MouseEvent) => {
       if (!showControls || isLiveSession || currentScene?.type !== 'slide') return;
-      // Don't trigger page play/pause when clicking inside a video element's visual area.
-      // Video elements may be visually covered by other slide elements (e.g. text),
-      // so we check click coordinates against all video element bounding rects.
+      // 当点击视频元素的视觉区域时，不要触发页面播放/暂停。
+      // 视频元素可能在视觉上被其他幻灯片元素（如文本）覆盖，
+      // 因此我们检查点击坐标是否在所有视频元素的边界矩形内。
       const container = e.currentTarget as HTMLElement;
       const videoEls = container.querySelectorAll('[data-video-element]');
       for (const el of videoEls) {
@@ -79,7 +79,7 @@ export function CanvasArea({
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-50 dark:bg-gray-900 group/canvas">
-      {/* Slide area — takes remaining space */}
+      {/* 幻灯片区域 — 占据剩余空间 */}
       <div
         className={cn(
           'flex-1 min-h-0 relative overflow-hidden flex items-center justify-center p-2 transition-colors duration-500',
@@ -98,14 +98,14 @@ export function CanvasArea({
           )}
           onClick={handleSlideClick}
         >
-          {/* Whiteboard Layer */}
+          {/* 白板层 */}
           <div className="absolute inset-0 z-[110] pointer-events-none">
             <SceneProvider>
               <Whiteboard isOpen={whiteboardOpen} onClose={onWhiteboardClose} />
             </SceneProvider>
           </div>
 
-          {/* Scene Content */}
+          {/* 场景内容 */}
           {currentScene && !whiteboardOpen && (
             <div className="absolute inset-0">
               <SceneProvider>
@@ -114,7 +114,7 @@ export function CanvasArea({
             </div>
           )}
 
-          {/* Pending Scene Loading Overlay */}
+          {/* 待处理场景加载遮罩 */}
           <AnimatePresence>
             {isPendingScene && !currentScene && (
               <motion.div
@@ -155,12 +155,12 @@ export function CanvasArea({
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-4">
-                    {/* Spinner */}
+                    {/* 加载动画 */}
                     <div className="relative w-12 h-12">
                       <div className="absolute inset-0 rounded-full border-2 border-gray-100 dark:border-gray-700" />
                       <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-purple-500 dark:border-t-purple-400 animate-spin" />
                     </div>
-                    {/* Text */}
+                    {/* 文本 */}
                     <motion.span
                       initial={{ opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -175,14 +175,14 @@ export function CanvasArea({
             )}
           </AnimatePresence>
 
-          {/* Scene Number Badge */}
+          {/* 场景编号徽章 */}
           {currentScene && (
             <div className="absolute top-4 right-4 text-gray-200 dark:text-gray-700 font-black text-4xl opacity-50 pointer-events-none select-none mix-blend-multiply dark:mix-blend-screen">
               {(currentSceneIndex + 1).toString().padStart(2, '0')}
             </div>
           )}
 
-          {/* Play hint — breathing button when idle or paused (slides only) */}
+          {/* 播放提示 — 空闲或暂停时的呼吸按钮（仅限幻灯片） */}
           <AnimatePresence>
             {showPlayHint && (
               <motion.div
@@ -225,7 +225,7 @@ export function CanvasArea({
         </div>
       </div>
 
-      {/* ── Canvas Toolbar — in document flow, only when not merged into roundtable ── */}
+      {/* ── 画布工具栏 — 在文档流中，仅在未合并到圆桌时显示 ── */}
       {!hideToolbar && (
         <CanvasToolbar
           className={cn(

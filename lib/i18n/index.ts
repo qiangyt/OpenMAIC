@@ -44,7 +44,7 @@ export function getClientTranslation(key: string): string {
         locale = storedLocale;
       }
     } catch {
-      // localStorage unavailable, keep default locale
+      // localStorage 不可用，保持默认语言
     }
   }
 

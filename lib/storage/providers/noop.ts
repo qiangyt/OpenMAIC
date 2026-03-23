@@ -1,6 +1,6 @@
 import type { StorageProvider, StorageType } from '../types';
 
-/** No-op provider used when no external storage is configured. */
+/** 未配置外部存储时使用的空操作提供者。 */
 export class NoopStorageProvider implements StorageProvider {
   async upload(): Promise<string> {
     return '';

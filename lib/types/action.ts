@@ -1,15 +1,15 @@
 /**
- * Unified Action System
+ * 统一动作系统
  *
- * Actions are the sole mechanism for agents to interact with the presentation.
- * Two categories:
- * - Fire-and-forget: visual effects on slides (spotlight, laser)
- * - Synchronous: must wait for completion before next action (speech, whiteboard, discussion)
+ * 动作是智能体与演示文稿交互的唯一机制。
+ * 分为两类：
+ * - 即发即弃：幻灯片上的视觉效果（聚光灯、激光笔）
+ * - 同步：必须等待完成才能执行下一个动作（语音、白板、讨论）
  *
- * Both online (streaming) and offline (playback) paths consume the same Action types.
+ * 在线（流式）和离线（回放）路径都使用相同的 Action 类型。
  */
 
-// ==================== Base ====================
+// ==================== 基础 ====================
 
 export interface ActionBase {
   id: string;
@@ -17,53 +17,53 @@ export interface ActionBase {
   description?: string;
 }
 
-// ==================== Fire-and-forget actions ====================
+// ==================== 即发即弃动作 ====================
 
-/** Spotlight — focus on a single element, dim everything else */
+/** 聚光灯 — 聚焦于单个元素，将其他元素变暗 */
 export interface SpotlightAction extends ActionBase {
   type: 'spotlight';
   elementId: string;
-  dimOpacity?: number; // default 0.5
+  dimOpacity?: number; // 默认 0.5
 }
 
-/** Laser — point at an element with a laser effect */
+/** 激光笔 — 用激光效果指向元素 */
 export interface LaserAction extends ActionBase {
   type: 'laser';
   elementId: string;
-  color?: string; // default '#ff0000'
+  color?: string; // 默认 '#ff0000'
 }
 
-// ==================== Synchronous actions ====================
+// ==================== 同步动作 ====================
 
-/** Speech — teacher narration (wait for TTS to finish) */
+/** 语音 — 教师旁白（等待 TTS 完成） */
 export interface SpeechAction extends ActionBase {
   type: 'speech';
   text: string;
   audioId?: string;
-  audioUrl?: string; // Server-generated TTS audio URL
+  audioUrl?: string; // 服务端生成的 TTS 音频 URL
   voice?: string;
-  speed?: number; // default 1.0
+  speed?: number; // 默认 1.0
 }
 
-/** Open whiteboard (wait for animation) */
+/** 打开白板（等待动画完成） */
 export interface WbOpenAction extends ActionBase {
   type: 'wb_open';
 }
 
-/** Draw text on whiteboard (wait for render) */
+/** 在白板上绘制文本（等待渲染完成） */
 export interface WbDrawTextAction extends ActionBase {
   type: 'wb_draw_text';
-  elementId?: string; // Custom element ID for later reference (e.g. wb_delete)
-  content: string; // HTML string or plain text
+  elementId?: string; // 自定义元素 ID，供后续引用（如 wb_delete）
+  content: string; // HTML 字符串或纯文本
   x: number;
   y: number;
-  width?: number; // default 400
-  height?: number; // default 100
-  fontSize?: number; // default 18
-  color?: string; // default '#333333'
+  width?: number; // 默认 400
+  height?: number; // 默认 100
+  fontSize?: number; // 默认 18
+  color?: string; // 默认 '#333333'
 }
 
-/** Draw shape on whiteboard (wait for render) */
+/** 在白板上绘制形状（等待渲染完成） */
 export interface WbDrawShapeAction extends ActionBase {
   type: 'wb_draw_shape';
   elementId?: string; // Custom element ID for later reference (e.g. wb_delete)
@@ -72,10 +72,10 @@ export interface WbDrawShapeAction extends ActionBase {
   y: number;
   width: number;
   height: number;
-  fillColor?: string; // default '#5b9bd5'
+  fillColor?: string; // 默认 '#5b9bd5'
 }
 
-/** Draw chart on whiteboard (wait for render) */
+/** 在白板上绘制图表（等待渲染完成） */
 export interface WbDrawChartAction extends ActionBase {
   type: 'wb_draw_chart';
   elementId?: string; // Custom element ID for later reference (e.g. wb_delete)
@@ -92,7 +92,7 @@ export interface WbDrawChartAction extends ActionBase {
   themeColors?: string[];
 }
 
-/** Draw LaTeX formula on whiteboard (wait for render) */
+/** 在白板上绘制 LaTeX 公式（等待渲染完成） */
 export interface WbDrawLatexAction extends ActionBase {
   type: 'wb_draw_latex';
   elementId?: string; // Custom element ID for later reference (e.g. wb_delete)
@@ -100,11 +100,11 @@ export interface WbDrawLatexAction extends ActionBase {
   x: number;
   y: number;
   width?: number; // default 400
-  height?: number; // auto-calculated based on formula aspect ratio
-  color?: string; // default '#000000'
+  height?: number; // 根据公式宽高比自动计算
+  color?: string; // 默认 '#000000'
 }
 
-/** Draw table on whiteboard (wait for render) */
+/** 在白板上绘制表格（等待渲染完成） */
 export interface WbDrawTableAction extends ActionBase {
   type: 'wb_draw_table';
   elementId?: string; // Custom element ID for later reference (e.g. wb_delete)
@@ -112,48 +112,48 @@ export interface WbDrawTableAction extends ActionBase {
   y: number;
   width: number;
   height: number;
-  data: string[][]; // Simplified 2D string array, first row is header
+  data: string[][]; // 简化的二维字符串数组，第一行为表头
   outline?: { width: number; style: string; color: string };
   theme?: { color: string };
 }
 
-/** Draw line/arrow on whiteboard (wait for render) */
+/** 在白板上绘制线条/箭头（等待渲染完成） */
 export interface WbDrawLineAction extends ActionBase {
   type: 'wb_draw_line';
   elementId?: string; // Custom element ID for later reference (e.g. wb_delete)
-  startX: number; // Start X position (0-1000)
-  startY: number; // Start Y position (0-562)
-  endX: number; // End X position (0-1000)
-  endY: number; // End Y position (0-562)
-  color?: string; // Default '#333333'
-  width?: number; // Line width, default 2
-  style?: 'solid' | 'dashed'; // Default 'solid'
-  points?: ['', 'arrow'] | ['arrow', ''] | ['arrow', 'arrow'] | ['', '']; // Endpoint markers, default ['', '']
+  startX: number; // 起点 X 坐标（0-1000）
+  startY: number; // 起点 Y 坐标（0-562）
+  endX: number; // 终点 X 坐标（0-1000）
+  endY: number; // 终点 Y 坐标（0-562）
+  color?: string; // 默认 '#333333'
+  width?: number; // 线条宽度，默认 2
+  style?: 'solid' | 'dashed'; // 默认 'solid'
+  points?: ['', 'arrow'] | ['arrow', ''] | ['arrow', 'arrow'] | ['', '']; // 端点标记，默认 ['', '']
 }
 
-/** Clear all whiteboard elements */
+/** 清除所有白板元素 */
 export interface WbClearAction extends ActionBase {
   type: 'wb_clear';
 }
 
-/** Delete a specific whiteboard element by ID */
+/** 根据 ID 删除指定的白板元素 */
 export interface WbDeleteAction extends ActionBase {
   type: 'wb_delete';
   elementId: string;
 }
 
-/** Close whiteboard (wait for animation) */
+/** 关闭白板（等待动画完成） */
 export interface WbCloseAction extends ActionBase {
   type: 'wb_close';
 }
 
-/** Play video — start playback of a video element on the slide */
+/** 播放视频 — 开始播放幻灯片上的视频元素 */
 export interface PlayVideoAction extends ActionBase {
   type: 'play_video';
   elementId: string;
 }
 
-/** Discussion — trigger a roundtable discussion */
+/** 讨论 — 触发圆桌讨论 */
 export interface DiscussionAction extends ActionBase {
   type: 'discussion';
   topic: string;
@@ -161,7 +161,7 @@ export interface DiscussionAction extends ActionBase {
   agentId?: string;
 }
 
-// ==================== Union type ====================
+// ==================== 联合类型 ====================
 
 export type Action =
   | SpotlightAction
@@ -182,13 +182,13 @@ export type Action =
 
 export type ActionType = Action['type'];
 
-/** Action types that fire immediately without blocking */
+/** 立即执行且不阻塞的动作类型 */
 export const FIRE_AND_FORGET_ACTIONS: ActionType[] = ['spotlight', 'laser'];
 
-/** Action types that only work on slide scenes (require slide canvas elements) */
+/** 仅在幻灯片场景中有效的动作类型（需要幻灯片画布元素） */
 export const SLIDE_ONLY_ACTIONS: ActionType[] = ['spotlight', 'laser'];
 
-/** Action types that must complete before the next action runs */
+/** 必须在下一个动作执行前完成的动作类型 */
 export const SYNC_ACTIONS: ActionType[] = [
   'speech',
   'play_video',
@@ -205,11 +205,11 @@ export const SYNC_ACTIONS: ActionType[] = [
   'discussion',
 ];
 
-// ==================== Canvas utility types (non-action) ====================
+// ==================== 画布工具类型（非动作） ====================
 
 /**
- * Percentage-based geometry (0-100 coordinate system)
- * Used by spotlight/laser overlays for responsive positioning.
+ * 基于百分比的几何信息（0-100 坐标系统）
+ * 用于聚光灯/激光笔覆盖层的响应式定位。
  */
 export interface PercentageGeometry {
   x: number; // 0-100

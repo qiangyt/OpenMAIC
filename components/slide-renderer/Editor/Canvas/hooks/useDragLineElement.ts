@@ -12,10 +12,10 @@ interface AdsorptionPoint {
 }
 
 /**
- * Drag line element Hook
+ * 拖拽线条元素 Hook
  *
- * @param elementListRef - Element list ref (used to read the latest value on mouseup)
- * @param setElementList - Element list setter (used to trigger re-render)
+ * @param elementListRef - 元素列表 ref（用于在 mouseup 时读取最新值）
+ * @param setElementList - 元素列表 setter（用于触发重新渲染）
  */
 export function useDragLineElement(
   elementListRef: React.RefObject<PPTElement[]>,
@@ -26,7 +26,7 @@ export function useDragLineElement(
   const ctrlOrShiftKeyActive = useKeyboardStore((state) => state.ctrlOrShiftKeyActive());
   const { addHistorySnapshot } = useHistorySnapshot();
 
-  // Drag line endpoint
+  // 拖拽线条端点
   const dragLineElement = useCallback(
     (e: React.MouseEvent, element: PPTLineElement, command: OperateLineHandlers) => {
       let isMouseDown = true;
@@ -38,7 +38,7 @@ export function useDragLineElement(
 
       const adsorptionPoints: AdsorptionPoint[] = [];
 
-      // Get the 8 scale points of all non-rotated, non-line elements as adsorption positions
+      // 获取所有非旋转、非线条元素的8个缩放点作为吸附位置
       for (let i = 0; i < elementListRef.current.length; i++) {
         const _element = elementListRef.current[i];
         if (_element.type === 'line' || _element.rotate) continue;
@@ -84,7 +84,7 @@ export function useDragLineElement(
         const moveX = (currentPageX - startPageX) / canvasScale;
         const moveY = (currentPageY - startPageY) / canvasScale;
 
-        // Position of line start and end points in the editing area
+        // 编辑区域内线条起点和终点的位置
         let startX = element.left + element.start[0];
         let startY = element.top + element.start[1];
         let endX = element.left + element.end[0];
@@ -103,8 +103,8 @@ export function useDragLineElement(
         let c2X = element.left + c2[0];
         let c2Y = element.top + c2[1];
 
-        // Drag start or end point position
-        // Horizontal and vertical snapping
+        // 拖拽起点或终点位置
+        // 水平和垂直吸附
         if (command === OperateLineHandlers.START) {
           startX = startX + moveX;
           startY = startY + moveY;
@@ -168,7 +168,7 @@ export function useDragLineElement(
           if (Math.abs(c2Y - endY) < sorptionRange) c2Y = endY;
         }
 
-        // Calculate updated start and end coordinates relative to the element's own position
+        // 计算更新后相对于元素自身位置的起点和终点坐标
         const minX = Math.min(startX, endX);
         const minY = Math.min(startY, endY);
         const maxX = Math.max(startX, endX);
@@ -185,7 +185,7 @@ export function useDragLineElement(
           end[1] = 0;
         }
 
-        // Update local element list during mousemove
+        // 在 mousemove 期间更新本地元素列表
         const newElements = elementListRef.current.map((el) => {
           if (el.id === element.id) {
             const newEl: PPTLineElement = {
@@ -235,7 +235,7 @@ export function useDragLineElement(
           return el;
         });
 
-        // Update both ref and state
+        // 同时更新 ref 和 state
         elementListRef.current = newElements;
         setElementList(newElements);
       };

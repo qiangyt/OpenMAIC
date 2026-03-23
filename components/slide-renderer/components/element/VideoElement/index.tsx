@@ -8,9 +8,9 @@ export interface VideoElementProps {
 }
 
 /**
- * Editable video element component.
- * In edit mode, displays the poster/thumbnail with a play icon overlay.
- * Does NOT autoplay to avoid disrupting the editing experience.
+ * 可编辑视频元素组件
+ * 在编辑模式下，显示封面图/缩略图并带有播放图标覆盖层
+ * 不自动播放，以避免干扰编辑体验
  */
 export function VideoElement({ elementInfo, selectElement }: VideoElementProps) {
   const handleSelectElement = (e: React.MouseEvent | React.TouchEvent) => {
@@ -58,7 +58,7 @@ export function VideoElement({ elementInfo, selectElement }: VideoElementProps) 
             <div className="w-full h-full bg-black/10 rounded" />
           )}
 
-          {/* Play icon overlay */}
+          {/* 播放图标覆盖层 */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="w-12 h-12 rounded-full bg-black/50 flex items-center justify-center">
               <svg className="w-6 h-6 text-white ml-0.5" viewBox="0 0 24 24" fill="currentColor">

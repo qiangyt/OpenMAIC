@@ -10,8 +10,8 @@ export interface BaseTextElementProps {
 }
 
 /**
- * Base text element component (read-only)
- * Renders static text content with styling
+ * 基础文本元素组件（只读）
+ * 渲染带样式的静态文本内容
  */
 export function BaseTextElement({ elementInfo, target }: BaseTextElementProps) {
   const { shadowStyle } = useElementShadow(elementInfo.shadow);

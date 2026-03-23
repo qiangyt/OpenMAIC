@@ -1,8 +1,8 @@
 /**
- * Agent MCP - Manages project agent roles during PBL generation.
+ * Agent MCP - 管理 PBL 生成过程中的项目智能体角色。
  *
- * Migrated from PBL-Nano. No HTML rendering, no list_tools(), no hardcoded model.
- * Operates directly on a shared PBLProjectConfig.
+ * 从 PBL-Nano 迁移而来。无 HTML 渲染，无 list_tools()，无硬编码模型。
+ * 直接操作共享的 PBLProjectConfig。
  */
 
 import type { PBLProjectConfig, PBLAgent, PBLRoleDivision, PBLToolResult } from '../types';

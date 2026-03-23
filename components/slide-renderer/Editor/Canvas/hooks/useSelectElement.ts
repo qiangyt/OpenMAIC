@@ -5,8 +5,8 @@ import { useKeyboardStore } from '@/lib/store/keyboard';
 import type { PPTElement } from '@/lib/types/slides';
 
 /**
- * Hook for handling element selection in Canvas
- * Supports single selection, multi-selection (Ctrl/Shift), and group selection
+ * 处理画布中元素选择的 Hook
+ * 支持单选、多选（Ctrl/Shift）和组合选择
  */
 export function useSelectElement(
   elementListRef: React.RefObject<PPTElement[]>,
@@ -23,15 +23,15 @@ export function useSelectElement(
 
   const ctrlOrShiftKeyActive = useKeyboardStore((state) => state.ctrlOrShiftKeyActive());
 
-  // Select element
-  // startMove indicates whether to enter move state after selection
+  // 选择元素
+  // startMove 表示选择后是否进入移动状态
   const selectElement = useCallback(
     (e: React.MouseEvent | React.TouchEvent, element: PPTElement, startMove = true) => {
       if (!editorAreaFocus) setEditorAreaFocus(true);
 
-      // If the target element is not currently selected, set it as selected
-      // If Ctrl or Shift is held, enter multi-select mode: add target to current selection; otherwise select only the target
-      // If the target is a group member, also select the other members of that group
+      // 如果目标元素当前未被选中，将其设为选中
+      // 如果按住 Ctrl 或 Shift，进入多选模式：将目标添加到当前选择；否则仅选择目标
+      // 如果目标是组合成员，同时选择该组合的其他成员
       if (!activeElementIdList.includes(element.id)) {
         let newActiveIdList: string[] = [];
 
@@ -53,9 +53,9 @@ export function useSelectElement(
         setHandleElementId(element.id);
       }
 
-      // If the target element is already selected with Ctrl/Shift held, deselect it
-      // Unless it's the last selected element, or the group it belongs to is the last selected group
-      // If the target is a group member, also deselect other members of that group
+      // 如果目标元素已被选中且按住 Ctrl/Shift，则取消选择
+      // 除非它是最后一个选中元素，或它所属的组合是最后一个选中组合
+      // 如果目标是组合成员，同时取消选择该组合的其他成员
       else if (ctrlOrShiftKeyActive) {
         let newActiveIdList: string[] = [];
 
@@ -74,12 +74,12 @@ export function useSelectElement(
         }
       }
 
-      // If the target is already selected but not the current handle element, make it the handle element
+      // 如果目标已被选中但不是当前操作元素，将其设为操作元素
       else if (handleElementId !== element.id) {
         setHandleElementId(element.id);
       }
 
-      // If the target is already the handle element, clicking again sets it as the active group element
+      // 如果目标已是操作元素，再次点击将其设为活动组元素
       else if (activeGroupElementId !== element.id) {
         const startPageX =
           e.nativeEvent instanceof MouseEvent
@@ -110,7 +110,7 @@ export function useSelectElement(
 
       if (startMove) moveElement(e, element);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally excludes elementListRef (stable ref) to avoid infinite re-creation
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 故意排除 elementListRef（稳定引用）以避免无限重建
     [
       editorAreaFocus,
       activeElementIdList,

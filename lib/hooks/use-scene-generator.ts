@@ -43,23 +43,23 @@ function getApiHeaders(): HeadersInit {
     'x-base-url': config.baseUrl || '',
     'x-provider-type': config.providerType || '',
     'x-requires-api-key': String(config.requiresApiKey ?? false),
-    // Image generation provider
+    // 图片生成提供商
     'x-image-provider': settings.imageProviderId || '',
     'x-image-model': settings.imageModelId || '',
     'x-image-api-key': imageProviderConfig?.apiKey || '',
     'x-image-base-url': imageProviderConfig?.baseUrl || '',
-    // Video generation provider
+    // 视频生成提供商
     'x-video-provider': settings.videoProviderId || '',
     'x-video-model': settings.videoModelId || '',
     'x-video-api-key': videoProviderConfig?.apiKey || '',
     'x-video-base-url': videoProviderConfig?.baseUrl || '',
-    // Media generation toggles
+    // 媒体生成开关
     'x-image-generation-enabled': String(settings.imageGenerationEnabled ?? false),
     'x-video-generation-enabled': String(settings.videoGenerationEnabled ?? false),
   };
 }
 
-/** Call POST /api/generate/scene-content (step 1) */
+/** 调用 POST /api/generate/scene-content（步骤 1） */
 async function fetchSceneContent(
   params: {
     outline: SceneOutline;
@@ -92,7 +92,7 @@ async function fetchSceneContent(
   return response.json();
 }
 
-/** Call POST /api/generate/scene-actions (step 2) */
+/** 调用 POST /api/generate/scene-actions（步骤 2） */
 async function fetchSceneActions(
   params: {
     outline: SceneOutline;
@@ -120,7 +120,7 @@ async function fetchSceneActions(
   return response.json();
 }
 
-/** Generate TTS for one speech action and store in IndexedDB */
+/** 为单个语音动作生成 TTS 并存储到 IndexedDB */
 export async function generateAndStoreTTS(
   audioId: string,
   text: string,
@@ -170,7 +170,7 @@ export async function generateAndStoreTTS(
   });
 }
 
-/** Generate TTS for all speech actions in a scene. Returns result. */
+/** 为场景中的所有语音动作生成 TTS。返回结果。 */
 async function generateTTSForScene(
   scene: Scene,
   signal?: AbortSignal,
@@ -251,7 +251,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
         store.getState().setGeneratingOutlines(current.filter((o) => o.id !== outlineId));
       };
 
-      // Create a new AbortController for this generation run
+      // 为此生成运行创建新的 AbortController
       fetchAbortRef.current = new AbortController();
       const signal = fetchAbortRef.current.signal;
 
@@ -265,7 +265,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
 
       store.getState().setGenerationStatus('generating');
 
-      // Determine pending outlines
+      // 确定待处理的大纲
       const completedOrders = new Set(scenes.map((s) => s.order));
       const pending = outlines
         .filter((o) => !completedOrders.has(o.order))
@@ -281,13 +281,13 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
 
       store.getState().setGeneratingOutlines(pending);
 
-      // Launch media generation in parallel — does not block content/action generation
+      // 并行启动媒体生成 — 不阻塞内容/动作生成
       mediaAbortRef.current = new AbortController();
       generateMediaForOutlines(outlines, stage.id, mediaAbortRef.current.signal).catch((err) => {
         log.warn('Media generation error:', err);
       });
 
-      // Get previousSpeeches from last completed scene
+      // 从最后完成的场景获取 previousSpeeches
       let previousSpeeches: string[] = [];
       const sortedScenes = [...scenes].sort((a, b) => a.order - b.order);
       if (sortedScenes.length > 0) {
@@ -297,7 +297,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
           .map((a) => a.text);
       }
 
-      // Serial generation loop — two-step per outline
+      // 串行生成循环 — 每个大纲两步
       try {
         let pausedByFailureOrAbort = false;
         for (const outline of pending) {
@@ -309,7 +309,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
 
           store.getState().setCurrentGeneratingOrder(outline.order);
 
-          // Step 1: Generate content
+          // 步骤 1：生成内容
           options.onPhaseChange?.('content', outline);
           const contentResult = await fetchSceneContent(
             {
@@ -342,7 +342,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
             break;
           }
 
-          // Step 2: Generate actions + assemble scene
+          // 步骤 2：生成动作 + 组装场景
           options.onPhaseChange?.('actions', outline);
           const actionsResult = await fetchSceneActions(
             {
@@ -361,7 +361,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
             const scene = actionsResult.scene;
             const settings = useSettingsStore.getState();
 
-            // TTS generation — failure means the whole scene fails
+            // TTS 生成 — 失败意味着整个场景失败
             if (settings.ttsEnabled && settings.ttsProviderId !== 'browser-native-tts') {
               const ttsResult = await generateTTSForScene(scene, signal);
               if (!ttsResult.success) {
@@ -377,7 +377,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
               }
             }
 
-            // Epoch changed — stage switched, discard this scene
+            // Epoch 已更改 — 课程已切换，丢弃此场景
             if (store.getState().generationEpoch !== startEpoch) {
               pausedByFailureOrAbort = true;
               break;
@@ -406,7 +406,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
           options.onComplete?.();
         }
       } catch (err: unknown) {
-        // AbortError is expected when stop() is called — don't treat as failure
+        // AbortError 在调用 stop() 时是预期的 — 不要视为失败
         if (err instanceof DOMException && err.name === 'AbortError') {
           log.info('Generation aborted');
           store.getState().setGenerationStatus('paused');
@@ -421,7 +421,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
     [options, store],
   );
 
-  // Keep ref in sync so retrySingleOutline can call it
+  // 保持 ref 同步，以便 retrySingleOutline 可以调用它
   generateRemainingRef.current = generateRemaining;
 
   const stop = useCallback(() => {
@@ -433,7 +433,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
 
   const isGenerating = useCallback(() => generatingRef.current, []);
 
-  /** Retry a single failed outline from scratch (content → actions → TTS). */
+  /** 从头重试单个失败的大纲（内容 → 动作 → TTS）。 */
   const retrySingleOutline = useCallback(
     async (outlineId: string) => {
       const state = store.getState();
@@ -447,7 +447,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
         store.getState().setGeneratingOutlines(current.filter((o) => o.id !== outlineId));
       };
 
-      // Remove from failed list and mark as generating
+      // 从失败列表中移除并标记为生成中
       store.getState().retryFailedOutline(outlineId);
       store.getState().setGenerationStatus('generating');
       const currentGenerating = store.getState().generatingOutlines;
@@ -459,7 +459,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
       const signal = abortController.signal;
 
       try {
-        // Step 1: Content
+        // 步骤 1：内容
         const contentResult = await fetchSceneContent(
           {
             outline,
@@ -478,7 +478,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
           return;
         }
 
-        // Step 2: Actions
+        // 步骤 2：动作
         const sortedScenes = [...store.getState().scenes].sort((a, b) => a.order - b.order);
         const lastScene = sortedScenes[sortedScenes.length - 1];
         const previousSpeeches = lastScene
@@ -505,7 +505,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
           return;
         }
 
-        // Step 3: TTS
+        // 步骤 3：TTS
         const settings = useSettingsStore.getState();
         if (settings.ttsEnabled && settings.ttsProviderId !== 'browser-native-tts') {
           const ttsResult = await generateTTSForScene(actionsResult.scene, signal);
@@ -518,7 +518,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
         removeGeneratingOutline();
         store.getState().addScene(actionsResult.scene);
 
-        // Resume remaining generation if there are pending outlines
+        // 如果有待处理的大纲，恢复剩余生成
         if (store.getState().generatingOutlines.length > 0 && lastParamsRef.current) {
           generateRemainingRef.current?.(lastParamsRef.current);
         }

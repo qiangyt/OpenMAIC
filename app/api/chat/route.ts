@@ -1,15 +1,15 @@
 /**
- * Stateless Chat API Endpoint
+ * 无状态聊天 API 端点
  *
- * POST /api/chat - Send message, receive SSE stream
+ * POST /api/chat - 发送消息，接收 SSE 流
  *
- * This endpoint:
- * 1. Receives full state from client (messages + storeState)
- * 2. Runs single-pass generation
- * 3. Streams events as SSE (text deltas + tool calls)
+ * 此端点：
+ * 1. 从客户端接收完整状态（messages + storeState）
+ * 2. 运行单次生成
+ * 3. 以 SSE 流式传输事件（文本增量 + 工具调用）
  *
- * Fully stateless: interruption is handled by the client aborting
- * the fetch request, which triggers req.signal on the server side.
+ * 完全无状态：中断由客户端中止 fetch 请求处理，
+ * 这会在服务器端触发 req.signal。
  */
 
 import { NextRequest } from 'next/server';
@@ -23,12 +23,12 @@ import { createLogger } from '@/lib/logger';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 const log = createLogger('Chat API');
 
-// Allow streaming responses up to 60 seconds
+// 允许流式响应最长 60 秒
 export const maxDuration = 60;
 
 /**
  * POST /api/chat
- * Send a message and receive SSE stream of generation events
+ * 发送消息并接收生成事件的 SSE 流
  *
  * Request body: StatelessChatRequest
  * {
@@ -40,7 +40,7 @@ export const maxDuration = 60;
  *   model?: string
  * }
  *
- * Response: SSE stream of StatelessEvent
+ * Response: StatelessEvent 的 SSE 流
  */
 export async function POST(req: NextRequest) {
   const encoder = new TextEncoder();
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   try {
     const body: StatelessChatRequest = await req.json();
 
-    // Validate required fields
+    // 验证必填字段
     if (!body.messages || !Array.isArray(body.messages)) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: messages');
     }
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: config.agentIds');
     }
 
-    // Resolve API key: client > server > empty
+    // 解析 API key：客户端 > 服务器 > 空
     const modelString = body.model || 'gpt-4o-mini';
     const { providerId, modelId } = parseModelString(modelString);
 
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       `Agents: ${body.config.agentIds.join(', ')}, Messages: ${body.messages.length}, Turn: ${body.directorState?.turnCount ?? 0}`,
     );
 
-    // Create LanguageModel via the unified provider system
+    // 通过统一提供商系统创建 LanguageModel
     const { model: languageModel } = getModel({
       providerId,
       modelId,
@@ -99,18 +99,18 @@ export async function POST(req: NextRequest) {
       proxy,
     });
 
-    // Use the native request signal for abort propagation
+    // 使用原生请求信号进行中止传播
     const signal = req.signal;
 
-    // Create SSE stream
+    // 创建 SSE 流
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
 
-    // Stream generation in background with heartbeat to prevent connection timeout
+    // 在后台流式生成，使用心跳防止连接超时
     const HEARTBEAT_INTERVAL_MS = 15_000;
     (async () => {
-      // Heartbeat: periodically send SSE comments to keep the connection alive.
-      // Proxies / browsers may close idle SSE connections after 30-120s of silence.
+      // 心跳：定期发送 SSE 注释以保持连接活跃。
+      // 代理/浏览器可能会在 30-120 秒无活动后关闭空闲的 SSE 连接。
       let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
       const startHeartbeat = () => {
         stopHeartbeat();
@@ -157,20 +157,20 @@ export async function POST(req: NextRequest) {
       } catch (error) {
         stopHeartbeat();
 
-        // If aborted, just close the writer silently
+        // 如果已中止，静默关闭 writer
         if (signal.aborted) {
           log.info('Request aborted during streaming');
           try {
             await writer.close();
           } catch {
-            /* already closed */
+            /* 已关闭 */
           }
           return;
         }
 
         log.error('Stream error:', error);
 
-        // Try to send error event
+        // 尝试发送错误事件
         try {
           const errorEvent: StatelessEvent = {
             type: 'error',
@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
           await writer.write(encoder.encode(`data: ${JSON.stringify(errorEvent)}\n\n`));
           await writer.close();
         } catch {
-          // Writer may already be closed
+          // Writer 可能已关闭
         }
       }
     })();

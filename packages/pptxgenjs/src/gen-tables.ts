@@ -8,18 +8,18 @@ import { getSmartParseNumber, inch2Emu, rgbToHex, valToPts } from './gen-utils'
 import PptxGenJS from './pptxgen'
 
 /**
- * Break cell text into lines based upon table column width (e.g.: Magic Happens Here(tm))
- * @param {TableCell} cell - table cell
- * @param {number} colWidth - table column width (inches)
- * @return {TableRow[]} - cell's text objects grouped into lines
+ * 根据表格列宽将单元格文本分割成行（神奇的处理逻辑）
+ * @param {TableCell} cell - 表格单元格
+ * @param {number} colWidth - 表格列宽（英寸）
+ * @return {TableRow[]} - 按行分组的单元格文本对象
  */
 function parseTextToLines(cell: TableCell, colWidth: number, verbose?: boolean): TableCell[][] {
-	// FYI: CPL = Width / (font-size / font-constant)
-	// FYI: CHAR:2.3, colWidth:10, fontSize:12 => CPL=138, (actual chars per line in PPT)=145 [14.5 CPI]
-	// FYI: CHAR:2.3, colWidth:7 , fontSize:12 => CPL= 97, (actual chars per line in PPT)=100 [14.3 CPI]
-	// FYI: CHAR:2.3, colWidth:9 , fontSize:16 => CPL= 96, (actual chars per line in PPT)=84  [ 9.3 CPI]
-	const FOCO = 2.3 + (cell.options?.autoPageCharWeight ? cell.options.autoPageCharWeight : 0) // Character Constant
-	const CPL = Math.floor((colWidth / ONEPT) * EMU) / ((cell.options?.fontSize ? cell.options.fontSize : DEF_FONT_SIZE) / FOCO) // Chars-Per-Line
+	// 参考: CPL = 宽度 / (字体大小 / 字体常数)
+	// 参考: CHAR:2.3, colWidth:10, fontSize:12 => CPL=138, (PPT中实际每行字符数)=145 [14.5 CPI]
+	// 参考: CHAR:2.3, colWidth:7 , fontSize:12 => CPL= 97, (PPT中实际每行字符数)=100 [14.3 CPI]
+	// 参考: CHAR:2.3, colWidth:9 , fontSize:16 => CPL= 96, (PPT中实际每行字符数)=84  [ 9.3 CPI]
+	const FOCO = 2.3 + (cell.options?.autoPageCharWeight ? cell.options.autoPageCharWeight : 0) // 字符常数
+	const CPL = Math.floor((colWidth / ONEPT) * EMU) / ((cell.options?.fontSize ? cell.options.fontSize : DEF_FONT_SIZE) / FOCO) // 每行字符数
 
 	const parsedLines: TableCell[][] = []
 	let inputCells: TableCell[] = []
@@ -27,34 +27,34 @@ function parseTextToLines(cell: TableCell, colWidth: number, verbose?: boolean):
 	const inputLines2: TableCell[][] = []
 	/*
 		if (cell.options && cell.options.autoPageCharWeight) {
-			let CHR1 = 2.3 + (cell.options && cell.options.autoPageCharWeight ? cell.options.autoPageCharWeight : 0) // Character Constant
-			let CPL1 = ((colWidth / ONEPT) * EMU) / ((cell.options && cell.options.fontSize ? cell.options.fontSize : DEF_FONT_SIZE) / CHR1) // Chars-Per-Line
+			let CHR1 = 2.3 + (cell.options && cell.options.autoPageCharWeight ? cell.options.autoPageCharWeight : 0) // 字符常数
+			let CPL1 = ((colWidth / ONEPT) * EMU) / ((cell.options && cell.options.fontSize ? cell.options.fontSize : DEF_FONT_SIZE) / CHR1) // 每行字符数
 			console.log(`cell.options.autoPageCharWeight: '${cell.options.autoPageCharWeight}' => CPL: ${CPL1}`)
 			let CHR2 = 2.3 + 0
-			let CPL2 = ((colWidth / ONEPT) * EMU) / ((cell.options && cell.options.fontSize ? cell.options.fontSize : DEF_FONT_SIZE) / CHR2) // Chars-Per-Line
+			let CPL2 = ((colWidth / ONEPT) * EMU) / ((cell.options && cell.options.fontSize ? cell.options.fontSize : DEF_FONT_SIZE) / CHR2) // 每行字符数
 			console.log(`cell.options.autoPageCharWeight: '0' => CPL: ${CPL2}`)
 		}
 	*/
 
 	/**
-	 * EX INPUTS: `cell.text`
-	 * - string....: "Account Name Column"
-	 * - object....: { text:"Account Name Column" }
-	 * - object[]..: [{ text:"Account Name", options:{ bold:true } }, { text:" Column" }]
-	 * - object[]..: [{ text:"Account Name", options:{ breakLine:true } }, { text:"Input" }]
+	 * 示例输入: `cell.text`
+	 * - 字符串....: "Account Name Column"
+	 * - 对象......: { text:"Account Name Column" }
+	 * - 对象数组..: [{ text:"Account Name", options:{ bold:true } }, { text:" Column" }]
+	 * - 对象数组..: [{ text:"Account Name", options:{ breakLine:true } }, { text:"Input" }]
 	 */
 
 	/**
-	 * EX OUTPUTS:
-	 * - string....: [{ text:"Account Name Column" }]
-	 * - object....: [{ text:"Account Name Column" }]
-	 * - object[]..: [{ text:"Account Name", options:{ breakLine:true } }, { text:"Input" }]
-	 * - object[]..: [{ text:"Account Name", options:{ breakLine:true } }, { text:"Input" }]
+	 * 示例输出:
+	 * - 字符串....: [{ text:"Account Name Column" }]
+	 * - 对象......: [{ text:"Account Name Column" }]
+	 * - 对象数组..: [{ text:"Account Name", options:{ breakLine:true } }, { text:"Input" }]
+	 * - 对象数组..: [{ text:"Account Name", options:{ breakLine:true } }, { text:"Input" }]
 	 */
 
-	// STEP 1: Ensure inputCells is an array of TableCells
+	// 步骤 1: 确保 inputCells 是 TableCell 数组
 	if (cell.text && cell.text.toString().trim().length === 0) {
-		// Allow a single space/whitespace as cell text (user-requested feature)
+		// 允许单个空格/空白作为单元格文本（用户请求的功能）
 		inputCells.push({ _type: SLIDE_OBJECT_TYPES.tablecell, text: ' ' })
 	} else if (typeof cell.text === 'number' || typeof cell.text === 'string') {
 		inputCells.push({ _type: SLIDE_OBJECT_TYPES.tablecell, text: (cell.text || '').toString().trim() })
@@ -67,16 +67,16 @@ function parseTextToLines(cell: TableCell, colWidth: number, verbose?: boolean):
 		// console.log('...............................................\n\n')
 	}
 
-	// STEP 2: Group table cells into lines based on "\n" or `breakLine` prop
+	// 步骤 2: 根据 "\n" 或 `breakLine` 属性将表格单元格分组为行
 	/**
-	 * - EX: `[{ text:"Input Output" }, { text:"Extra" }]`                       == 1 line
-	 * - EX: `[{ text:"Input" }, { text:"Output", options:{ breakLine:true } }]` == 1 line
-	 * - EX: `[{ text:"Input\nOutput" }]`                                        == 2 lines
-	 * - EX: `[{ text:"Input", options:{ breakLine:true } }, { text:"Output" }]` == 2 lines
+	 * - 示例: `[{ text:"Input Output" }, { text:"Extra" }]`                       == 1 行
+	 * - 示例: `[{ text:"Input" }, { text:"Output", options:{ breakLine:true } }]` == 1 行
+	 * - 示例: `[{ text:"Input\nOutput" }]`                                        == 2 行
+	 * - 示例: `[{ text:"Input", options:{ breakLine:true } }, { text:"Output" }]` == 2 行
 	 */
 	let newLine: TableCell[] = []
 	inputCells.forEach(cell => {
-		// (this is always true, we just constructed them above, but we need to tell typescript b/c type is still string||Cell[])
+		// (这里总是 true，我们上面刚构造了它们，但需要告诉 TypeScript，因为类型仍然是 string||Cell[])
 		if (typeof cell.text === 'string') {
 			if (cell.text.split('\n').length > 1) {
 				cell.text.split('\n').forEach(textLine => {
@@ -101,7 +101,7 @@ function parseTextToLines(cell: TableCell, colWidth: number, verbose?: boolean):
 			}
 		}
 
-		// Flush buffer
+		// 刷新缓冲区
 		if (newLine.length > 0) {
 			inputLines1.push(newLine)
 			newLine = []
@@ -113,16 +113,16 @@ function parseTextToLines(cell: TableCell, colWidth: number, verbose?: boolean):
 		// console.log('...............................................\n\n')
 	}
 
-	// STEP 3: Tokenize every text object into words (then it's really easy to assemble lines below without having to break text, add its `options`, etc.)
+	// 步骤 3: 将每个文本对象分词为单词（这样在下面组装行时就很容易，无需拆分文本、添加其 `options` 等）
 	inputLines1.forEach(line => {
 		line.forEach(cell => {
 			const lineCells: TableCell[] = []
-			const cellTextStr = String(cell.text) // force convert to string (compiled JS is better with this than a cast)
+			const cellTextStr = String(cell.text) // 强制转换为字符串（编译后的 JS 比类型转换更擅长处理这个）
 			const lineWords = cellTextStr.split(' ')
 
 			lineWords.forEach((word, idx) => {
 				const cellProps = { ...cell.options }
-				// IMPORTANT: Handle `breakLine` prop - we cannot apply to each word - only apply to very last word!
+				// 重要: 处理 `breakLine` 属性 - 我们不能应用到每个单词 - 只能应用到最后一个单词！
 				if (cellProps?.breakLine) cellProps.breakLine = idx + 1 === lineWords.length
 				lineCells.push({ _type: SLIDE_OBJECT_TYPES.tablecell, text: word + (idx + 1 < lineWords.length ? ' ' : ''), options: cellProps })
 			})
@@ -136,13 +136,13 @@ function parseTextToLines(cell: TableCell, colWidth: number, verbose?: boolean):
 		// console.log('...............................................\n\n')
 	}
 
-	// STEP 4: Group cells/words into lines based upon space consumed by word letters
+	// 步骤 4: 根据单词字母占用的空间将单元格/单词分组为行
 	inputLines2.forEach(line => {
 		let lineCells: TableCell[] = []
 		let strCurrLine = ''
 
 		line.forEach(word => {
-			// A: create new line when horizontal space is exhausted
+			// A: 当水平空间耗尽时创建新行
 			if (strCurrLine.length + word.text.length > CPL) {
 				// if (verbose) console.log(`STEP 4: New line added: (${strCurrLine.length} + ${word.text.length} > ${CPL})`);
 				parsedLines.push(lineCells)
@@ -150,14 +150,14 @@ function parseTextToLines(cell: TableCell, colWidth: number, verbose?: boolean):
 				strCurrLine = ''
 			}
 
-			// B: add current word to line cells
+			// B: 将当前单词添加到行单元格
 			lineCells.push(word)
 
-			// C: add current word to `strCurrLine` which we use to keep track of line's char length
+			// C: 将当前单词添加到 `strCurrLine`，用于跟踪行的字符长度
 			strCurrLine += word.text.toString()
 		})
 
-		// Flush buffer: Only create a line when there's text to avoid empty row
+		// 刷新缓冲区: 只有在有文本时才创建行，避免空行
 		if (lineCells.length > 0) parsedLines.push(lineCells)
 	})
 	if (verbose) {
@@ -166,17 +166,17 @@ function parseTextToLines(cell: TableCell, colWidth: number, verbose?: boolean):
 		console.log('...............................................\n\n')
 	}
 
-	// Done:
+	// 完成:
 	return parsedLines
 }
 
 /**
- * Takes an array of table rows and breaks into an array of slides, which contain the calculated amount of table rows that fit on that slide
- * @param {TableCell[][]} tableRows - table rows
- * @param {TableToSlidesProps} tableProps - table2slides properties
- * @param {PresLayout} presLayout - presentation layout
- * @param {SlideLayout} masterSlide - master slide
- * @return {TableRowSlide[]} array of table rows
+ * 获取表格行数组并将其拆分为幻灯片数组，每张幻灯片包含计算出的适合该幻灯片的表格行数
+ * @param {TableCell[][]} tableRows - 表格行
+ * @param {TableToSlidesProps} tableProps - table2slides 属性
+ * @param {PresLayout} presLayout - 演示文稿布局
+ * @param {SlideLayout} masterSlide - 母版幻灯片
+ * @return {TableRowSlide[]} 表格行数组
  */
 export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps: TableToSlidesProps = {}, presLayout: PresLayout, masterSlide?: SlideLayout): TableRowSlide[] {
 	let arrInchMargins = DEF_SLIDE_MARGIN_IN
@@ -199,7 +199,7 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 		// console.log(`| startY .......................................... = ${(emuStartY / EMU).toFixed(1)}`)
 		// console.log(`| emuSlideTabH .................................... = ${(emuSlideTabH / EMU).toFixed(1)}`)
 		if (tableRowSlides.length > 1) {
-			// D: RULE: Use margins for starting point after the initial Slide, not `opt.y` (ISSUE #43, ISSUE #47, ISSUE #48)
+			// D: 规则: 初始幻灯片之后使用边距作为起始点，而不是 `opt.y` (ISSUE #43, ISSUE #47, ISSUE #48)
 			if (typeof tableProps.autoPageSlideStartY === 'number') {
 				emuSlideTabH = (tablePropH || presLayout.height) - inch2Emu(tableProps.autoPageSlideStartY + arrInchMargins[2])
 			} else if (typeof tableProps.newSlideStartY === 'number') {
@@ -207,7 +207,7 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 				emuSlideTabH = (tablePropH || presLayout.height) - inch2Emu(tableProps.newSlideStartY + arrInchMargins[2])
 			} else if (tablePropY) {
 				emuSlideTabH = (tablePropH || presLayout.height) - inch2Emu((tablePropY / EMU < arrInchMargins[0] ? tablePropY / EMU : arrInchMargins[0]) + arrInchMargins[2])
-				// Use whichever is greater: area between margins or the table H provided (dont shrink usable area - the whole point of over-riding Y on paging is to *increase* usable space)
+				// 使用较大的值: 边距之间的区域或提供的表格高度（不要缩小可用区域 - 分页时覆盖 Y 的全部意义是为了*增加*可用空间）
 				if (emuSlideTabH < tablePropH) emuSlideTabH = tablePropH
 			}
 		}
@@ -235,9 +235,9 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 		console.log(`| tableCalcW ...................................... = ${tableCalcW / EMU}`)
 	}
 
-	// STEP 1: Calculate margins
+	// 步骤 1: 计算边距
 	{
-		// Important: Use default size as zero cell margin is causing our tables to be too large and touch bottom of slide!
+		// 重要: 使用默认大小，因为零单元格边距会导致我们的表格太大并触及幻灯片底部！
 		if (!tableProps.slideMargin && tableProps.slideMargin !== 0) tableProps.slideMargin = DEF_SLIDE_MARGIN_IN[0]
 
 		if (masterSlide && typeof masterSlide._margin !== 'undefined') {
@@ -251,10 +251,10 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 		if (tableProps.verbose) console.log(`| arrInchMargins .................................. = [${arrInchMargins.join(', ')}]`)
 	}
 
-	// STEP 2: Calculate number of columns
+	// 步骤 2: 计算列数
 	{
-		// NOTE: Cells may have a colspan, so merely taking the length of the [0] (or any other) row is not
-		// ....: sufficient to determine column count. Therefore, check each cell for a colspan and total cols as reqd
+		// 注意: 单元格可能有 colspan，所以仅仅取 [0]（或任何其他）行的长度
+		// ....: 不足以确定列数。因此，检查每个单元格的 colspan 并按要求总计列数
 		const firstRow = tableRows[0] || []
 		firstRow.forEach(cell => {
 			if (!cell) cell = { _type: SLIDE_OBJECT_TYPES.tablecell }
@@ -264,19 +264,19 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 		if (tableProps.verbose) console.log(`| numCols ......................................... = ${numCols}`)
 	}
 
-	// STEP 3: Calculate width using tableProps.colW if possible
+	// 步骤 3: 如果可能，使用 tableProps.colW 计算宽度
 	if (!tablePropW && tableProps.colW) {
 		tableCalcW = Array.isArray(tableProps.colW) ? tableProps.colW.reduce((p, n) => p + n) * EMU : tableProps.colW * numCols || 0
 		if (tableProps.verbose) console.log(`| tableCalcW ...................................... = ${tableCalcW / EMU}`)
 	}
 
-	// STEP 4: Calculate usable width now that total usable space is known (`emuSlideTabW`)
+	// 步骤 4: 现在已知总可用空间，计算可用宽度（`emuSlideTabW`）
 	{
 		emuSlideTabW = tableCalcW || inch2Emu((tablePropX ? tablePropX / EMU : arrInchMargins[1]) + arrInchMargins[3])
 		if (tableProps.verbose) console.log(`| emuSlideTabW .................................... = ${(emuSlideTabW / EMU).toFixed(1)}`)
 	}
 
-	// STEP 5: Calculate column widths if not provided (emuSlideTabW will be used below to determine lines-per-col)
+	// 步骤 5: 如果未提供，计算列宽（emuSlideTabW 将在下面用于确定每列的行数）
 	if (!tableProps.colW || !Array.isArray(tableProps.colW)) {
 		if (tableProps.colW && !isNaN(Number(tableProps.colW))) {
 			const arrColW = []
@@ -287,7 +287,7 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 				if (Array.isArray(tableProps.colW)) tableProps.colW.push(val)
 			})
 		} else {
-			// No column widths provided? Then distribute cols.
+			// 没有提供列宽？那么平均分配列。
 			tableProps.colW = []
 			for (let iCol = 0; iCol < numCols; iCol++) {
 				tableProps.colW.push(emuSlideTabW / EMU / numCols)
@@ -295,15 +295,15 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 		}
 	}
 
-	// STEP 6: **MAIN** Iterate over rows, add table content, create new slides as rows overflow
+	// 步骤 6: **主要逻辑** 遍历行，添加表格内容，当行溢出时创建新幻灯片
 	let newTableRowSlide: TableRowSlide = { rows: [] as TableRow[] }
 	tableRows.forEach((row, iRow) => {
-		// A: Row variables
+		// A: 行变量
 		const rowCellLines: TableCell[] = []
 		let maxCellMarTopEmu = 0
 		let maxCellMarBtmEmu = 0
 
-		// B: Create new row in data model, calc `maxCellMar*`
+		// B: 在数据模型中创建新行，计算 `maxCellMar*`
 		let currTableRow: TableRow = []
 		row.forEach(cell => {
 			currTableRow.push({
@@ -312,9 +312,9 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 				options: cell.options,
 			})
 
-			/** FUTURE: DEPRECATED:
-			 * - Backwards-Compat: Oops! Discovered we were still using points for cell margin before v3.8.0 (UGH!)
-			 * - We cant introduce a breaking change before v4.0, so...
+			/** 未来: 已弃用:
+			 * - 向后兼容: 哎呀！发现我们在 v3.8.0 之前仍然使用点作为单元格边距（唉！）
+			 * - 我们不能在 v4.0 之前引入破坏性更改，所以...
 			 */
 			if (cell.options.margin && cell.options.margin[0] >= 1) {
 				if (cell.options?.margin && cell.options.margin[0] && valToPts(cell.options.margin[0]) > maxCellMarTopEmu) maxCellMarTopEmu = valToPts(cell.options.margin[0])
@@ -329,12 +329,12 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 			}
 		})
 
-		// C: Calc usable vertical space/table height. Set default value first, adjust below when necessary.
+		// C: 计算可用的垂直空间/表格高度。首先设置默认值，必要时在下面调整。
 		calcSlideTabH()
-		emuTabCurrH += maxCellMarTopEmu + maxCellMarBtmEmu // Start row height with margins
+		emuTabCurrH += maxCellMarTopEmu + maxCellMarBtmEmu // 从边距开始计算行高
 		if (tableProps.verbose && iRow === 0) console.log(`| SLIDE [${tableRowSlides.length}]: emuSlideTabH ...... = ${(emuSlideTabH / EMU).toFixed(1)} `)
 
-		// D: --==[[ BUILD DATA SET ]]==-- (iterate over cells: split text into lines[], set `lineHeight`)
+		// D: --==[[ 构建数据集 ]]==-- (遍历单元格: 将文本分割为行数组，设置 `lineHeight`)
 		row.forEach((cell, iCell) => {
 			const newCell: TableCell = {
 				_type: SLIDE_OBJECT_TYPES.tablecell,
@@ -348,22 +348,22 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 				options: cell.options,
 			}
 
-			// E-1: Exempt cells with `rowspan` from increasing lineHeight (or we could create a new slide when unecessary!)
+			// E-1: 豁免带有 `rowspan` 的单元格增加行高（否则我们可能会不必要地创建新幻灯片！）
 			if (newCell.options.rowspan) newCell._lineHeight = 0
 
-			// E-2: The parseTextToLines method uses `autoPageCharWeight`, so inherit from table options
+			// E-2: parseTextToLines 方法使用 `autoPageCharWeight`，所以从表格选项继承
 			newCell.options.autoPageCharWeight = tableProps.autoPageCharWeight ? tableProps.autoPageCharWeight : null
 
-			// E-3: **MAIN** Parse cell contents into lines based upon col width, font, etc
+			// E-3: **主要逻辑** 根据列宽、字体等将单元格内容解析为行
 			let totalColW = tableProps.colW[iCell]
 			if (cell.options.colspan && Array.isArray(tableProps.colW)) {
 				totalColW = tableProps.colW.filter((_cell, idx) => idx >= iCell && idx < idx + cell.options.colspan).reduce((prev, curr) => prev + curr)
 			}
 
-			// E-4: Create lines based upon available column width
+			// E-4: 根据可用列宽创建行
 			newCell._lines = parseTextToLines(cell, totalColW, false)
 
-			// E-5: Add cell to array
+			// E-5: 将单元格添加到数组
 			rowCellLines.push(newCell)
 		})
 
@@ -410,14 +410,14 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 		let isDone = false
 		while (!isDone) {
 			const srcCell: TableCell = rowCellLines[currCellIdx]
-			let tgtCell: TableCell = currTableRow[currCellIdx] // NOTE: may be redefined below (a new row may be created, thus changing this value)
+			let tgtCell: TableCell = currTableRow[currCellIdx] // 注意: 可能会在下面重新定义（可能会创建新行，从而更改此值）
 
-			// 1: calc emuLineMaxH
+			// 1: 计算 emuLineMaxH
 			rowCellLines.forEach(cell => {
 				if (cell._lineHeight >= emuLineMaxH) emuLineMaxH = cell._lineHeight
 			})
 
-			// 2: create a new slide if there is insufficient room for the current row
+			// 2: 如果当前行没有足够的空间，则创建新幻灯片
 			if (emuTabCurrH + emuLineMaxH > emuSlideTabH) {
 				if (tableProps.verbose) {
 					console.log('\n|-----------------------------------------------------------------------|')
@@ -426,29 +426,29 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 					console.log('|-----------------------------------------------------------------------|\n\n')
 				}
 
-				// A: add current row slide or it will be lost (only if it has rows and text)
+				// A: 添加当前行幻灯片，否则会丢失（仅当它有行和文本时）
 				if (currTableRow.length > 0 && currTableRow.map(cell => cell.text.length).reduce((p, n) => p + n) > 0) newTableRowSlide.rows.push(currTableRow)
 
-				// B: add current slide to Slides array
+				// B: 将当前幻灯片添加到幻灯片数组
 				tableRowSlides.push(newTableRowSlide)
 
-				// C: reset working/curr slide to hold rows as they're created
+				// C: 重置工作/当前幻灯片以容纳创建的行
 				const newRows: TableRow[] = []
 				newTableRowSlide = { rows: newRows }
 
-				// D: reset working/curr row
+				// D: 重置工作/当前行
 				currTableRow = []
 				row.forEach(cell => currTableRow.push({ _type: SLIDE_OBJECT_TYPES.tablecell, text: [], options: cell.options }))
 
-				// E: Calc usable vertical space/table height now as we may still be in the same row and code above ("C: Calc usable vertical space/table height.") calc may now be invalid
+				// E: 籈在我们可能仍在同一行中，计算可用的垂直空间/表格高度，因为上面的代码（“C: 计算可用的垂直空间/表格高度。"）现在可能无效
 				calcSlideTabH()
-				emuTabCurrH += maxCellMarTopEmu + maxCellMarBtmEmu // Start row height with margins
+				emuTabCurrH += maxCellMarTopEmu + maxCellMarBtmEmu // 从边距开始计算行高
 				if (tableProps.verbose) console.log(`| SLIDE [${tableRowSlides.length}]: emuSlideTabH ...... = ${(emuSlideTabH / EMU).toFixed(1)} `)
 
-				// F: reset current table height for this new Slide
+				// F: 为此新幻灯片重置当前表格高度
 				emuTabCurrH = 0
 
-				// G: handle repeat headers option /or/ Add new empty row to continue current lines into
+				// G: 处理重复表头选项/或添加新的空行以继续当前行
 				if ((tableProps.addHeaderToEach || tableProps.autoPageRepeatHeader) && tableProps._arrObjTabHeadRows) {
 					tableProps._arrObjTabHeadRows.forEach(row => {
 						const newHeadRow: TableRow = []
@@ -458,36 +458,36 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 							if (cell._lineHeight > maxLineHeight) maxLineHeight = cell._lineHeight
 						})
 						newTableRowSlide.rows.push(newHeadRow)
-						emuTabCurrH += maxLineHeight // TODO: what about margins? dont we need to include cell margin in line height?
+						emuTabCurrH += maxLineHeight // TODO: 边距怎么办？ 我们不需要在行高中包含单元格边距吗？
 					})
 				}
 
-				// WIP: NEW: TEST THIS!!
+				// 进行中: 新功能: 测试这个!!
 				tgtCell = currTableRow[currCellIdx]
 			}
 
-			// 3: set array of words that comprise this line
+			// 3: 设置组成此行的单词数组
 			const currLine: TableCell[] = srcCell._lines.shift()
 
-			// 4: create new line by adding all words from curr line (or add empty if there are no words to avoid "needs repair" issue triggered when cells have null content)
+			// 4: 通过添加当前行的所有单词来创建新行（如果没有单词则添加空内容，以避免单元格内容为 null 时触发"需要修复"问题）
 			if (Array.isArray(tgtCell.text)) {
 				if (currLine) tgtCell.text = tgtCell.text.concat(currLine)
 				else if (tgtCell.text.length === 0) tgtCell.text = tgtCell.text.concat({ _type: SLIDE_OBJECT_TYPES.tablecell, text: '' })
-				// IMPORTANT: ^^^ add empty if there are no words to avoid "needs repair" issue triggered when cells have null content
+				// 重要: ^^^ 如果没有单词则添加空内容，以避免单元格内容为 null 时触发"需要修复"问题
 			}
 
-			// 5: increase table height by the curr line height (if we're on the last column)
+			// 5: 通过当前行高增加表格高度（如果在最后一列）
 			if (currCellIdx === rowCellLines.length - 1) emuTabCurrH += emuLineMaxH
 
-			// 6: advance column/cell index (or circle back to first one to continue adding lines)
+           	// 6: 匉列/单元格索引前进（或循环回到第一个以继续添加行）
 			currCellIdx = currCellIdx < rowCellLines.length - 1 ? currCellIdx + 1 : 0
 
-			// 7: WIP: done?
+           	// 7: 进行中: 完成?
 			const brent = rowCellLines.map(cell => cell._lines.length).reduce((prev, next) => prev + next)
 			if (brent === 0) isDone = true
 		}
 
-		// F: Flush/capture row buffer before it resets at the top of this loop
+		// F: 在循环顶部重置之前刷新/捕获行缓冲区
 		if (currTableRow.length > 0) newTableRowSlide.rows.push(currTableRow)
 
 		if (tableProps.verbose) {
@@ -499,7 +499,7 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 		}
 	})
 
-	// STEP 7: Flush buffer / add final slide
+	// 步骤 7: 刷新缓冲区 / 添加最终幻灯片
 	tableRowSlides.push(newTableRowSlide)
 
 	if (tableProps.verbose) {
@@ -509,16 +509,15 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 		console.log('|================================================|\n\n')
 	}
 
-	// LAST:
+	// 最后:
 	return tableRowSlides
 }
-
 /**
- * Reproduces an HTML table as a PowerPoint table - including column widths, style, etc. - creates 1 or more slides as needed
- * @param {PptxGenJS} pptx - pptxgenjs instance
- * @param {string} tabEleId - HTMLElementID of the table
- * @param {ITableToSlidesOpts} options - array of options (e.g.: tabsize)
- * @param {SlideLayout} masterSlide - masterSlide
+ * 将 HTML 表格复制为 PowerPoint 表格 - 包括列宽、样式等 - 根据需要创建 1 张或多张幻灯片
+ * @param {PptxGenJS} pptx - pptxgenjs 实例
+ * @param {string} tabEleId - 表格的 HTMLElementID
+ * @param {ITableToSlidesOpts} options - 选项数组（例如: tabsize）
+ * @param {SlideLayout} masterSlide - 母版幻灯片
  */
 export function genTableToSlides(pptx: PptxGenJS, tabEleId: string, options: TableToSlidesProps = {}, masterSlide?: SlideLayout): void {
 	const opts = options || {}
@@ -529,13 +528,13 @@ export function genTableToSlides(pptx: PptxGenJS, tabEleId: string, options: Tab
 	const arrObjTabFootRows: [TableCell[]?] = []
 	const arrColW: number[] = []
 	const arrTabColW: number[] = []
-	let arrInchMargins: [number, number, number, number] = [0.5, 0.5, 0.5, 0.5] // TRBL-style
+	let arrInchMargins: [number, number, number, number] = [0.5, 0.5, 0.5, 0.5] // 上右下左样式
 	let intTabW = 0
 
-	// REALITY-CHECK:
+	// 现实检查:
 	if (!document.getElementById(tabEleId)) throw new Error('tableToSlides: Table ID "' + tabEleId + '" does not exist!')
 
-	// STEP 1: Set margins
+	// 步骤 1: 设置边距
 	if (masterSlide?._margin) {
 		if (Array.isArray(masterSlide._margin)) arrInchMargins = masterSlide._margin
 		else if (!isNaN(masterSlide._margin)) arrInchMargins = [masterSlide._margin, masterSlide._margin, masterSlide._margin, masterSlide._margin]
@@ -556,14 +555,14 @@ export function genTableToSlides(pptx: PptxGenJS, tabEleId: string, options: Tab
 		console.log(`| emuSlideTabW .................................... = ${(emuSlideTabW / EMU).toFixed(1)}`)
 	}
 
-	// STEP 2: Grab table col widths - just find the first availble row, either thead/tbody/tfoot, others may have colspans, who cares, we only need col widths from 1
+	// 步骤 2: 获取表格列宽 - 只需找到第一个可用行，无论是 thead/tbody/tfoot，其他可能有 colspans，谁在乎，我们只需要从 1 行获取列宽
 	let firstRowCells = document.querySelectorAll(`#${tabEleId} tr:first-child th`)
 	if (firstRowCells.length === 0) firstRowCells = document.querySelectorAll(`#${tabEleId} tr:first-child td`)
 	firstRowCells.forEach((cellEle: Element) => {
 		const cell = cellEle as HTMLTableCellElement
 		if (cell.getAttribute('colspan')) {
-			// Guesstimate (divide evenly) col widths
-			// NOTE: both j$query and vanilla selectors return {0} when table is not visible)
+			// 估算（平均分配）列宽
+			// 注意: 当表格不可见时，j$query 和 vanilla 选择器都返回 {0}
 			for (let idxc = 0; idxc < Number(cell.getAttribute('colspan')); idxc++) {
 				arrTabColW.push(Math.round(cell.offsetWidth / Number(cell.getAttribute('colspan'))))
 			}
@@ -575,7 +574,7 @@ export function genTableToSlides(pptx: PptxGenJS, tabEleId: string, options: Tab
 		intTabW += colW
 	})
 
-	// STEP 3: Calc/Set column widths by using same column width percent from HTML table
+	// 步骤 3: 使用与 HTML 表格相同的列宽百分比计算/设置列宽
 	arrTabColW.forEach((colW, idxW) => {
 		const intCalcWidth = Number(((Number(emuSlideTabW) * ((colW / intTabW) * 100)) / 100 / EMU).toFixed(2))
 		let intMinWidth = 0
@@ -590,15 +589,15 @@ export function genTableToSlides(pptx: PptxGenJS, tabEleId: string, options: Tab
 		console.log(`| arrColW ......................................... = [${arrColW.join(', ')}]`)
 	}
 
-	// STEP 4: Iterate over each table element and create data arrays (text and opts)
-	// NOTE: We create 3 arrays instead of one so we can loop over body then show header/footer rows on first and last page
+	// 步骤 4: 遍历每个表格元素并创建数据数组（文本和选项）
+	// 注意: 我们创建 3 个数组而不是一个，这样我们可以遍历主体，然后在第一页和最后一页显示页眉/页脚行
 	const tableParts = ['thead', 'tbody', 'tfoot']
 	tableParts.forEach(part => {
 		document.querySelectorAll(`#${tabEleId} ${part} tr`).forEach((row: Element) => {
 			const htmlRow = row as HTMLTableRowElement
 			const arrObjTabCells: TableCell[] = []
 			Array.from(htmlRow.cells).forEach(cell => {
-				// A: Get RGB text/bkgd colors
+				// A: 获取 RGB 文本/背景颜色
 				const arrRGB1 = window.getComputedStyle(cell).getPropertyValue('color').replace(/\s+/gi, '').replace('rgba(', '').replace('rgb(', '').replace(')', '').split(',')
 				let arrRGB2 = window
 					.getComputedStyle(cell)
@@ -609,14 +608,14 @@ export function genTableToSlides(pptx: PptxGenJS, tabEleId: string, options: Tab
 					.replace(')', '')
 					.split(',')
 				if (
-					// NOTE: (ISSUE#57): Default for unstyled tables is black bkgd, so use white instead
+					// 注意: (ISSUE#57): 未设置样式的表格默认背景是黑色，所以改用白色
 					window.getComputedStyle(cell).getPropertyValue('background-color') === 'rgba(0, 0, 0, 0)' ||
 					window.getComputedStyle(cell).getPropertyValue('transparent')
 				) {
 					arrRGB2 = ['255', '255', '255']
 				}
 
-				// B: Create option object
+				// B: 创建选项对象
 				const cellOpts: TableCellProps = {
 					align: null,
 					bold:
@@ -644,8 +643,8 @@ export function genTableToSlides(pptx: PptxGenJS, tabEleId: string, options: Tab
 					cellOpts.valign = valign === 'top' ? 'top' : valign === 'middle' ? 'middle' : valign === 'bottom' ? 'bottom' : null
 				}
 
-				// C: Add padding [margin] (if any)
-				// NOTE: Margins translate: px->pt 1:1 (e.g.: a 20px padded cell looks the same in PPTX as 20pt Text Inset/Padding)
+				// C: 添加内边距 [margin]（如果有）
+				// 注意: 边距转换: px->pt 1:1（例如: 20px 内边距的单元格在 PPTX 中看起来与 20pt 文本插入/内边距相同）
 				if (window.getComputedStyle(cell).getPropertyValue('padding-left')) {
 					cellOpts.margin = [0, 0, 0, 0]
 					const sidesPad = ['padding-top', 'padding-right', 'padding-bottom', 'padding-left']
@@ -654,7 +653,7 @@ export function genTableToSlides(pptx: PptxGenJS, tabEleId: string, options: Tab
 					})
 				}
 
-				// D: Add border (if any)
+				// D: 添加边框（如果有）
 				if (
 					window.getComputedStyle(cell).getPropertyValue('border-top-width') ||
 					window.getComputedStyle(cell).getPropertyValue('border-right-width') ||
@@ -686,10 +685,10 @@ export function genTableToSlides(pptx: PptxGenJS, tabEleId: string, options: Tab
 					})
 				}
 
-				// LAST: Add cell
+				// 最后: 添加单元格
 				arrObjTabCells.push({
 					_type: SLIDE_OBJECT_TYPES.tablecell,
-					text: cell.innerText, // `innerText` returns <br> as "\n", so linebreak etc. work later!
+					text: cell.innerText, // `innerText` 将 <br> 返回为 "\n"，所以换行等稍后可以正常工作！
 					options: cellOpts,
 				})
 			})
@@ -710,23 +709,23 @@ export function genTableToSlides(pptx: PptxGenJS, tabEleId: string, options: Tab
 		})
 	})
 
-	// STEP 5: Break table into Slides as needed
-	// Pass head-rows as there is an option to add to each table and the parse func needs this data to fulfill that option
+	// 步骤 5: 根据需要将表格拆分为幻灯片
+	// 传递标题行，因为有一个选项可以添加到每个表格，解析函数需要此数据来满足该选项
 	opts._arrObjTabHeadRows = arrObjTabHeadRows || null
 	opts.colW = arrColW
 	getSlidesForTableRows([...arrObjTabHeadRows, ...arrObjTabBodyRows, ...arrObjTabFootRows], opts, pptx.presLayout, masterSlide).forEach((slide, idxTr) => {
-		// A: Create new Slide
+		// A: 创建新幻灯片
 		const newSlide = pptx.addSlide({ masterName: opts.masterSlideName || null })
 
-		// B: DESIGN: Reset `y` to startY or margin after first Slide (ISSUE#43, ISSUE#47, ISSUE#48)
+		// B: 设计: 在第一张幻灯片后将 `y` 重置为 startY 或 margin (ISSUE#43, ISSUE#47, ISSUE#48)
 		if (idxTr === 0) opts.y = opts.y || arrInchMargins[0]
 		if (idxTr > 0) opts.y = opts.autoPageSlideStartY || opts.newSlideStartY || arrInchMargins[0]
 		if (opts.verbose) console.log(`| opts.autoPageSlideStartY: ${opts.autoPageSlideStartY} / arrInchMargins[0]: ${arrInchMargins[0]} => opts.y = ${opts.y}`)
 
-		// C: Add table to Slide
+		// C: 将表格添加到幻灯片
 		newSlide.addTable(slide.rows, { x: opts.x || arrInchMargins[3], y: opts.y, w: Number(emuSlideTabW) / EMU, colW: arrColW, autoPage: false })
 
-		// D: Add any additional objects
+		// D: 添加任何额外的对象
 		if (opts.addImage) {
 			opts.addImage.options = opts.addImage.options || {}
 			if (!opts.addImage.image || (!opts.addImage.image.path && !opts.addImage.image.data)) {

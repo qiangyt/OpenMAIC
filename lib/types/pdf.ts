@@ -1,33 +1,33 @@
 /**
- * PDF parsing result types
- * Extended to support advanced features from providers like MinerU
+ * PDF 解析结果类型
+ * 扩展以支持 MinerU 等服务提供者的高级功能
  */
 
 /**
- * Parsed PDF content with text and images
+ * 解析后的 PDF 内容，包含文本和图像
  */
 export interface ParsedPdfContent {
-  /** Extracted text content from the PDF */
+  /** 从 PDF 提取的文本内容 */
   text: string;
 
-  /** Array of images as base64 data URLs */
+  /** base64 数据 URL 格式的图像数组 */
   images: string[];
 
-  /** Extracted tables (MinerU feature) */
+  /** 提取的表格（MinerU 功能） */
   tables?: Array<{
     page: number;
     data: string[][];
     caption?: string;
   }>;
 
-  /** Extracted formulas (MinerU feature) */
+  /** 提取的公式（MinerU 功能） */
   formulas?: Array<{
     page: number;
     latex: string;
     position?: { x: number; y: number; width: number; height: number };
   }>;
 
-  /** Layout analysis (MinerU feature) */
+  /** 布局分析（MinerU 功能） */
   layout?: Array<{
     page: number;
     type: 'title' | 'text' | 'image' | 'table' | 'formula';
@@ -35,17 +35,17 @@ export interface ParsedPdfContent {
     position?: { x: number; y: number; width: number; height: number };
   }>;
 
-  /** Metadata about the PDF */
+  /** PDF 元数据 */
   metadata?: {
     fileName?: string;
     fileSize?: number;
     pageCount: number;
     parser?: string; // 'unpdf' | 'mineru'
     processingTime?: number;
-    taskId?: string; // MinerU task ID
-    /** Image ID to base64 URL mapping (used in generation pipeline) */
-    imageMapping?: Record<string, string>; // e.g., { "img_1": "data:image/png;base64,..." }
-    /** PdfImage array with page numbers (used in generation pipeline) */
+    taskId?: string; // MinerU 任务 ID
+    /** 图像 ID 到 base64 URL 的映射（用于生成流水线） */
+    imageMapping?: Record<string, string>; // 例如 { "img_1": "data:image/png;base64,..." }
+    /** 带页码的 PdfImage 数组（用于生成流水线） */
     pdfImages?: Array<{
       id: string;
       src: string;
@@ -59,15 +59,15 @@ export interface ParsedPdfContent {
 }
 
 /**
- * Request parameters for PDF parsing
+ * PDF 解析请求参数
  */
 export interface ParsePdfRequest {
-  /** PDF file to parse */
+  /** 要解析的 PDF 文件 */
   pdf: File;
 }
 
 /**
- * Response from PDF parsing API
+ * PDF 解析 API 响应
  */
 export interface ParsePdfResponse {
   success: boolean;

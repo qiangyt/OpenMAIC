@@ -18,7 +18,7 @@ interface SceneContextValue<T = unknown> {
   sceneType: Scene['type'];
   sceneData: T;
   updateSceneData: (updater: (draft: T) => void) => void;
-  // Internal: subscribe to scene data changes
+  // 内部：订阅场景数据变更
   subscribe: (callback: () => void) => () => void;
   getSnapshot: () => T;
 }
@@ -26,17 +26,17 @@ interface SceneContextValue<T = unknown> {
 const SceneContext = createContext<SceneContextValue | null>(null);
 
 /**
- * Generic Scene Provider
- * Provides current scene data and update methods to child components
- * Automatically syncs changes back to stageStore
+ * 通用场景提供者
+ * 为子组件提供当前场景数据和更新方法
+ * 自动将变更同步回 stageStore
  *
- * Usage:
+ * 用法：
  * <SceneProvider>
- *   <SlideRenderer /> // Uses useSceneData<SlideContent>()
+ *   <SlideRenderer /> // 使用 useSceneData<SlideContent>()
  * </SceneProvider>
  */
 export function SceneProvider({ children }: { children: React.ReactNode }) {
-  // Subscribe to current scene
+  // 订阅当前场景
   const currentScene = useStageStore((state) => {
     if (!state.currentSceneId) return null;
     return state.scenes.find((s) => s.id === state.currentSceneId) || null;
@@ -48,10 +48,10 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
   const sceneType = currentScene?.type || 'slide';
   const sceneData = currentScene?.content || null;
 
-  // Listeners for scene data changes
+  // 场景数据变更的监听器
   const listenersRef = useRef(new Set<() => void>());
 
-  // Subscribe function for child components
+  // 供子组件使用的订阅函数
   const subscribe = useCallback((callback: () => void) => {
     listenersRef.current.add(callback);
     return () => {
@@ -59,17 +59,17 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Get current snapshot
+  // 获取当前快照
   const getSnapshot = useCallback(() => {
     return sceneData;
   }, [sceneData]);
 
-  // Notify all listeners when sceneData changes
+  // 当 sceneData 变更时通知所有监听器
   useEffect(() => {
     listenersRef.current.forEach((listener) => listener());
   }, [sceneData]);
 
-  // Update scene data with Immer
+  // 使用 Immer 更新场景数据
   const updateSceneData = useCallback(
     (updater: (draft: unknown) => void) => {
       if (!currentScene) return;
@@ -94,7 +94,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     [sceneId, sceneType, sceneData, updateSceneData, subscribe, getSnapshot],
   );
 
-  // Don't render anything if there's no scene - let parent component handle this
+  // 如果没有场景则不渲染任何内容 - 让父组件处理此情况
   if (!currentScene) {
     return null;
   }
@@ -103,15 +103,15 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Hook to access current scene data
- * Type-safe with generics
+ * 访问当前场景数据的 Hook
+ * 使用泛型实现类型安全
  *
  * @example
- * // In SlideRenderer
+ * // 在 SlideRenderer 中
  * const { sceneData, updateSceneData } = useSceneData<SlideContent>();
  * const Canvas = sceneData.Canvas;
  *
- * // Update Canvas background
+ * // 更新 Canvas 背景
  * updateSceneData(draft => {
  *   draft.Canvas.background = { type: 'solid', color: '#fff' };
  * });
@@ -125,16 +125,16 @@ export function useSceneData<T = unknown>(): SceneContextValue<T> {
 }
 
 /**
- * Hook to subscribe to a specific part of scene data
- * **Precise subscription** - only re-renders when the selector return value changes
+ * 订阅场景数据特定部分的 Hook
+ * **精确订阅** - 仅当选择器返回值变更时才重新渲染
  *
- * How it works:
- * 1. Uses useSyncExternalStore to subscribe to an external data source
- * 2. Selector extracts the needed data slice
- * 3. React auto-performs shallow comparison, only triggering re-render when the return value changes
+ * 工作原理：
+ * 1. 使用 useSyncExternalStore 订阅外部数据源
+ * 2. 选择器提取所需的数据切片
+ * 3. React 自动执行浅比较，仅当返回值变更时才触发重新渲染
  *
  * @example
- * // Only subscribes to background; changes to elements won't trigger re-render
+ * // 仅订阅背景；元素的变更不会触发重新渲染
  * const background = useSceneSelector<SlideContent>(
  *   content => content.Canvas.background
  * );
@@ -147,23 +147,23 @@ export function useSceneSelector<T = unknown, R = unknown>(selector: (data: T) =
 
   const { subscribe, getSnapshot } = context as SceneContextValue<T>;
 
-  // Cache selector and previous result
+  // 缓存选择器和上一次的结果
   const selectorRef = useRef(selector);
   const snapshotRef = useRef<R | undefined>(undefined);
 
-  // Update selector ref
+  // 更新选择器引用
   useEffect(() => {
     selectorRef.current = selector;
   }, [selector]);
 
-  // Use useSyncExternalStore for precise subscription
+  // 使用 useSyncExternalStore 实现精确订阅
   return useSyncExternalStore(
     subscribe,
     () => {
       const snapshot = getSnapshot();
       const newValue = selectorRef.current(snapshot);
 
-      // Shallow comparison optimization: if value hasn't changed, return previous reference
+      // 浅比较优化：如果值未变更，返回之前的引用
       if (snapshotRef.current !== undefined && shallowEqual(snapshotRef.current, newValue)) {
         return snapshotRef.current;
       }
@@ -172,7 +172,7 @@ export function useSceneSelector<T = unknown, R = unknown>(selector: (data: T) =
       return newValue;
     },
     () => {
-      // SSR fallback
+      // SSR 回退
       const snapshot = getSnapshot();
       return selectorRef.current(snapshot);
     },
@@ -180,8 +180,8 @@ export function useSceneSelector<T = unknown, R = unknown>(selector: (data: T) =
 }
 
 /**
- * Shallow comparison function
- * Used to optimize re-renders in useSceneSelector
+ * 浅比较函数
+ * 用于优化 useSceneSelector 的重新渲染
  */
 function shallowEqual(a: unknown, b: unknown): boolean {
   if (Object.is(a, b)) {

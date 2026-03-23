@@ -33,7 +33,7 @@ export function LectureNotesView({ notes, currentSceneId }: LectureNotesViewProp
   const { t } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to the current scene note
+  // 自动滚动到当前场景笔记
   useEffect(() => {
     if (!currentSceneId || !containerRef.current) return;
     const el = containerRef.current.querySelector(`[data-scene-id="${currentSceneId}"]`);
@@ -42,7 +42,7 @@ export function LectureNotesView({ notes, currentSceneId }: LectureNotesViewProp
     }
   }, [currentSceneId]);
 
-  // Empty state
+  // 空状态
   if (notes.length === 0) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-center p-6">
@@ -80,9 +80,9 @@ export function LectureNotesView({ notes, currentSceneId }: LectureNotesViewProp
                 : 'bg-gray-50/50 dark:bg-gray-800/30',
             )}
           >
-            {/* Page label row */}
+            {/* 页码标签行 */}
             <div className="flex items-center gap-2 mb-1.5">
-              {/* Timeline dot */}
+              {/* 时间线圆点 */}
               <div
                 className={cn(
                   'w-2 h-2 rounded-full shrink-0',
@@ -108,16 +108,16 @@ export function LectureNotesView({ notes, currentSceneId }: LectureNotesViewProp
               )}
             </div>
 
-            {/* Scene title */}
+            {/* 场景标题 */}
             <h4 className="text-[13px] font-bold text-gray-800 dark:text-gray-100 mb-1.5 leading-snug pl-4">
               {note.sceneTitle}
             </h4>
 
-            {/* Ordered items: spotlight/laser inline at sentence start, discussion as card */}
+            {/* 有序项目：聚光灯/激光笔内联显示在句子开头，讨论以卡片形式显示 */}
             <div className="pl-4 space-y-1">
               {(() => {
-                // Build render rows: group inline actions (spotlight/laser) with next speech,
-                // but render discussion as its own block
+                // 构建渲染行：将内联动作（聚光灯/激光笔）与下一条语音分组，
+                // 但将讨论作为独立块渲染
                 type Row =
                   | { kind: 'speech'; inlineActions: string[]; text: string }
                   | { kind: 'discussion'; label?: string }
@@ -126,7 +126,7 @@ export function LectureNotesView({ notes, currentSceneId }: LectureNotesViewProp
                 let pendingInline: string[] = [];
                 for (const item of note.items) {
                   if (item.kind === 'action' && item.type === 'discussion') {
-                    // Flush pending inline actions as trailing if any
+                    // 如果有待处理的内联动作，将其作为尾部刷新
                     if (pendingInline.length > 0) {
                       rows.push({
                         kind: 'trailing',

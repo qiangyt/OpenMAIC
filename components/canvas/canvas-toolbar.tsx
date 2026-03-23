@@ -36,7 +36,7 @@ export interface CanvasToolbarProps {
   readonly showStopDiscussion?: boolean;
   readonly onStopDiscussion?: () => void;
   readonly className?: string;
-  // Audio/playback controls
+  // 音频/播放控制
   readonly ttsEnabled?: boolean;
   readonly ttsMuted?: boolean;
   readonly ttsVolume?: number;
@@ -48,19 +48,19 @@ export interface CanvasToolbarProps {
   readonly onCycleSpeed?: () => void;
 }
 
-/* Compact control button */
+/* 紧凑控制按钮 */
 const ctrlBtn = cn(
   'relative w-7 h-7 rounded-md flex items-center justify-center',
   'transition-all duration-150 outline-none cursor-pointer',
   'hover:bg-gray-500/[0.08] dark:hover:bg-gray-400/[0.08] active:scale-90',
 );
 
-/* Subtle separator */
+/* 细微分隔符 */
 function CtrlDivider() {
   return <div className="w-px h-3 bg-gray-200/80 dark:bg-gray-700/60 mx-0.5 shrink-0" />;
 }
 
-/* Volume icon based on level */
+/* 基于音量级别的图标 */
 function VolumeIcon({
   muted,
   volume,
@@ -112,7 +112,7 @@ export function CanvasToolbar({
     (s) => s.stage?.whiteboard?.[0]?.elements?.length || 0,
   );
 
-  // Volume slider hover state
+  // 音量滑块悬停状态
   const [volumeHover, setVolumeHover] = useState(false);
   const volumeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const volumeContainerRef = useRef<HTMLDivElement>(null);
@@ -126,15 +126,15 @@ export function CanvasToolbar({
     volumeTimerRef.current = setTimeout(() => setVolumeHover(false), 300);
   }, []);
 
-  // Cleanup volume hover timer on unmount
+  // 组件卸载时清理音量悬停计时器
   useEffect(() => () => clearTimeout(volumeTimerRef.current), []);
 
-  // Effective volume for display
+  // 用于显示的有效音量
   const effectiveVolume = ttsMuted ? 0 : ttsVolume;
 
   return (
     <div className={cn('flex items-center', className)}>
-      {/* ── Left: sidebar toggle + page indicator ── */}
+      {/* ── 左侧：侧边栏切换 + 页面指示器 ── */}
       <div className="flex items-center gap-1 shrink-0 pl-1">
         {onToggleSidebar && (
           <button
@@ -158,10 +158,10 @@ export function CanvasToolbar({
         </span>
       </div>
 
-      {/* ── Center: unified playback controls ── */}
+      {/* ── 中间：统一播放控制 ── */}
       <div className="flex-1 flex items-center justify-center min-w-0">
         <div className="inline-flex items-center gap-0.5 bg-gray-100/60 dark:bg-gray-800/60 rounded-lg px-1 h-7">
-          {/* Volume with vertical popover slider */}
+          {/* 音量及垂直弹出滑块 */}
           {onToggleMute && (
             <div
               ref={volumeContainerRef}
@@ -186,7 +186,7 @@ export function CanvasToolbar({
                 <VolumeIcon muted={!!ttsMuted} volume={ttsVolume} disabled={!ttsEnabled} />
               </button>
 
-              {/* Vertical volume slider (pops up above) */}
+              {/* 垂直音量滑块（从上方弹出） */}
               <div
                 className={cn(
                   'absolute bottom-full left-1/2 -translate-x-1/2 mb-2 flex flex-col items-center',
@@ -222,13 +222,13 @@ export function CanvasToolbar({
                     )}
                   />
                 </div>
-                {/* Arrow pointing down */}
+                {/* 向下箭头 */}
                 <div className="w-2 h-2 bg-white dark:bg-gray-800 border-b border-r border-gray-200 dark:border-gray-700 rotate-45 -mt-[5px]" />
               </div>
             </div>
           )}
 
-          {/* Speed */}
+          {/* 速度 */}
           {onCycleSpeed && (
             <TooltipProvider delayDuration={0}>
               <Tooltip>
@@ -258,7 +258,7 @@ export function CanvasToolbar({
 
           <CtrlDivider />
 
-          {/* Prev scene */}
+          {/* 上一场景 */}
           {scenesCount > 1 && (
             <button
               onClick={onPrevSlide}
@@ -273,7 +273,7 @@ export function CanvasToolbar({
             </button>
           )}
 
-          {/* Play / Pause / Stop Discussion */}
+          {/* 播放 / 暂停 / 停止讨论 */}
           {showStopDiscussion && onStopDiscussion ? (
             <button
               onClick={(e) => {
@@ -314,7 +314,7 @@ export function CanvasToolbar({
             </button>
           ) : null}
 
-          {/* Next scene */}
+          {/* 下一场景 */}
           {scenesCount > 1 && (
             <button
               onClick={onNextSlide}
@@ -331,7 +331,7 @@ export function CanvasToolbar({
 
           <CtrlDivider />
 
-          {/* Auto-play */}
+          {/* 自动播放 */}
           {onToggleAutoPlay && (
             <TooltipProvider delayDuration={0}>
               <Tooltip>
@@ -357,7 +357,7 @@ export function CanvasToolbar({
             </TooltipProvider>
           )}
 
-          {/* Whiteboard */}
+          {/* 白板 */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -380,7 +380,7 @@ export function CanvasToolbar({
         </div>
       </div>
 
-      {/* ── Right: chat toggle ── */}
+      {/* ── 右侧：聊天切换 ── */}
       <div className="flex items-center justify-end gap-px shrink-0 pr-1">
         {onToggleChat && (
           <button

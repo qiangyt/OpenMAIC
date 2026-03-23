@@ -5,15 +5,15 @@ import { useStageStore } from './stage';
 import type { Scene } from '@/lib/types/stage';
 
 export interface SnapshotState {
-  // State
-  snapshotCursor: number; // Snapshot pointer
-  snapshotLength: number; // Snapshot count
+  // 状态
+  snapshotCursor: number; // 快照指针
+  snapshotLength: number; // 快照数量
 
-  // Computed
+  // 计算属性
   canUndo: () => boolean;
   canRedo: () => boolean;
 
-  // Actions
+  // 操作
   setSnapshotCursor: (cursor: number) => void;
   setSnapshotLength: (length: number) => void;
   initSnapshotDatabase: () => Promise<void>;
@@ -23,26 +23,26 @@ export interface SnapshotState {
 }
 
 /**
- * Snapshot store for undo/redo functionality
- * Based on PPTist's snapshot store, migrated to Zustand
+ * 快照 Store，用于撤销/重做功能
+ * 基于 PPTist 的快照 Store，迁移到 Zustand
  *
- * Uses IndexedDB (via Dexie) to store snapshot history
+ * 使用 IndexedDB（通过 Dexie）存储快照历史
  */
 export const useSnapshotStore = create<SnapshotState>((set, get) => ({
-  // Initial state
+  // 初始状态
   snapshotCursor: -1,
   snapshotLength: 0,
 
-  // Computed properties
+  // 计算属性
   canUndo: () => get().snapshotCursor > 0,
   canRedo: () => get().snapshotCursor < get().snapshotLength - 1,
 
-  // Actions
+  // 操作
   setSnapshotCursor: (cursor: number) => set({ snapshotCursor: cursor }),
   setSnapshotLength: (length: number) => set({ snapshotLength: length }),
 
   /**
-   * Initialize snapshot database with current state
+   * 用当前状态初始化快照数据库
    */
   initSnapshotDatabase: async () => {
     const stageStore = useStageStore.getState();
@@ -60,42 +60,42 @@ export const useSnapshotStore = create<SnapshotState>((set, get) => ({
   },
 
   /**
-   * Add a new snapshot to the history
-   * Handles snapshot length limit and cursor position
+   * 向历史记录添加新快照
+   * 处理快照长度限制和指针位置
    */
   addSnapshot: async () => {
     const stageStore = useStageStore.getState();
     const { snapshotCursor } = get();
 
-    // Get all snapshot IDs from IndexedDB
+    // 从 IndexedDB 获取所有快照 ID
     const allKeys = await db.snapshots.orderBy('id').keys();
 
     let needDeleteKeys: IndexableTypeArray = [];
 
-    // If cursor is not at the end, delete all snapshots after cursor
-    // This happens when user undoes multiple times then performs a new action
+    // 如果指针不在末尾，删除指针后的所有快照
+    // 这发生在用户多次撤销后执行新操作时
     if (snapshotCursor >= 0 && snapshotCursor < allKeys.length - 1) {
       needDeleteKeys = allKeys.slice(snapshotCursor + 1);
     }
 
-    // Add new snapshot
+    // 添加新快照
     const snapshot = {
       index: stageStore.getSceneIndex(stageStore.currentSceneId || ''),
       slides: JSON.parse(JSON.stringify(stageStore.scenes)),
     };
     await db.snapshots.add(snapshot);
 
-    // Calculate new snapshot length
+    // 计算新的快照长度
     let snapshotLength = allKeys.length - needDeleteKeys.length + 1;
 
-    // Enforce snapshot length limit
+    // 执行快照长度限制
     const snapshotLengthLimit = 20;
     if (snapshotLength > snapshotLengthLimit) {
       needDeleteKeys.push(allKeys[0]);
       snapshotLength--;
     }
 
-    // Maintain page focus after undo: set the second-to-last snapshot's index to current scene
+    // 撤销后保持页面焦点：将倒数第二个快照的索引设置为当前场景
     // https://github.com/pipipi-pikachu/PPTist/issues/27
     if (snapshotLength >= 2) {
       const currentSceneIndex = stageStore.getSceneIndex(stageStore.currentSceneId || '');
@@ -104,7 +104,7 @@ export const useSnapshotStore = create<SnapshotState>((set, get) => ({
       });
     }
 
-    // Delete obsolete snapshots
+    // 删除过时的快照
     await db.snapshots.bulkDelete(needDeleteKeys as number[]);
 
     set({
@@ -114,7 +114,7 @@ export const useSnapshotStore = create<SnapshotState>((set, get) => ({
   },
 
   /**
-   * Undo: restore previous snapshot
+   * 撤销：恢复上一个快照
    */
   undo: async () => {
     const { snapshotCursor } = get();
@@ -139,7 +139,7 @@ export const useSnapshotStore = create<SnapshotState>((set, get) => ({
   },
 
   /**
-   * Redo: restore next snapshot
+   * 重做：恢复下一个快照
    */
   redo: async () => {
     const { snapshotCursor, snapshotLength } = get();

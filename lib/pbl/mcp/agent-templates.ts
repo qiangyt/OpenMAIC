@@ -1,7 +1,7 @@
 /**
- * Agent template prompts for PBL Question and Judge agents.
+ * PBL 提问助手和评判助手的智能体模板提示词。
  *
- * Migrated from PBL-Nano with multi-language support.
+ * 从 PBL-Nano 迁移而来，支持多语言。
  */
 
 export function getQuestionAgentPrompt(language: string = 'en-US'): string {

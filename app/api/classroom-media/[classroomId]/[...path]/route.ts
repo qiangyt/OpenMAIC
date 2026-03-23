@@ -23,18 +23,18 @@ export async function GET(
 ) {
   const { classroomId, path: pathSegments } = await params;
 
-  // Validate classroomId
+  // 验证 classroomId
   if (!isValidClassroomId(classroomId)) {
     return NextResponse.json({ error: 'Invalid classroom ID' }, { status: 400 });
   }
 
-  // Validate path segments — no traversal
+  // 验证路径段 — 禁止目录遍历
   const joined = pathSegments.join('/');
   if (joined.includes('..') || pathSegments.some((s) => s.includes('\0'))) {
     return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
   }
 
-  // Only allow media/ and audio/ subdirectories
+  // 只允许 media/ 和 audio/ 子目录
   const subDir = pathSegments[0];
   if (subDir !== 'media' && subDir !== 'audio') {
     return NextResponse.json({ error: 'Invalid path' }, { status: 404 });
@@ -44,7 +44,7 @@ export async function GET(
   const resolvedBase = path.resolve(CLASSROOMS_DIR, classroomId);
 
   try {
-    // Resolve symlinks and verify the real path stays within the classroom dir
+    // 解析符号链接并验证实际路径保持在课堂目录内
     const realPath = await fs.realpath(filePath);
     if (!realPath.startsWith(resolvedBase + path.sep) && realPath !== resolvedBase) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -58,7 +58,7 @@ export async function GET(
     const ext = path.extname(realPath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
-    // Stream the file to avoid loading large videos into memory
+    // 流式传输文件以避免将大型视频加载到内存中
     const stream = createReadStream(realPath);
     const webStream = new ReadableStream({
       start(controller) {

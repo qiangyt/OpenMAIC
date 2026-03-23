@@ -4,23 +4,23 @@ import { useSlideBackgroundStyle } from '@/lib/hooks/use-slide-background-style'
 import { ThumbnailElement } from './ThumbnailElement';
 
 interface ThumbnailSlideProps {
-  /** Slide data */
+  /** 幻灯片数据 */
   readonly slide: Slide;
-  /** Thumbnail width */
+  /** 缩略图宽度 */
   readonly size: number;
-  /** Viewport width base (default 1000px) */
+  /** 视口宽度基准（默认 1000px） */
   readonly viewportSize: number;
-  /** Viewport aspect ratio (default 0.5625 i.e. 16:9) */
+  /** 视口宽高比（默认 0.5625 即 16:9） */
   readonly viewportRatio: number;
-  /** Whether visible (for lazy loading optimization) */
+  /** 是否可见（用于懒加载优化） */
   readonly visible?: boolean;
 }
 
 /**
- * Thumbnail slide component
+ * 缩略图幻灯片组件
  *
- * Renders a thumbnail preview of a single slide
- * Uses CSS transform scale to resize the entire view for better performance
+ * 渲染单个幻灯片的缩略图预览
+ * 使用 CSS transform scale 来缩放整个视图以获得更好的性能
  */
 export function ThumbnailSlide({
   slide,
@@ -29,10 +29,10 @@ export function ThumbnailSlide({
   viewportRatio,
   visible = true,
 }: ThumbnailSlideProps) {
-  // Calculate scale ratio
+  // 计算缩放比例
   const scale = useMemo(() => size / viewportSize, [size, viewportSize]);
 
-  // Get background style
+  // 获取背景样式
   const { backgroundStyle } = useSlideBackgroundStyle(slide.background);
 
   if (!visible) {
@@ -67,10 +67,10 @@ export function ThumbnailSlide({
           transform: `scale(${scale})`,
         }}
       >
-        {/* Background */}
+        {/* 背景 */}
         <div className="background w-full h-full bg-center absolute" style={backgroundStyle} />
 
-        {/* Render all elements */}
+        {/* 渲染所有元素 */}
         {slide.elements.map((element, index) => (
           <ThumbnailElement key={element.id} elementInfo={element} elementIndex={index + 1} />
         ))}

@@ -17,7 +17,7 @@ interface AgentRevealModalProps {
   }>;
   open: boolean;
   onClose: () => void;
-  /** Called once after all cards are revealed — signals generation can continue */
+  /** 所有卡片揭示完成后调用一次 — 表示生成可以继续 */
   onAllRevealed?: () => void;
 }
 
@@ -25,7 +25,7 @@ function isUrl(str: string): boolean {
   return str.startsWith('http') || str.startsWith('/') || str.startsWith('data:');
 }
 
-/** Lighten a hex color by mixing with white */
+/** 通过与白色混合来提亮十六进制颜色 */
 function lighten(hex: string, amount: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
@@ -95,7 +95,7 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
     return () => clearTimeout(startTimeout);
   }, [open, agents.length]);
 
-  // Switch from preserve-3d to flat after all flip animations complete to enable scrolling
+  // 所有翻转动画完成后从 preserve-3d 切换到 flat 以启用滚动
   useEffect(() => {
     if (!allRevealed) return;
     const timer = setTimeout(() => setFlipsComplete(true), 800);
@@ -112,7 +112,7 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* Close button */}
+          {/* 关闭按钮 */}
           {allRevealed && (
             <motion.button
               className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-full bg-black/5 text-zinc-500 backdrop-blur-sm transition-colors hover:bg-black/10 hover:text-zinc-700 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20 dark:hover:text-white"
@@ -125,7 +125,7 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
             </motion.button>
           )}
 
-          {/* Title */}
+          {/* 标题 */}
           <motion.h2
             className="mb-8 text-2xl font-bold text-zinc-800 drop-shadow-sm dark:text-white dark:drop-shadow-lg md:text-3xl"
             initial={{ opacity: 0, y: -20 }}
@@ -136,7 +136,7 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
             {t('generation.agentRevealTitle')}
           </motion.h2>
 
-          {/* Cards */}
+          {/* 卡片 */}
           <div className="flex flex-wrap items-stretch justify-center gap-4 px-4 md:gap-5">
             {agents.map((agent, index) => {
               const isRevealed = index < revealedCount;
@@ -159,37 +159,37 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
                     animate={{ rotateY: isRevealed ? 0 : 180 }}
                     transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
                   >
-                    {/* ====== FRONT FACE ====== */}
+                    {/* ====== 正面 ====== */}
                     <div
                       className="absolute inset-0 overflow-clip rounded-2xl"
                       style={{ backfaceVisibility: 'hidden' }}
                     >
-                      {/* Outer colored border */}
+                      {/* 外部彩色边框 */}
                       <div
                         className="absolute inset-0 rounded-2xl p-[2px]"
                         style={{
                           background: `linear-gradient(160deg, ${agent.color}, ${lighten(agent.color, 0.35)}, ${agent.color})`,
                         }}
                       >
-                        {/* Inner card body */}
+                        {/* 内部卡片主体 */}
                         <div className="relative flex size-full flex-col overflow-clip rounded-[14px] bg-white dark:bg-zinc-900">
-                          {/* Top gradient band with texture */}
+                          {/* 顶部渐变条带纹理 */}
                           <div className="relative shrink-0 overflow-hidden" style={{ height: 56 }}>
-                            {/* Color gradient fill */}
+                            {/* 颜色渐变填充 */}
                             <div
                               className="absolute inset-0"
                               style={{
                                 background: `linear-gradient(135deg, ${agent.color}30 0%, ${agent.color}10 100%)`,
                               }}
                             />
-                            {/* Subtle noise texture */}
+                            {/* 细微噪点纹理 */}
                             <div
                               className="absolute inset-0 opacity-[0.04]"
                               style={{
                                 backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
                               }}
                             />
-                            {/* Decorative corner accent lines */}
+                            {/* 装饰性角落线条 */}
                             <svg
                               className="absolute right-0 top-0 size-16 text-white/[0.06]"
                               viewBox="0 0 64 64"
@@ -221,7 +221,7 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
                             </svg>
                           </div>
 
-                          {/* Avatar — overlapping the band */}
+                          {/* 头像 — 与顶部条带重叠 */}
                           <div className="relative z-10 -mt-7 flex justify-center">
                             <div
                               className="flex size-[50px] items-center justify-center rounded-full border-[2.5px] shadow-lg shadow-black/40"
@@ -244,7 +244,7 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
                             </div>
                           </div>
 
-                          {/* Name + role row */}
+                          {/* 名称 + 角色行 */}
                           <div className="mt-1.5 flex flex-col items-center gap-0.5 px-3">
                             <h3
                               className="max-w-full truncate text-center text-[13px] font-bold tracking-wide"
@@ -264,7 +264,7 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
                             </span>
                           </div>
 
-                          {/* Thin ornamental divider */}
+                          {/* 细装饰分隔线 */}
                           <div className="mx-5 mt-2 flex items-center gap-2">
                             <div
                               className="h-px flex-1"
@@ -284,14 +284,14 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
                             />
                           </div>
 
-                          {/* Persona text — fills remaining space */}
+                          {/* 人设文本 — 填充剩余空间 */}
                           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3.5 pt-1.5 pb-3">
                             <p className="text-left text-[10.5px] leading-[1.65] text-zinc-600 dark:text-zinc-400">
                               {agent.persona}
                             </p>
                           </div>
 
-                          {/* Bottom edge glow */}
+                          {/* 底部边缘发光 */}
                           <div
                             className="pointer-events-none absolute inset-x-0 bottom-0 h-8"
                             style={{
@@ -302,7 +302,7 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
                       </div>
                     </div>
 
-                    {/* ====== BACK FACE ====== */}
+                    {/* ====== 背面 ====== */}
                     <div
                       className="absolute inset-0 overflow-hidden rounded-2xl"
                       style={{
@@ -310,7 +310,7 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
                         transform: 'rotateY(180deg)',
                       }}
                     >
-                      {/* Gradient border matching front style */}
+                      {/* 与正面样式匹配的渐变边框 */}
                       <div
                         className="absolute inset-0 rounded-2xl p-[2px]"
                         style={{
@@ -324,9 +324,9 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
                               'linear-gradient(145deg, #1e1b4b 0%, #312e81 40%, #1e1b4b 100%)',
                           }}
                         >
-                          {/* Decorative inner border */}
+                          {/* 装饰性内边框 */}
                           <div className="absolute inset-3 rounded-xl border border-white/[0.08]" />
-                          {/* Diamond pattern corners */}
+                          {/* 菱形图案角落 */}
                           <svg
                             className="absolute left-3 top-3 size-5 text-white/[0.07]"
                             viewBox="0 0 20 20"
@@ -351,7 +351,7 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
                           >
                             <path d="M10 0 L20 10 L10 20 L0 10 Z" fill="currentColor" />
                           </svg>
-                          {/* Center icon */}
+                          {/* 中心图标 */}
                           <Sparkles className="size-9 text-purple-300/70" />
                           <span className="mt-1.5 text-xl font-bold text-purple-200/60">?</span>
                         </div>
@@ -363,7 +363,7 @@ export function AgentRevealModal({ agents, open, onClose, onAllRevealed }: Agent
             })}
           </div>
 
-          {/* Progress dots + continue */}
+          {/* 进度点 + 继续 */}
           <motion.div
             className="mt-6 flex flex-col items-center gap-4"
             initial={{ opacity: 0 }}

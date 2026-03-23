@@ -51,7 +51,7 @@ export function OutlinesEditor({
 
   const removeOutline = (index: number) => {
     const newOutlines = outlines.filter((_, i) => i !== index);
-    // Update order
+    // 更新顺序
     newOutlines.forEach((outline, i) => {
       outline.order = i + 1;
     });
@@ -63,7 +63,7 @@ export function OutlinesEditor({
     if (newIndex < 0 || newIndex >= outlines.length) return;
     const newOutlines = [...outlines];
     [newOutlines[index], newOutlines[newIndex]] = [newOutlines[newIndex], newOutlines[index]];
-    // Update order
+    // 更新顺序
     newOutlines.forEach((outline, i) => {
       outline.order = i + 1;
     });
@@ -276,7 +276,7 @@ export function OutlinesEditor({
         </Card>
       )}
 
-      {/* Actions */}
+      {/* 操作按钮 */}
       <div className="flex justify-between pt-4">
         <Button variant="outline" onClick={onBack} disabled={isLoading}>
           返回修改需求

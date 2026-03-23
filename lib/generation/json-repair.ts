@@ -1,5 +1,5 @@
 /**
- * JSON parsing with fallback strategies for AI-generated responses.
+ * AI 生成响应的 JSON 解析，带回退策略。
  */
 
 import { jsonrepair } from 'jsonrepair';
@@ -7,11 +7,11 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('Generation');
 
 export function parseJsonResponse<T>(response: string): T | null {
-  // Strategy 1: Try to extract JSON from markdown code blocks (may have multiple)
+  // 策略 1: 尝试从 markdown 代码块中提取 JSON（可能有多个）
   const codeBlockMatches = response.matchAll(/```(?:json)?\s*([\s\S]*?)```/g);
   for (const match of codeBlockMatches) {
     const extracted = match[1].trim();
-    // Only try if it looks like JSON (starts with { or [)
+    // 只有看起来像 JSON（以 { 或 [ 开头）才尝试
     if (extracted.startsWith('{') || extracted.startsWith('[')) {
       const result = tryParseJson<T>(extracted);
       if (result !== null) {
@@ -21,13 +21,13 @@ export function parseJsonResponse<T>(response: string): T | null {
     }
   }
 
-  // Strategy 2: Try to find JSON structure directly in response (no code block)
-  // Look for array or object start
+  // 策略 2: 尝试直接在响应中查找 JSON 结构（无代码块）
+  // 查找数组或对象的起始位置
   const jsonStartArray = response.indexOf('[');
   const jsonStartObject = response.indexOf('{');
 
   if (jsonStartArray !== -1 || jsonStartObject !== -1) {
-    // Prefer the structure that appears first
+    // 优先选择先出现的结构
     const startIndex =
       jsonStartArray === -1
         ? jsonStartObject
@@ -35,7 +35,7 @@ export function parseJsonResponse<T>(response: string): T | null {
           ? jsonStartArray
           : Math.min(jsonStartArray, jsonStartObject);
 
-    // Find the matching close bracket
+    // 查找匹配的闭合括号
     let depth = 0;
     let endIndex = -1;
     let inString = false;
@@ -81,7 +81,7 @@ export function parseJsonResponse<T>(response: string): T | null {
     }
   }
 
-  // Strategy 3: Last resort - try the whole response
+  // 策略 3: 最后手段 - 尝试整个响应
   const result = tryParseJson<T>(response.trim());
   if (result !== null) {
     log.debug('Successfully parsed raw response as JSON');
@@ -95,40 +95,40 @@ export function parseJsonResponse<T>(response: string): T | null {
 }
 
 /**
- * Try to parse JSON with various fixes for common AI response issues
+ * 尝试解析 JSON，对 AI 响应中的常见问题进行各种修复
  */
 export function tryParseJson<T>(jsonStr: string): T | null {
-  // Attempt 1: Try parsing as-is
+  // 尝试 1: 按原样解析
   try {
     return JSON.parse(jsonStr) as T;
   } catch {
-    // Continue to fix attempts
+    // 继续尝试修复
   }
 
-  // Attempt 2: Fix common JSON issues from AI responses
+  // 尝试 2: 修复 AI 响应中的常见 JSON 问题
   try {
     let fixed = jsonStr;
 
-    // Fix 1: Handle LaTeX-style escapes that break JSON (e.g., \frac, \left, \right, \times, etc.)
-    // These are common in math content and need to be double-escaped
-    // Match backslash followed by letters (LaTeX commands) inside strings
+    // 修复 1: 处理会破坏 JSON 的 LaTeX 风格转义（如 \frac, \left, \right, \times 等）
+    // 这些在数学内容中很常见，需要双重转义
+    // 匹配字符串内的反斜杠后跟字母（LaTeX 命令）
     fixed = fixed.replace(/"([^"]*?)"/g, (_match, content) => {
-      // Double-escape any backslash followed by a letter (except valid JSON escapes)
+      // 双重转义任何反斜杠后跟字母（除了有效的 JSON 转义）
       const fixedContent = content.replace(/\\([a-zA-Z])/g, '\\\\$1');
       return `"${fixedContent}"`;
     });
 
-    // Fix 2: Fix other invalid escape sequences (e.g., \S, \L, etc.)
-    // Valid JSON escapes: \", \\, \/, \b, \f, \n, \r, \t, \uXXXX
+    // 修复 2: 修复其他无效的转义序列（如 \S, \L 等）
+    // 有效的 JSON 转义: \", \\, \/, \b, \f, \n, \r, \t, \uXXXX
     fixed = fixed.replace(/\\([^"\\\/bfnrtu\n\r])/g, (match, char) => {
-      // If it's a letter, it's likely a LaTeX command
+      // 如果是字母，很可能是 LaTeX 命令
       if (/[a-zA-Z]/.test(char)) {
         return '\\\\' + char;
       }
       return match;
     });
 
-    // Fix 3: Try to fix truncated JSON arrays/objects
+    // 修复 3: 尝试修复被截断的 JSON 数组/对象
     const trimmed = fixed.trim();
     if (trimmed.startsWith('[') && !trimmed.endsWith(']')) {
       const lastCompleteObj = fixed.lastIndexOf('}');
@@ -137,7 +137,7 @@ export function tryParseJson<T>(jsonStr: string): T | null {
         log.warn('Fixed truncated JSON array');
       }
     } else if (trimmed.startsWith('{') && !trimmed.endsWith('}')) {
-      // Try to close incomplete object
+      // 尝试闭合不完整的对象
       const openBraces = (fixed.match(/{/g) || []).length;
       const closeBraces = (fixed.match(/}/g) || []).length;
       if (openBraces > closeBraces) {
@@ -148,22 +148,22 @@ export function tryParseJson<T>(jsonStr: string): T | null {
 
     return JSON.parse(fixed) as T;
   } catch {
-    // Continue to next attempt
+    // 继续下一个尝试
   }
 
-  // Attempt 3: Use jsonrepair to fix malformed JSON (e.g. unescaped quotes in Chinese text)
+  // 尝试 3: 使用 jsonrepair 修复格式错误的 JSON（例如中文文本中的未转义引号）
   try {
     const repaired = jsonrepair(jsonStr);
     return JSON.parse(repaired) as T;
   } catch {
-    // Continue to next attempt
+    // 继续下一个尝试
   }
 
-  // Attempt 4: More aggressive fixing - remove control characters
+  // 尝试 4: 更激进的修复 - 移除控制字符
   try {
     let fixed = jsonStr;
 
-    // Remove or escape control characters
+    // 移除或转义控制字符
     fixed = fixed.replace(/[\x00-\x1F\x7F]/g, (char) => {
       switch (char) {
         case '\n':

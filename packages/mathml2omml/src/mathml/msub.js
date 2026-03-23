@@ -2,9 +2,9 @@ import { getNary, getNaryTarget } from '../ooml/index.js'
 import { walker } from '../walker.js'
 
 export function msub(element, targetParent, previousSibling, nextSibling, ancestors) {
-  // Subscript
+  // 下标
   if (element.children.length !== 2) {
-    // treat as mrow
+    // 视为 mrow 处理
     return targetParent
   }
   ancestors = [...ancestors]
@@ -16,9 +16,9 @@ export function msub(element, targetParent, previousSibling, nextSibling, ancest
   //
   // m:nAry
   //
-  // Conditions:
-  // 1. base text must be nary operator
-  // 2. no accents
+  // 条件：
+  // 1. 基底文本必须是 nary 运算符
+  // 2. 没有重音符号
   const naryChar = getNary(base)
   if (
     naryChar &&
@@ -28,7 +28,7 @@ export function msub(element, targetParent, previousSibling, nextSibling, ancest
     topTarget = getNaryTarget(naryChar, element, 'subSup', false, true)
     element.isNary = true
   } else {
-    // Check for empty base → prescript pattern (LaTeX {}_{sub}X)
+    // 检查空基底 → 前标模式（LaTeX {}_{sub}X）
     const isEmptyBase = base.name === 'mrow' && (!base.children || base.children.length === 0)
 
     if (isEmptyBase) {
@@ -98,11 +98,11 @@ export function msub(element, targetParent, previousSibling, nextSibling, ancest
     topTarget.children.push({ type: 'tag', name: 'm:sup', attribs: {}, children: [] })
     topTarget.children.push({ type: 'tag', name: 'm:e', attribs: {}, children: [] })
   }
-  // For prescript, add empty m:sup and m:e (base filled by walker redirect)
+  // 对于前标，添加空的 m:sup 和 m:e（基底由 walker 重定向填充）
   if (element.isPrescript) {
     topTarget.children.push({ type: 'tag', name: 'm:sup', attribs: {}, children: [] })
     topTarget.children.push({ type: 'tag', name: 'm:e', attribs: {}, children: [] })
   }
   targetParent.children.push(topTarget)
-  // Don't iterate over children in the usual way.
+  // 不要以常规方式遍历子元素。
 }

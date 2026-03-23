@@ -1,18 +1,18 @@
 /**
- * Shared Type Definitions for Multi-Agent Orchestration
+ * 多智能体编排的共享类型定义
  *
- * Defines the session-based multi-agent conversation system with
- * support for QA, Discussion, and Lecture session types.
+ * 定义基于会话的多智能体对话系统，
+ * 支持 QA、讨论和讲座会话类型。
  */
 
 import type { UIMessage } from 'ai';
 
-// Session Types
+// 会话类型
 export type SessionType = 'qa' | 'discussion' | 'lecture';
 export type SessionStatus = 'idle' | 'active' | 'interrupted' | 'completed';
 
 /**
- * Metadata attached to chat messages
+ * 附加到聊天消息的元数据
  */
 export interface ChatMessageMetadata {
   senderName?: string;
@@ -26,7 +26,7 @@ export interface ChatMessageMetadata {
 }
 
 /**
- * Action buttons that can be attached to messages
+ * 可附加到消息的操作按钮
  */
 export interface MessageAction {
   id: string;
@@ -36,7 +36,7 @@ export interface MessageAction {
 }
 
 /**
- * Chat session representing a conversation with one or more agents
+ * 表示与一个或多个智能体对话的聊天会话
  */
 export interface ChatSession {
   id: string;
@@ -54,18 +54,18 @@ export interface ChatSession {
 }
 
 /**
- * Session configuration
+ * 会话配置
  */
 export interface SessionConfig {
   agentIds: string[];
   maxTurns: number;
   currentTurn: number;
-  triggerAgentId?: string; // For discussion: first agent to speak
-  defaultAgentId?: string; // For QA: the responding agent
+  triggerAgentId?: string; // 讨论：第一个发言的智能体
+  defaultAgentId?: string; // QA：响应的智能体
 }
 
 /**
- * Pending tool call request sent to client for execution
+ * 发送给客户端执行的待处理工具调用请求
  */
 export interface ToolCallRequest {
   toolCallId: string;
@@ -77,7 +77,7 @@ export interface ToolCallRequest {
 }
 
 /**
- * Completed tool call record with result
+ * 带有结果的已完成工具调用记录
  */
 export interface ToolCallRecord {
   toolCallId: string;
@@ -92,7 +92,7 @@ export interface ToolCallRecord {
 }
 
 /**
- * Server-Sent Event types for streaming session updates
+ * 用于流式会话更新的服务器发送事件类型
  */
 export type SessionEvent =
   | { type: 'message'; data: UIMessage<ChatMessageMetadata> }
@@ -116,7 +116,7 @@ export type SessionEvent =
   | { type: 'text_end'; data: { messageId: string; content: string } };
 
 /**
- * Summary data sent when session completes
+ * 会话完成时发送的摘要数据
  */
 export interface SessionSummary {
   sessionId: string;
@@ -127,7 +127,7 @@ export interface SessionSummary {
 }
 
 /**
- * Request body for creating a new session
+ * 创建新会话的请求体
  */
 export interface CreateSessionRequest {
   type: SessionType;
@@ -141,7 +141,7 @@ export interface CreateSessionRequest {
 }
 
 /**
- * Request body for sending a message to a session
+ * 向会话发送消息的请求体
  */
 export interface SendMessageRequest {
   content: string;
@@ -158,14 +158,14 @@ export interface SendMessageRequest {
 }
 
 /**
- * Request body for submitting tool results
+ * 提交工具结果的请求体
  */
 export interface ToolResultsRequest {
   results: ToolCallRecord[];
 }
 
 /**
- * Session list item (without full messages for efficiency)
+ * 会话列表项（不含完整消息，以提高效率）
  */
 export interface SessionListItem {
   id: string;
@@ -179,7 +179,7 @@ export interface SessionListItem {
 }
 
 /**
- * Convert a full ChatSession to a list item (without messages)
+ * 将完整的 ChatSession 转换为列表项（不含消息）
  */
 export function toSessionListItem(session: ChatSession): SessionListItem {
   return {
@@ -195,16 +195,16 @@ export function toSessionListItem(session: ChatSession): SessionListItem {
 }
 
 /**
- * A single item in a lecture note — either speech text or an action badge.
- * Ordered to match the original action sequence in the scene.
+ * 讲座笔记中的单个条目 — 语音文本或操作标记。
+ * 顺序与场景中的原始操作序列匹配。
  */
 export type LectureNoteItem =
   | { kind: 'speech'; text: string }
   | { kind: 'action'; type: string; label?: string };
 
 /**
- * A completed lecture note entry for one scene.
- * Built from Scene.actions, displayed in the Notes tab.
+ * 一个场景的已完成讲座笔记条目。
+ * 由 Scene.actions 构建，显示在笔记标签页中。
  */
 export interface LectureNoteEntry {
   sceneId: string;
@@ -214,14 +214,14 @@ export interface LectureNoteEntry {
   completedAt: number;
 }
 
-// ==================== Stateless Multi-Agent API Types ====================
+// ==================== 无状态多智能体 API 类型 ====================
 
 import type { Stage, Scene, StageMode } from '@/lib/types/stage';
 import type { AgentTurnSummary, WhiteboardActionRecord } from '@/lib/orchestration/director-prompt';
 
 /**
- * Accumulated director state passed between per-agent requests.
- * Client-maintained — backend is stateless.
+ * 在每个智能体请求之间传递的累积调度器状态。
+ * 由客户端维护 — 后端是无状态的。
  */
 export interface DirectorState {
   turnCount: number;
@@ -230,13 +230,13 @@ export interface DirectorState {
 }
 
 /**
- * Request body for the stateless chat API
- * All state is sent from the client on each request
+ * 无状态聊天 API 的请求体
+ * 每次请求时所有状态都由客户端发送
  */
 export interface StatelessChatRequest {
-  /** Conversation history (client-maintained) */
+  /** 对话历史（由客户端维护） */
   messages: UIMessage<ChatMessageMetadata>[];
-  /** Current application state */
+  /** 当前应用状态 */
   storeState: {
     stage: Stage | null;
     scenes: Scene[];
@@ -244,17 +244,17 @@ export interface StatelessChatRequest {
     mode: StageMode;
     whiteboardOpen: boolean;
   };
-  /** Agent configuration */
+  /** 智能体配置 */
   config: {
     agentIds: string[];
     sessionType?: 'qa' | 'discussion';
-    /** Discussion topic (for agent-initiated discussions) */
+    /** 讨论主题（用于智能体发起的讨论） */
     discussionTopic?: string;
-    /** Discussion prompt (for agent-initiated discussions) */
+    /** 讨论提示（用于智能体发起的讨论） */
     discussionPrompt?: string;
-    /** Which agent should speak first in a discussion */
+    /** 讨论中哪个智能体应首先发言 */
     triggerAgentId?: string;
-    /** Full agent configs for generated (non-default) agents that aren't in the server-side registry */
+    /** 生成的（非默认）智能体的完整配置，不在服务端注册表中 */
     agentConfigs?: Array<{
       id: string;
       name: string;
@@ -268,21 +268,21 @@ export interface StatelessChatRequest {
       boundStageId?: string;
     }>;
   };
-  /** Accumulated director state from previous per-agent requests */
+  /** 来自之前每个智能体请求的累积调度器状态 */
   directorState?: DirectorState;
-  /** User profile for personalization */
+  /** 用于个性化的用户资料 */
   userProfile?: {
     nickname?: string;
     bio?: string;
   };
-  /** OpenAI-compatible API credentials */
+  /** OpenAI 兼容 API 凭证 */
   apiKey: string;
   baseUrl?: string;
   model?: string;
 }
 
 /**
- * Parsed action from structured output
+ * 从结构化输出解析的动作
  */
 export interface ParsedAction {
   actionId: string;
@@ -290,11 +290,11 @@ export interface ParsedAction {
   params: Record<string, unknown>;
 }
 
-/** @deprecated Use ParsedAction instead */
+/** @deprecated 请使用 ParsedAction 代替 */
 export type ParsedToolCall = ParsedAction;
 
 /**
- * Server-Sent Events for stateless chat API
+ * 无状态聊天 API 的服务器发送事件
  */
 export type StatelessEvent =
   | {

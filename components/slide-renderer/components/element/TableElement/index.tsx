@@ -11,9 +11,9 @@ export interface TableElementProps {
 }
 
 /**
- * Editable table element component.
- * Supports selection/drag/resize via selectElement callback.
- * Cell editing is not implemented yet (display-only, matching ChartElement pattern).
+ * 可编辑表格元素组件
+ * 通过 selectElement 回调支持选择/拖拽/缩放
+ * 单元格编辑尚未实现（仅显示，与 ChartElement 模式一致）
  */
 export function TableElement({ elementInfo, selectElement }: TableElementProps) {
   const handleSelectElement = (e: React.MouseEvent | React.TouchEvent) => {

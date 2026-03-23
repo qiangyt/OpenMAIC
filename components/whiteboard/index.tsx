@@ -18,7 +18,7 @@ interface WhiteboardProps {
 }
 
 /**
- * Whiteboard component
+ * 白板组件
  */
 export function Whiteboard({ isOpen, onClose }: WhiteboardProps) {
   const { t } = useI18n();
@@ -28,7 +28,7 @@ export function Whiteboard({ isOpen, onClose }: WhiteboardProps) {
   const [historyOpen, setHistoryOpen] = useState(false);
   const snapshotCount = useWhiteboardHistoryStore((s) => s.snapshots.length);
 
-  // Get element count for indicator
+  // 获取元素数量用于指示器
   const whiteboard = stage?.whiteboard?.[0];
   const elementCount = whiteboard?.elements?.length || 0;
 
@@ -38,21 +38,21 @@ export function Whiteboard({ isOpen, onClose }: WhiteboardProps) {
     if (!whiteboard || elementCount === 0 || clearingRef.current) return;
     clearingRef.current = true;
 
-    // Save snapshot before clearing
+    // 清除前保存快照
     if (whiteboard.elements && whiteboard.elements.length > 0) {
       useWhiteboardHistoryStore
         .getState()
         .pushSnapshot(whiteboard.elements, t('whiteboard.beforeClear'));
     }
 
-    // Trigger cascade exit animation
+    // 触发级联退出动画
     useCanvasStore.getState().setWhiteboardClearing(true);
 
-    // Wait for cascade: base 380ms + 55ms per element, capped at 1400ms
+    // 等待级联：基础 380ms + 每个元素 55ms，上限 1400ms
     const animMs = Math.min(380 + elementCount * 55, 1400);
     await new Promise((resolve) => setTimeout(resolve, animMs));
 
-    // Actually remove elements
+    // 实际移除元素
     const result = stageAPI.whiteboard.delete(whiteboard.id);
     useCanvasStore.getState().setWhiteboardClearing(false);
     clearingRef.current = false;
@@ -66,7 +66,7 @@ export function Whiteboard({ isOpen, onClose }: WhiteboardProps) {
 
   return (
     <>
-      {/* Main Whiteboard Overlay */}
+      {/* 主白板遮罩层 */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -90,7 +90,7 @@ export function Whiteboard({ isOpen, onClose }: WhiteboardProps) {
             }}
             className="absolute inset-4 pointer-events-auto bg-white/95 dark:bg-gray-800/95 backdrop-blur-2xl rounded-3xl shadow-[0_32px_80px_-20px_rgba(0,0,0,0.25)] border-2 border-purple-200/60 dark:border-purple-700/60 flex flex-col overflow-hidden z-[120] ring-4 ring-purple-100/40 dark:ring-purple-800/40"
           >
-            {/* Header */}
+            {/* 头部 */}
             <div className="h-14 px-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between shrink-0 bg-white/50 dark:bg-gray-800/50">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
@@ -145,14 +145,14 @@ export function Whiteboard({ isOpen, onClose }: WhiteboardProps) {
               </div>
             </div>
 
-            {/* Whiteboard Content Area */}
+            {/* 白板内容区域 */}
             <div className="flex-1 relative bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#374151_1px,transparent_1px)] [background-size:24px_24px] overflow-hidden">
               <WhiteboardCanvas />
 
-              {/* History panel */}
+              {/* 历史面板 */}
               <WhiteboardHistory isOpen={historyOpen} onClose={() => setHistoryOpen(false)} />
 
-              {/* Test panel */}
+              {/* 测试面板 */}
               {/* <WhiteboardTestPanel /> */}
             </div>
           </motion.div>

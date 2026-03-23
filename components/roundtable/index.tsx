@@ -37,18 +37,17 @@ export interface DiscussionRequest {
 interface RoundtableProps {
   readonly mode?: 'playback' | 'autonomous';
   readonly initialParticipants?: Participant[];
-  readonly playbackView?: PlaybackView; // Centralised derived state from Stage
-  readonly currentSpeech?: string | null; // Live SSE speech (from StreamBuffer — discussion/QA)
-  readonly lectureSpeech?: string | null; // Active lecture speech (from PlaybackEngine, full text)
-  readonly idleText?: string | null; // Static idle text (first speech action)
-  readonly playbackCompleted?: boolean; // True when engine finished all actions (show restart icon)
+  readonly playbackView?: PlaybackView; // Stage 的集中派生状态
+  readonly currentSpeech?: string | null; // 实时 SSE 语音（来自 StreamBuffer — 讨论/QA）
+  readonly lectureSpeech?: string | null; // 活跃的讲座语音（来自 PlaybackEngine，完整文本）
+  readonly idleText?: string | null; // 静态空闲文本（第一个语音动作）
+  readonly playbackCompleted?: boolean; // 引擎完成所有动作为 true（显示重启图标）
   readonly discussionRequest?: DiscussionAction | null;
   readonly engineMode?: EngineMode;
   readonly isStreaming?: boolean;
   readonly sessionType?: 'qa' | 'discussion';
   readonly speakingAgentId?: string | null;
-  readonly speechProgress?: number | null; // StreamBuffer reveal progress (0–1) for auto-scroll
-  readonly showEndFlash?: boolean;
+  readonly speechProgress?: number | null; // StreamBuffer 显示进度（0-1），  readonly showEndFlash?: boolean;
   readonly endFlashSessionType?: 'qa' | 'discussion';
   readonly thinkingState?: { stage: string; agentId?: string } | null;
   readonly isCueUser?: boolean;
@@ -63,7 +62,7 @@ interface RoundtableProps {
   readonly onPlayPause?: () => void;
   readonly totalActions?: number;
   readonly currentActionIndex?: number;
-  // Toolbar props (merged from CanvasArea)
+  // 工具栏属性（从 CanvasArea 合并）
   readonly currentSceneIndex?: number;
   readonly scenesCount?: number;
   readonly whiteboardOpen?: boolean;
@@ -79,7 +78,7 @@ interface RoundtableProps {
 const DEFAULT_TEACHER_AVATAR = '/avatars/teacher.png';
 const DEFAULT_USER_AVATAR = '/avatars/user.png';
 
-/** Render avatar as <img> for URLs or as emoji text span */
+/** 将头像渲染为 <img>（URL）或表情符号文本 span */
 function AvatarDisplay({ src, alt, className }: { src: string; alt?: string; className?: string }) {
   const isUrl = src.startsWith('http') || src.startsWith('data:') || src.startsWith('/');
   if (isUrl) {
@@ -152,10 +151,10 @@ export function Roundtable({
   const teacherAvatarRef = useRef<HTMLDivElement>(null);
   const studentAvatarRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // End flash visible state (Issue 3)
+  // 结束闪烁可见状态（问题 3）
   const [endFlashVisible, setEndFlashVisible] = useState(false);
 
-  // Send cooldown: lock input from "message sent" until "agent bubble appears"
+  // 发送冷却：从"消息已发送"到"智能体气泡出现"期间锁定输入
   const [isSendCooldown, setIsSendCooldown] = useState(false);
   const isSendCooldownRef = useRef(false);
 
@@ -164,7 +163,7 @@ export function Roundtable({
     (p) => p.role !== 'teacher' && p.role !== 'user',
   );
 
-  // Stable ref object for the current discussion agent's avatar
+  // 当前讨论智能体头像的稳定 ref 对象
   const discussionAnchorRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!discussionRequest) {
@@ -179,12 +178,12 @@ export function Roundtable({
     }
   }, [discussionRequest, teacherParticipant?.id]);
 
-  // Derived state from Stage's computePlaybackView (centralised derivation)
+  // Stage 的 computePlaybackView 派生状态（集中派生）
   const isInLiveFlow =
     playbackView?.isInLiveFlow ??
     !!(speakingAgentId || thinkingState || isStreaming || sessionType);
 
-  // Role-aware source text: userMessage overlay on top of playbackView
+  // 角色感知的源文本：userMessage 优先于 playbackView
   const sourceText = userMessage
     ? userMessage
     : (playbackView?.sourceText ??
@@ -194,7 +193,7 @@ export function Roundtable({
           ? ''
           : lectureSpeech || (playbackCompleted ? '' : idleText) || ''));
 
-  // Auto-scroll bubble: keep latest streaming text visible during live/discussion flow
+  // 自动滚动气泡：在实时/讨论流程中保持最新流式文本可见
   useEffect(() => {
     if (!isInLiveFlow) return;
     const el = bubbleScrollRef.current;
@@ -204,7 +203,7 @@ export function Roundtable({
     el.scrollTo({ top: scrollableHeight, behavior: 'smooth' });
   }, [sourceText, isInLiveFlow]);
 
-  // End flash effect (Issue 3)
+  // 结束闪烁效果（问题 3）
   useEffect(() => {
     if (showEndFlash) {
       setEndFlashVisible(true);
@@ -215,7 +214,7 @@ export function Roundtable({
     }
   }, [showEndFlash]);
 
-  // Clear send cooldown when agent bubble appears
+  // 当智能体气泡出现时清除发送冷却
   useEffect(() => {
     if (isSendCooldown && speakingAgentId) {
       setIsSendCooldown(false);
@@ -223,8 +222,8 @@ export function Roundtable({
     }
   }, [isSendCooldown, speakingAgentId]);
 
-  // Safety net: clear cooldown when streaming transitions from active → ended
-  // (not when isStreaming was already false — that would clear cooldown immediately)
+  // 安全网：当流式传输从活跃 → 结束转换时清除冷却
+  //（不是 isStreaming 已经为 false 时 — 那会立即清除冷却）
   const prevStreamingRef = useRef(false);
   useEffect(() => {
     if (prevStreamingRef.current && !isStreaming && isSendCooldown) {
@@ -234,14 +233,14 @@ export function Roundtable({
     prevStreamingRef.current = !!isStreaming;
   }, [isStreaming, isSendCooldown]);
 
-  // Separate participants by role (teacherParticipant & studentParticipants declared earlier for effect)
+  // 按角色分离参与者（teacherParticipant 和 studentParticipants 在前面为 effect 岾式声明）
   const userParticipant = initialParticipants.find((p) => p.role === 'user');
 
   const teacherAvatar = teacherParticipant?.avatar || DEFAULT_TEACHER_AVATAR;
   const teacherName = teacherParticipant?.name || t('roundtable.teacher');
   const userAvatar = userParticipant?.avatar || DEFAULT_USER_AVATAR;
 
-  // Audio recording
+  // 音频录制
   const { isRecording, isProcessing, startRecording, stopRecording } = useAudioRecorder({
     onTranscription: (text) => {
       if (!text.trim()) {
@@ -249,7 +248,7 @@ export function Roundtable({
         setIsVoiceOpen(false);
         return;
       }
-      // Block if in send cooldown (e.g. text was sent while voice was processing)
+      // 如果在发送冷却中则阻止（例如，语音处理时发送了文本）
       if (isSendCooldownRef.current) {
         setIsVoiceOpen(false);
         return;
@@ -308,15 +307,15 @@ export function Roundtable({
     }
   };
 
-  // Determine active speaking state and bubble ownership
-  // Check if current speaker is a student agent (not teacher)
+  // 确定活跃的说话状态和气泡归属
+  // 检查当前说话者是否为学生智能体（非教师）
   const speakingStudent = speakingAgentId
     ? studentParticipants.find((s) => s.id === speakingAgentId)
     : null;
 
-  // Bubble loading: speakingAgentId is set (agent_start fired) but text hasn't arrived yet
+  // 气泡加载：speakingAgentId 已设置（agent_start 已触发）但文本尚未到达
   const isBubbleLoading = !!(speakingAgentId && !currentSpeech && !userMessage);
-  // Student agent specifically loading (for agent-style bubble)
+  // 学生智能体正在加载（用于智能体样式气泡）
   const isAgentLoading = !!(speakingStudent && !currentSpeech && !userMessage);
 
   const activeRole: 'teacher' | 'user' | 'agent' | null = userMessage
@@ -364,7 +363,7 @@ export function Roundtable({
           ? t('roundtable.you')
           : '';
 
-  // Stable key based on speaker identity, NOT text content (prevents re-mount flicker)
+  // 基于说话者身份的稳定键，而非文本内容（防止重新挂载闪烁）
   const bubbleKey =
     bubbleRole === 'user'
       ? 'user'
@@ -374,9 +373,8 @@ export function Roundtable({
           ? 'teacher'
           : 'idle';
 
-  // Show stop button whenever there's an active QA/discussion session or live mode.
-  // sessionType is only cleared in doSessionCleanup, so this stays stable through
-  // brief loading gaps (e.g. between user message and agent SSE response).
+  // 当有活跃的 QA/讨论会话或实时模式时显示停止按钮。
+  // sessionType 仅在 doSessionCleanup 中清除，因此在短暂的加载间隙（例如用户消息和智能体 SSE 响应之间）保持稳定。
   const showStopButton =
     engineMode === 'live' || sessionType === 'qa' || sessionType === 'discussion';
 
@@ -423,20 +421,20 @@ export function Roundtable({
         onCycleSpeed={handleCycleSpeed}
       />
 
-      {/* ── Interaction area — three-column layout ── */}
+      {/* ── 交互区域 — 三列布局 ── */}
       <div className="flex-1 flex items-stretch min-h-0">
-        {/* Left: Teacher identity */}
+        {/* 左侧：教师身份 */}
         <div className="w-[90px] shrink-0 flex flex-col border-r border-gray-100/50 dark:border-gray-700/50 bg-white/40 dark:bg-gray-900/40 overflow-visible relative">
-          {/* Decorative Element (Top) */}
+          {/* 装饰性元素（顶部） */}
           <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-purple-50/50 dark:from-purple-900/10 to-transparent pointer-events-none" />
           <div className="absolute top-3 inset-x-0 flex flex-col items-center justify-center gap-1 opacity-10 pointer-events-none">
             <BookOpen size={20} className="text-purple-900 dark:text-purple-100" />
             <div className="w-8 h-0.5 bg-purple-900 dark:bg-purple-100 rounded-full" />
           </div>
 
-          {/* Main Content */}
+          {/* 主要内容 */}
           <div className="flex-1 flex items-center justify-center gap-3 px-2 min-h-0 pb-1 pt-8">
-            {/* Avatar Group (Left) */}
+            {/* 头像组（左侧） */}
             <div
               ref={teacherAvatarRef}
               className="relative group cursor-pointer flex flex-col items-center justify-center gap-1"

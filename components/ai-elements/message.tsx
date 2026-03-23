@@ -160,7 +160,7 @@ export const MessageBranchContent = ({ children, ...props }: MessageBranchConten
     [children],
   );
 
-  // Use useEffect to update branches when they change
+  // 使用 useEffect 在分支变化时更新它们
   useEffect(() => {
     if (branches.length !== childrenArray.length) {
       setBranches(childrenArray);
@@ -192,7 +192,7 @@ export const MessageBranchSelector = ({
 }: MessageBranchSelectorProps) => {
   const { totalBranches } = useMessageBranch();
 
-  // Don't render if there's only one branch
+  // 如果只有一个分支则不渲染
   if (totalBranches <= 1) {
     return null;
   }

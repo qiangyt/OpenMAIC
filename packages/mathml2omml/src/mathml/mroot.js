@@ -2,9 +2,9 @@ import { getTextContent } from '../helpers.js'
 import { walker } from '../walker.js'
 
 export function mroot(element, targetParent, previousSibling, nextSibling, ancestors) {
-  // Root
+  // 根式
   if (element.children.length !== 2) {
-    // treat as mrow
+    // 视为 mrow 处理
     return targetParent
   }
   ancestors = [...ancestors]

@@ -1,9 +1,9 @@
 /**
- * Scene Outlines Streaming API (SSE)
+ * 场景大纲流式 API (SSE)
  *
- * Streams outline generation via Server-Sent Events.
- * Emits individual outline objects as they're parsed from the LLM response,
- * so the frontend can display them incrementally.
+ * 通过 Server-Sent Events 流式传输大纲生成。
+ * 在从 LLM 响应解析时逐个发出大纲对象，
+ * 以便前端可以增量显示它们。
  *
  * SSE events:
  *   { type: 'outline', data: SceneOutline, index: number }
@@ -38,14 +38,14 @@ const log = createLogger('Outlines Stream');
 export const maxDuration = 300;
 
 /**
- * Incremental JSON array parser.
- * Extracts complete top-level objects from a partially-streamed JSON array.
- * Returns newly found objects (skipping `alreadyParsed` count).
+ * 增量 JSON 数组解析器。
+ * 从部分流式传输的 JSON 数组中提取完整的顶级对象。
+ * 返回新找到的对象（跳过 `alreadyParsed` 计数）。
  */
 function extractNewOutlines(buffer: string, alreadyParsed: number): SceneOutline[] {
   const results: SceneOutline[] = [];
 
-  // Find the start of the JSON array (skip any markdown fencing)
+  // 找到 JSON 数组的起始位置（跳过任何 markdown 围栏）
   const stripped = buffer.replace(/^[\s\S]*?(?=\[)/, '');
   const arrayStart = stripped.indexOf('[');
   if (arrayStart === -1) return results;
@@ -85,7 +85,7 @@ function extractNewOutlines(buffer: string, alreadyParsed: number): SceneOutline
             const obj = JSON.parse(stripped.substring(objectStart, i + 1));
             results.push(obj);
           } catch {
-            // Incomplete or invalid JSON — skip
+            // 不完整或无效的 JSON — 跳过
           }
         }
         objectStart = -1;
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Get API configuration from request headers
+    // 从请求 headers 获取 API 配置
     const { model: languageModel, modelInfo, modelString } = resolveModelFromHeaders(req);
 
     if (!body.requirements) {
@@ -116,17 +116,17 @@ export async function POST(req: NextRequest) {
       agents?: AgentInfo[];
     };
 
-    // Detect vision capability
+    // 检测视觉能力
     const hasVision = !!modelInfo?.capabilities?.vision;
 
-    // Build prompt (same logic as generateSceneOutlinesFromRequirements)
+    // 构建 prompt（与 generateSceneOutlinesFromRequirements 逻辑相同）
     let availableImagesText =
       requirements.language === 'zh-CN' ? '无可用图片' : 'No images available';
     let visionImages: Array<{ id: string; src: string }> | undefined;
 
     if (pdfImages && pdfImages.length > 0) {
       if (hasVision && imageMapping) {
-        // Vision mode: split into vision images (first N) and text-only (rest)
+        // 视觉模式：分为视觉图片（前 N 张）和纯文本（其余）
         const allWithSrc = pdfImages.filter((img) => imageMapping[img.id]);
         const visionSlice = allWithSrc.slice(0, MAX_VISION_IMAGES);
         const textOnlySlice = allWithSrc.slice(MAX_VISION_IMAGES);
@@ -147,14 +147,14 @@ export async function POST(req: NextRequest) {
           height: img.height,
         }));
       } else {
-        // Text-only mode: full descriptions
+        // 纯文本模式：完整描述
         availableImagesText = pdfImages
           .map((img) => formatImageDescription(img, requirements.language))
           .join('\n');
       }
     }
 
-    // Build media generation policy based on enabled flags
+    // 根据启用的标志构建媒体生成策略
     const imageGenerationEnabled = req.headers.get('x-image-generation-enabled') === 'true';
     const videoGenerationEnabled = req.headers.get('x-video-generation-enabled') === 'true';
     let mediaGenerationPolicy = '';
@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
         '**IMPORTANT: Do NOT include any video mediaGenerations (type: "video") in the outlines. Video generation is disabled. Image generation is allowed.**';
     }
 
-    // Build teacher context from agents (if available)
+    // 从智能体构建教师上下文（如果可用）
     const teacherContext = formatTeacherPersonaForPrompt(agents);
 
     const prompts = buildPrompt(PROMPT_IDS.REQUIREMENTS_TO_OUTLINES, {
@@ -194,12 +194,12 @@ export async function POST(req: NextRequest) {
       `Generating outlines: "${requirements.requirement.substring(0, 50)}" [model=${modelString}]`,
     );
 
-    // Create SSE stream with heartbeat to prevent connection timeout
+    // 创建带心跳的 SSE 流以防止连接超时
     const encoder = new TextEncoder();
     const HEARTBEAT_INTERVAL_MS = 15_000;
     const stream = new ReadableStream({
       async start(controller) {
-        // Heartbeat: periodically send SSE comments to keep the connection alive.
+        // 心跳：定期发送 SSE 注释以保持连接活跃。
         let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
         const startHeartbeat = () => {
           stopHeartbeat();
@@ -255,10 +255,10 @@ export async function POST(req: NextRequest) {
               for await (const chunk of result.textStream) {
                 fullText += chunk;
 
-                // Try to extract new outlines from the accumulated text
+                // 尝试从累积的文本中提取新大纲
                 const newOutlines = extractNewOutlines(fullText, parsedOutlines.length);
                 for (const outline of newOutlines) {
-                  // Ensure ID and order
+                  // 确保 ID 和顺序
                   const enriched = {
                     ...outline,
                     id: outline.id || nanoid(),
@@ -275,10 +275,10 @@ export async function POST(req: NextRequest) {
                 }
               }
 
-              // Validate: got outlines?
+              // 验证：获取到大纲了吗？
               if (parsedOutlines.length > 0) break;
 
-              // Empty result — retry if we have attempts left
+              // 空结果 — 如果还有剩余尝试次数则重试
               lastError = fullText.trim()
                 ? 'LLM response could not be parsed into outlines'
                 : 'LLM returned empty response';
@@ -287,7 +287,7 @@ export async function POST(req: NextRequest) {
                 log.warn(
                   `Empty outlines (attempt ${attempt}/${MAX_STREAM_RETRIES + 1}), retrying...`,
                 );
-                // Notify client a retry is happening
+                // 通知客户端正在重试
                 const retryEvent = JSON.stringify({
                   type: 'retry',
                   attempt,
@@ -315,16 +315,16 @@ export async function POST(req: NextRequest) {
           }
 
           if (parsedOutlines.length > 0) {
-            // Replace sequential gen_img_N/gen_vid_N with globally unique IDs
+            // 将顺序 gen_img_N/gen_vid_N 替换为全局唯一 ID
             const uniquifiedOutlines = uniquifyMediaElementIds(parsedOutlines);
-            // Send done event with all outlines
+            // 发送包含所有大纲的完成事件
             const doneEvent = JSON.stringify({
               type: 'done',
               outlines: uniquifiedOutlines,
             });
             controller.enqueue(encoder.encode(`data: ${doneEvent}\n\n`));
           } else {
-            // All retries exhausted, no outlines produced
+            // 所有重试已用尽，未生成大纲
             log.error(
               `Outline generation failed after ${MAX_STREAM_RETRIES + 1} attempts: ${lastError}`,
             );

@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Model name is required');
     }
 
-    // Parse model string and resolve server-side fallback
+    // 解析模型字符串并解析服务器端备用配置
     let languageModel;
     try {
       const result = resolveModel({
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Send a minimal test message
+    // 发送最小化测试消息
     const { text } = await generateText({
       model: languageModel,
       prompt: 'Say "OK" if you can hear me.',
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     let errorMessage = 'Connection failed';
     if (error instanceof Error) {
-      // Parse common error messages
+      // 解析常见错误消息
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         errorMessage = 'API key is invalid or expired';
       } else if (error.message.includes('404') || error.message.includes('not found')) {

@@ -1,8 +1,8 @@
 /**
- * PBL Runtime Chat API
+ * PBL 运行时聊天 API
  *
- * Handles @mention routing during PBL runtime.
- * Students @question or @judge an agent, and this endpoint generates a response.
+ * 处理 PBL 运行期间的 @提及 路由。
+ * 学生 @question 或 @judge 某个智能体，此端点生成响应。
  */
 
 import { NextRequest } from 'next/server';
@@ -31,10 +31,10 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Message and agent are required');
     }
 
-    // Get model config from headers
+    // 从 headers 获取模型配置
     const { model } = resolveModelFromHeaders(req);
 
-    // Build context for the agent, differentiating question vs judge
+    // 为智能体构建上下文，区分问题类和评判类
     let issueContext = '';
     if (currentIssue) {
       issueContext = `\n\n## Current Issue\nTitle: ${currentIssue.title}\nDescription: ${currentIssue.description}\nPerson in Charge: ${currentIssue.person_in_charge}`;

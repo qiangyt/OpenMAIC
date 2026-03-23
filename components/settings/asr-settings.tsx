@@ -35,7 +35,7 @@ export function ASRSettings({ selectedProviderId }: ASRSettingsProps) {
   const [testMessage, setTestMessage] = useState('');
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
-  // Reset state when provider changes (derived state pattern)
+  // 当服务商变更时重置状态（派生状态模式）
   const [prevProviderId, setPrevProviderId] = useState(selectedProviderId);
   if (selectedProviderId !== prevProviderId) {
     setPrevProviderId(selectedProviderId);
@@ -146,14 +146,14 @@ export function ASRSettings({ selectedProviderId }: ASRSettingsProps) {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {/* Server-configured notice */}
+      {/* 服务端配置提示 */}
       {isServerConfigured && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30 p-3 text-sm text-blue-700 dark:text-blue-300">
           {t('settings.serverConfiguredNotice')}
         </div>
       )}
 
-      {/* API Key & Base URL */}
+      {/* API 密钥和 Base URL */}
       {(asrProvider.requiresApiKey || isServerConfigured) && (
         <>
           <div className="grid grid-cols-2 gap-4">
@@ -206,7 +206,7 @@ export function ASRSettings({ selectedProviderId }: ASRSettingsProps) {
               />
             </div>
           </div>
-          {/* Request URL Preview */}
+          {/* 请求 URL 预览 */}
           {(() => {
             const effectiveBaseUrl =
               asrProvidersConfig[selectedProviderId]?.baseUrl || asrProvider.defaultBaseUrl || '';
@@ -230,7 +230,7 @@ export function ASRSettings({ selectedProviderId }: ASRSettingsProps) {
         </>
       )}
 
-      {/* Test ASR */}
+      {/* 测试 ASR */}
       <div className="space-y-2">
         <Label className="text-sm">{t('settings.testASR')}</Label>
         <div className="flex gap-2">

@@ -7,11 +7,11 @@ import { getRectRotatedRange, uniqAlignLines, type AlignLine } from '@/lib/utils
 import { useCanvasOperations } from '@/lib/hooks/use-canvas-operations';
 
 /**
- * Drag element hook
+ * 拖拽元素 Hook
  *
- * @param elementListRef - Element list ref (holds latest value)
- * @param setElementList - Element list setter (triggers re-render)
- * @param setAlignmentLines - Alignment lines setter
+ * @param elementListRef - 元素列表 ref（存储最新值）
+ * @param setElementList - 元素列表 setter（触发重新渲染）
+ * @param setAlignmentLines - 对齐线 setter
  */
 export function useDragElement(
   elementListRef: React.RefObject<PPTElement[]>,
@@ -43,7 +43,7 @@ export function useDragElement(
 
       const sorptionRange = 5;
 
-      // Save original element list for computing multi-select offsets
+      // 保存原始元素列表用于计算多选偏移
       const originElementList: PPTElement[] = JSON.parse(JSON.stringify(elementListRef.current));
       const originActiveElementList = originElementList.filter((el) =>
         activeElementIdList.includes(el.id),
@@ -62,9 +62,9 @@ export function useDragElement(
 
       const isActiveGroupElement = element.id === activeGroupElementId;
 
-      // Collect alignment snap lines
-      // Includes snap positions of other elements on canvas (excluding the target): top/bottom/left/right edges, horizontal/vertical centers
-      // Lines and rotated elements need their bounding ranges recalculated
+      // 收集对齐吸附线
+      // 包括画布上其他元素（除目标元素外）的吸附位置：上/下/左/右边缘，水平/垂直中心
+      // 线条和旋转元素需要重新计算边界范围
       let horizontalLines: AlignLine[] = [];
       let verticalLines: AlignLine[] = [];
 
@@ -115,7 +115,7 @@ export function useDragElement(
         verticalLines.push(leftLine, rightLine, verticalCenterLine);
       }
 
-      // Canvas viewport edges: four boundaries, horizontal center, vertical center
+      // 画布视口边界：四条边界、水平中心、垂直中心
       const edgeTopLine: AlignLine = { value: 0, range: [0, edgeWidth] };
       const edgeBottomLine: AlignLine = {
         value: edgeHeight,
@@ -138,7 +138,7 @@ export function useDragElement(
       horizontalLines.push(edgeTopLine, edgeBottomLine, edgeHorizontalCenterLine);
       verticalLines.push(edgeLeftLine, edgeRightLine, edgeVerticalCenterLine);
 
-      // Deduplicate alignment snap lines
+      // 去重对齐吸附线
       horizontalLines = uniqAlignLines(horizontalLines);
       verticalLines = uniqAlignLines(verticalLines);
 
@@ -146,8 +146,8 @@ export function useDragElement(
         const currentPageX = e instanceof MouseEvent ? e.pageX : e.changedTouches[0].pageX;
         const currentPageY = e instanceof MouseEvent ? e.pageY : e.changedTouches[0].pageY;
 
-        // If mouse movement is too small, consider it a misoperation:
-        // null = first move, need to check; true = still in misoperation range; false = moved beyond range
+        // 如果鼠标移动太小，视为误操作：
+        // null = 首次移动，需要检查；true = 仍在误操作范围内；false = 已移出范围
         if (isMisoperation !== false) {
           isMisoperation =
             Math.abs(startPageX - currentPageX) < sorptionRange &&
@@ -158,18 +158,18 @@ export function useDragElement(
         let moveX = (currentPageX - startPageX) / canvasScale;
         let moveY = (currentPageY - startPageY) / canvasScale;
 
-        // Lock to horizontal or vertical direction when Shift is held
+        // 按住 Shift 时锁定为水平或垂直方向
         if (shiftKeyState) {
           if (Math.abs(moveX) > Math.abs(moveY)) moveY = 0;
           if (Math.abs(moveX) < Math.abs(moveY)) moveX = 0;
         }
 
-        // Base target position
+        // 基础目标位置
         let targetLeft = elOriginLeft + moveX;
         let targetTop = elOriginTop + moveY;
 
-        // Calculate target element's bounding range on canvas for alignment snapping
-        // Must distinguish single-select vs multi-select; single-select further distinguishes line, normal, and rotated elements
+        // 计算目标元素在画布上的边界范围用于对齐吸附
+        // 必须区分单选和多选；单选还要区分线条、普通和旋转元素
         let targetMinX: number, targetMaxX: number, targetMinY: number, targetMaxY: number;
 
         if (activeElementIdList.length === 1 || isActiveGroupElement) {
@@ -244,8 +244,8 @@ export function useDragElement(
         const targetCenterX = targetMinX + (targetMaxX - targetMinX) / 2;
         const targetCenterY = targetMinY + (targetMaxY - targetMinY) / 2;
 
-        // Compare alignment snap lines with target position; auto-correct when difference is within threshold
-        // Horizontal and vertical directions are calculated separately
+        // 将对齐吸附线与目标位置比较；差值在阈值内时自动校正
+        // 水平和垂直方向分别计算
         const _alignmentLines: AlignmentLineProps[] = [];
         let isVerticalAdsorbed = false;
         let isHorizontalAdsorbed = false;
@@ -321,7 +321,7 @@ export function useDragElement(
         setAlignmentLines(_alignmentLines);
         let newElements: PPTElement[];
 
-        // In single-select mode or when the active group element is being operated, only update that element's position
+        // 单选模式或操作活动组元素时，仅更新该元素位置
         if (activeElementIdList.length === 1 || isActiveGroupElement) {
           newElements = elementListRef.current.map((el) => {
             if (el.id === element.id) {
@@ -330,8 +330,8 @@ export function useDragElement(
             return el;
           });
         }
-        // In multi-select mode, also update positions of other selected elements
-        // Their positions are calculated from the movement offset of the handle element
+        // 多选模式下，也要更新其他选中元素的位置
+        // 它们的位置根据操作元素移动偏移量计算
         else {
           const handleElement = elementListRef.current.find((el) => el.id === element.id);
           if (!handleElement) return;
@@ -351,7 +351,7 @@ export function useDragElement(
           });
         }
 
-        // Update both ref (latest value) and state (trigger re-render)
+        // 同时更新 ref（最新值）和 state（触发重新渲染）
         elementListRef.current = newElements;
         setElementList(newElements);
       };

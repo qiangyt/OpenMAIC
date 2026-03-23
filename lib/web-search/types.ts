@@ -1,14 +1,14 @@
 /**
- * Web Search Provider Type Definitions
+ * 网络搜索提供者类型定义
  */
 
 /**
- * Web Search Provider IDs
+ * 网络搜索提供者 ID
  */
 export type WebSearchProviderId = 'tavily';
 
 /**
- * Web Search Provider Configuration
+ * 网络搜索提供者配置
  */
 export interface WebSearchProviderConfig {
   id: WebSearchProviderId;

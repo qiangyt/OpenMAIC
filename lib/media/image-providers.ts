@@ -1,5 +1,5 @@
 /**
- * Image Generation Service -- routes to provider adapters
+ * 图像生成服务 —— 路由到提供商适配器
  */
 
 import type {

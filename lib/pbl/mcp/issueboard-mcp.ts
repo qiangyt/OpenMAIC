@@ -1,10 +1,10 @@
 /**
- * Issueboard MCP - Manages issues and workflow during PBL generation.
+ * Issueboard MCP - 管理 PBL 生成过程中的任务和工作流。
  *
- * Migrated from PBL-Nano. Key changes:
- * - No Anthropic SDK dependency (initialize_question_agent removed)
- * - Question agent initialization is handled by generate-pbl.ts post-processing
- * - Operates directly on a shared PBLProjectConfig
+ * 从 PBL-Nano 迁移而来。主要变更：
+ * - 无 Anthropic SDK 依赖（移除了 initialize_question_agent）
+ * - 提问助手初始化由 generate-pbl.ts 的后处理完成
+ * - 直接操作共享的 PBLProjectConfig
  */
 
 import type { PBLProjectConfig, PBLIssue, PBLToolResult } from '../types';
@@ -104,7 +104,7 @@ export class IssueboardMCP {
 
     this.config.issueboard.issues.push(newIssue);
 
-    // Auto-create question and judge agents
+    // 自动创建提问助手和评判助手
     this.agentMCP.createAgent({
       name: questionAgentName,
       system_prompt: getQuestionAgentPrompt(this.language),
@@ -188,7 +188,7 @@ export class IssueboardMCP {
       return { success: false, error: `Issue "${issueId}" not found.` };
     }
     this.config.issueboard.issues.splice(index, 1);
-    // Remove child issues
+    // 移除子任务
     this.config.issueboard.issues = this.config.issueboard.issues.filter(
       (i) => i.parent_issue !== issueId,
     );
@@ -208,7 +208,7 @@ export class IssueboardMCP {
       issue.index = i;
       reordered.push(issue);
     }
-    // Append any issues not in the reorder list
+    // 追加未在重排列表中的任务
     for (const issue of this.config.issueboard.issues) {
       if (!issueIds.includes(issue.id)) {
         reordered.push(issue);
@@ -219,14 +219,14 @@ export class IssueboardMCP {
   }
 
   activateNextIssue(): PBLToolResult {
-    // Deactivate current
+    // 停用当前任务
     const current = this.config.issueboard.issues.find((i) => i.is_active);
     if (current) {
       current.is_active = false;
       this.config.issueboard.current_issue_id = null;
     }
 
-    // Find next incomplete issue
+    // 查找下一个未完成的任务
     const next = this.config.issueboard.issues
       .filter((i) => !i.is_done)
       .sort((a, b) => a.index - b.index)[0];

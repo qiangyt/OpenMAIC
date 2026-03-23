@@ -108,7 +108,7 @@ export function SceneSidebar({
       }}
       className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-gray-100 dark:border-gray-800 shadow-[2px_0_24px_rgba(0,0,0,0.02)] flex flex-col shrink-0 z-20 relative overflow-visible"
     >
-      {/* Drag handle */}
+      {/* 拖拽手柄 */}
       {!collapsed && (
         <div
           onMouseDown={handleDragStart}
@@ -119,7 +119,7 @@ export function SceneSidebar({
       )}
 
       <div className={cn('flex flex-col w-full h-full overflow-hidden', collapsed && 'hidden')}>
-        {/* Logo Header */}
+        {/* Logo 头部 */}
         <div className="h-10 flex items-center justify-between shrink-0 relative mt-3 mb-1 px-3">
           <button
             onClick={() => router.push('/')}
@@ -136,7 +136,7 @@ export function SceneSidebar({
           </button>
         </div>
 
-        {/* Scenes List */}
+        {/* 场景列表 */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-2 scrollbar-hide pt-1">
           {scenes.map((scene, index) => {
             const isActive = currentSceneId === scene.id;
@@ -161,7 +161,7 @@ export function SceneSidebar({
                     : 'hover:bg-gray-50/80 dark:hover:bg-gray-800/50',
                 )}
               >
-                {/* Scene Header */}
+                {/* 场景头部 */}
                 <div className="flex justify-between items-center px-2 pt-0.5">
                   <div className="flex items-center gap-2 max-w-full">
                     <span
@@ -187,7 +187,7 @@ export function SceneSidebar({
                   </div>
                 </div>
 
-                {/* Thumbnail */}
+                {/* 缩略图 */}
                 <div className="relative aspect-video w-full rounded overflow-hidden bg-gray-100 dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/5">
                   <div className="absolute inset-0 flex items-center justify-center">
                     {isSlide && slideContent ? (
@@ -198,7 +198,7 @@ export function SceneSidebar({
                         size={Math.max(100, sidebarWidth - 28)}
                       />
                     ) : scene.type === 'quiz' ? (
-                      /* Quiz: question bar + 2x2 option grid */
+                      /* 测验：问题条 + 2x2 选项网格 */
                       <div className="w-full h-full bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/20 p-2 flex flex-col">
                         <div className="h-1.5 w-4/5 bg-orange-200/70 dark:bg-orange-700/30 rounded-full mb-1.5" />
                         <div className="flex-1 grid grid-cols-2 gap-1">
@@ -233,7 +233,7 @@ export function SceneSidebar({
                         </div>
                       </div>
                     ) : scene.type === 'interactive' ? (
-                      /* Interactive: browser window with chrome + content */
+                      /* 互动：带浏览器边框和内容的窗口 */
                       <div className="w-full h-full bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20 p-1.5 flex flex-col">
                         <div className="flex items-center gap-1 mb-1 pb-1 border-b border-emerald-200/40 dark:border-emerald-700/20">
                           <div className="flex gap-0.5">
@@ -258,7 +258,7 @@ export function SceneSidebar({
                         </div>
                       </div>
                     ) : scene.type === 'pbl' ? (
-                      /* PBL: kanban board with 3 columns */
+                      /* PBL：3 列看板 */
                       <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/20 p-1.5 flex flex-col">
                         <div className="flex items-center gap-1 mb-1.5">
                           <div className="w-1.5 h-1.5 rounded bg-blue-300 dark:bg-blue-600" />
@@ -293,7 +293,7 @@ export function SceneSidebar({
                         </div>
                       </div>
                     ) : (
-                      /* Fallback */
+                      /* 默认回退 */}
                       <div className="w-full h-full flex flex-col items-center justify-center gap-1 bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-500">
                         <Icon className="w-4 h-4" />
                         <span className="text-[9px] font-bold uppercase tracking-wider opacity-80">
@@ -318,7 +318,7 @@ export function SceneSidebar({
             );
           })}
 
-          {/* Single placeholder for the next generating page (clickable) */}
+          {/* 下一个生成页面的占位符（可点击） */}
           {generatingOutlines.length > 0 &&
             (() => {
               const outline = generatingOutlines[0];
@@ -349,7 +349,7 @@ export function SceneSidebar({
                       'bg-purple-50 dark:bg-purple-900/20 ring-1 ring-purple-200 dark:ring-purple-700 opacity-100',
                   )}
                 >
-                  {/* Scene Header */}
+                  {/* 场景头部 */}
                   <div className="flex justify-between items-center px-2 pt-0.5">
                     <div className="flex items-center gap-2 max-w-full">
                       <span
@@ -377,7 +377,7 @@ export function SceneSidebar({
                     </div>
                   </div>
 
-                  {/* Skeleton Thumbnail */}
+                  {/* 骨架屏缩略图 */}
                   <div
                     className={cn(
                       'relative aspect-video w-full rounded overflow-hidden ring-1',
@@ -441,7 +441,7 @@ export function SceneSidebar({
             })()}
         </div>
 
-        {/* Spacer to push toggle button area */}
+        {/* 占位空间，用于将切换按钮推到底部 */}
         <div className="mt-auto" />
       </div>
     </div>

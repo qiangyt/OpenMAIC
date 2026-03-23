@@ -1,15 +1,15 @@
 /**
- * Image Generation API
+ * 图像生成 API
  *
- * Generates an image from a text prompt using the specified provider.
- * Called by the client during media generation after slides are produced.
+ * 使用指定提供商从文本提示生成图像。
+ * 在幻灯片生成后，由客户端在媒体生成期间调用。
  *
  * POST /api/generate/image
  *
  * Headers:
- *   x-image-provider: ImageProviderId (default: 'seedream')
- *   x-api-key: string (optional, server fallback)
- *   x-base-url: string (optional, server fallback)
+ *   x-image-provider: ImageProviderId (默认: 'seedream')
+ *   x-api-key: string (可选，服务器备用)
+ *   x-base-url: string (可选，服务器备用)
  *
  * Body: { prompt, negativePrompt?, width?, height?, aspectRatio?, style? }
  * Response: { success: boolean, result?: ImageGenerationResult, error?: string }
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = clientBaseUrl ? clientBaseUrl : resolveImageBaseUrl(providerId, clientBaseUrl);
 
-    // Resolve dimensions from aspect ratio if not explicitly set
+    // 如果未明确设置，则根据宽高比解析尺寸
     if (!body.width && !body.height && body.aspectRatio) {
       const dims = aspectRatioToDimensions(body.aspectRatio);
       body.width = dims.width;
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     return apiSuccess({ result });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    // Detect content safety filter rejections (e.g. Seedream OutputImageSensitiveContentDetected)
+    // 检测内容安全过滤器拒绝（例如 Seedream OutputImageSensitiveContentDetected）
     if (message.includes('SensitiveContent') || message.includes('sensitive information')) {
       log.warn(`Image blocked by content safety filter: ${message}`);
       return apiError('CONTENT_SENSITIVE', 400, message);

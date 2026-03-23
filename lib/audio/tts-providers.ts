@@ -1,23 +1,23 @@
 /**
- * TTS (Text-to-Speech) Provider Implementation
+ * TTS（文本转语音）提供商实现
  *
- * Factory pattern for routing TTS requests to appropriate provider implementations.
- * Follows the same architecture as lib/ai/providers.ts for consistency.
+ * 使用工厂模式将 TTS 请求路由到相应的提供商实现。
+ * 遵循与 lib/ai/providers.ts 相同的架构以保持一致性。
  *
- * Currently Supported Providers:
- * - OpenAI TTS: https://platform.openai.com/docs/guides/text-to-speech
- * - Azure TTS: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech
- * - GLM TTS: https://docs.bigmodel.cn/cn/guide/models/sound-and-video/glm-tts
- * - Qwen TTS: https://bailian.console.aliyun.com/
- * - Browser Native: Web Speech API (client-side only)
+ * 当前支持的提供商：
+ * - OpenAI TTS：https://platform.openai.com/docs/guides/text-to-speech
+ * - Azure TTS：https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech
+ * - GLM TTS：https://docs.bigmodel.cn/cn/guide/models/sound-and-video/glm-tts
+ * - Qwen TTS：https://bailian.console.aliyun.com/
+ * - 浏览器原生：Web Speech API（仅客户端）
  *
- * HOW TO ADD A NEW PROVIDER:
+ * 如何添加新提供商：
  *
- * 1. Add provider ID to TTSProviderId in lib/audio/types.ts
- *    Example: | 'elevenlabs-tts'
+ * 1. 在 lib/audio/types.ts 中将提供商 ID 添加到 TTSProviderId
+ *    示例：| 'elevenlabs-tts'
  *
- * 2. Add provider configuration to lib/audio/constants.ts
- *    Example:
+ * 2. 在 lib/audio/constants.ts 中添加提供商配置
+ *    示例：
  *    'elevenlabs-tts': {
  *      id: 'elevenlabs-tts',
  *      name: 'ElevenLabs',
@@ -29,14 +29,14 @@
  *      speedRange: { min: 0.5, max: 2.0, default: 1.0 }
  *    }
  *
- * 3. Implement provider function in this file
- *    Pattern: async function generateXxxTTS(config, text): Promise<TTSGenerationResult>
- *    - Validate config and build API request
- *    - Handle API authentication (apiKey, headers)
- *    - Convert provider-specific parameters (voice, speed, format)
- *    - Return { audio: Uint8Array, format: string }
+ * 3. 在本文件中实现提供商函数
+ *    模式：async function generateXxxTTS(config, text): Promise<TTSGenerationResult>
+ *    - 验证配置并构建 API 请求
+ *    - 处理 API 认证（apiKey、headers）
+ *    - 转换提供商特定参数（voice、speed、format）
+ *    - 返回 { audio: Uint8Array, format: string }
  *
- *    Example:
+ *    示例：
  *    async function generateElevenLabsTTS(
  *      config: TTSModelConfig,
  *      text: string
@@ -70,30 +70,30 @@
  *      };
  *    }
  *
- * 4. Add case to generateTTS() switch statement
+ * 4. 在 generateTTS() switch 语句中添加 case
  *    case 'elevenlabs-tts':
  *      return await generateElevenLabsTTS(config, text);
  *
- * 5. Add i18n translations in lib/i18n.ts
+ * 5. 在 lib/i18n.ts 中添加 i18n 翻译
  *    providerElevenLabsTTS: { zh: 'ElevenLabs TTS', en: 'ElevenLabs TTS' }
  *
- * Error Handling Patterns:
- * - Always validate API key if requiresApiKey is true
- * - Throw descriptive errors for API failures
- * - Include response.statusText or error messages from API
- * - For client-only providers (browser-native), throw error directing to client-side usage
+ * 错误处理模式：
+ * - 如果 requiresApiKey 为 true，始终验证 API 密钥
+ * - 为 API 失败抛出描述性错误
+ * - 包含 response.statusText 或 API 返回的错误消息
+ * - 对于仅客户端的提供商（browser-native），抛出错误引导使用客户端方式
  *
- * API Call Patterns:
- * - Direct API: Use fetch with appropriate headers and body format (recommended for better encoding support)
- * - SSML: For Azure-like providers requiring SSML markup
- * - URL-based: For providers returning audio URL (download in second step)
+ * API 调用模式：
+ * - 直接 API：使用 fetch 配合适当的 headers 和 body 格式（推荐，编码支持更好）
+ * - SSML：用于需要 SSML 标记的 Azure 类提供商
+ * - 基于 URL：用于返回音频 URL 的提供商（第二步下载）
  */
 
 import type { TTSModelConfig } from './types';
 import { TTS_PROVIDERS } from './constants';
 
 /**
- * Result of TTS generation
+ * TTS 生成结果
  */
 export interface TTSGenerationResult {
   audio: Uint8Array;
@@ -101,7 +101,7 @@ export interface TTSGenerationResult {
 }
 
 /**
- * Generate speech using specified TTS provider
+ * 使用指定的 TTS 提供商生成语音
  */
 export async function generateTTS(
   config: TTSModelConfig,
@@ -112,7 +112,7 @@ export async function generateTTS(
     throw new Error(`Unknown TTS provider: ${config.providerId}`);
   }
 
-  // Validate API key if required
+  // 如果需要，验证 API 密钥
   if (provider.requiresApiKey && !config.apiKey) {
     throw new Error(`API key required for TTS provider: ${config.providerId}`);
   }
@@ -141,7 +141,7 @@ export async function generateTTS(
 }
 
 /**
- * OpenAI TTS implementation (direct API call with explicit UTF-8 encoding)
+ * OpenAI TTS 实现（直接 API 调用，显式 UTF-8 编码）
  */
 async function generateOpenAITTS(
   config: TTSModelConfig,
@@ -149,7 +149,7 @@ async function generateOpenAITTS(
 ): Promise<TTSGenerationResult> {
   const baseUrl = config.baseUrl || TTS_PROVIDERS['openai-tts'].defaultBaseUrl;
 
-  // Use gpt-4o-mini-tts for best quality and intelligent realtime applications
+  // 使用 gpt-4o-mini-tts 以获得最佳质量和智能实时应用
   const response = await fetch(`${baseUrl}/audio/speech`, {
     method: 'POST',
     headers: {
@@ -177,7 +177,7 @@ async function generateOpenAITTS(
 }
 
 /**
- * Azure TTS implementation (direct API call with SSML)
+ * Azure TTS 实现（直接 API 调用，使用 SSML）
  */
 async function generateAzureTTS(
   config: TTSModelConfig,
@@ -185,7 +185,7 @@ async function generateAzureTTS(
 ): Promise<TTSGenerationResult> {
   const baseUrl = config.baseUrl || TTS_PROVIDERS['azure-tts'].defaultBaseUrl;
 
-  // Build SSML
+  // 构建 SSML
   const rate = config.speed ? `${((config.speed - 1) * 100).toFixed(0)}%` : '0%';
   const ssml = `
     <speak version='1.0' xml:lang='zh-CN'>
@@ -217,7 +217,7 @@ async function generateAzureTTS(
 }
 
 /**
- * GLM TTS implementation (GLM API)
+ * GLM TTS 实现（GLM API）
  */
 async function generateGLMTTS(config: TTSModelConfig, text: string): Promise<TTSGenerationResult> {
   const baseUrl = config.baseUrl || TTS_PROVIDERS['glm-tts'].defaultBaseUrl;
@@ -247,7 +247,7 @@ async function generateGLMTTS(config: TTSModelConfig, text: string): Promise<TTS
         errorMessage = `GLM TTS API error: ${errorJson.error.message} (code: ${errorJson.error.code})`;
       }
     } catch {
-      // If not JSON, use the text as is
+      // 如果不是 JSON，使用原始文本
     }
     throw new Error(errorMessage);
   }
@@ -260,12 +260,12 @@ async function generateGLMTTS(config: TTSModelConfig, text: string): Promise<TTS
 }
 
 /**
- * Qwen TTS implementation (DashScope API - Qwen3 TTS Flash)
+ * Qwen TTS 实现（DashScope API - Qwen3 TTS Flash）
  */
 async function generateQwenTTS(config: TTSModelConfig, text: string): Promise<TTSGenerationResult> {
   const baseUrl = config.baseUrl || TTS_PROVIDERS['qwen-tts'].defaultBaseUrl;
 
-  // Calculate speed: Qwen3 uses rate parameter from -500 to 500
+  // 计算语速：Qwen3 使用 rate 参数，范围 -500 到 500
   // speed 1.0 = rate 0, speed 2.0 = rate 500, speed 0.5 = rate -250
   const rate = Math.round(((config.speed || 1.0) - 1.0) * 500);
 
@@ -280,10 +280,10 @@ async function generateQwenTTS(config: TTSModelConfig, text: string): Promise<TT
       input: {
         text,
         voice: config.voice,
-        language_type: 'Chinese', // Default to Chinese, can be made configurable
+        language_type: 'Chinese', // 默认中文，可配置
       },
       parameters: {
-        rate, // Speech rate from -500 to 500
+        rate, // 语速，范围 -500 到 500
       },
     }),
   });
@@ -295,12 +295,12 @@ async function generateQwenTTS(config: TTSModelConfig, text: string): Promise<TT
 
   const data = await response.json();
 
-  // Check for audio URL in response
+  // 检查响应中的音频 URL
   if (!data.output?.audio?.url) {
     throw new Error(`Qwen TTS error: No audio URL in response. Response: ${JSON.stringify(data)}`);
   }
 
-  // Download audio from URL
+  // 从 URL 下载音频
   const audioUrl = data.output.audio.url;
   const audioResponse = await fetch(audioUrl);
 
@@ -312,20 +312,20 @@ async function generateQwenTTS(config: TTSModelConfig, text: string): Promise<TT
 
   return {
     audio: new Uint8Array(arrayBuffer),
-    format: 'wav', // Qwen3 TTS returns WAV format
+    format: 'wav', // Qwen3 TTS 返回 WAV 格式
   };
 }
 
 /**
- * Get current TTS configuration from settings store
- * Note: This function should only be called in browser context
+ * 从设置存储获取当前 TTS 配置
+ * 注意：此函数只能在浏览器环境中调用
  */
 export async function getCurrentTTSConfig(): Promise<TTSModelConfig> {
   if (typeof window === 'undefined') {
     throw new Error('getCurrentTTSConfig() can only be called in browser context');
   }
 
-  // Lazy import to avoid circular dependency
+  // 延迟导入以避免循环依赖
   const { useSettingsStore } = await import('@/lib/store/settings');
   const { ttsProviderId, ttsVoice, ttsSpeed, ttsProvidersConfig } = useSettingsStore.getState();
 
@@ -340,11 +340,11 @@ export async function getCurrentTTSConfig(): Promise<TTSModelConfig> {
   };
 }
 
-// Re-export from constants for convenience
+// 为方便起见，从 constants 重新导出
 export { getAllTTSProviders, getTTSProvider, getTTSVoices } from './constants';
 
 /**
- * Escape XML special characters for SSML
+ * 转义 SSML 中的 XML 特殊字符
  */
 function escapeXml(text: string): string {
   return text

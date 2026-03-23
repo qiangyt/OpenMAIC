@@ -5,8 +5,8 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('LatexToOmml');
 
 /**
- * Strip MathML elements unsupported by mathml2omml (e.g. `<mpadded>`),
- * replacing them with their inner content.
+ * 移除 mathml2omml 不支持的 MathML 元素（如 `<mpadded>`），
+ * 替换为其内部内容。
  */
 function stripUnsupportedMathML(mathml: string): string {
   const unsupported = ['mpadded'];
@@ -19,8 +19,8 @@ function stripUnsupportedMathML(mathml: string): string {
 }
 
 /**
- * Build <a:rPr> for math runs. PowerPoint requires Cambria Math font.
- * @param szHundredths - font size in hundredths of a point (e.g. 1200 = 12pt). Omit for no sz.
+ * 为数学运行构建 <a:rPr>。PowerPoint 需要 Cambria Math 字体。
+ * @param szHundredths - 以百分之一磅为单位的字号（如 1200 = 12pt）。省略则不设置 sz。
  */
 function buildMathRPr(szHundredths?: number): string {
   const szAttr = szHundredths ? ` sz="${szHundredths}"` : '';
@@ -33,39 +33,39 @@ function buildMathRPr(szHundredths?: number): string {
 }
 
 /**
- * Post-process OMML for PPTX compatibility:
- * 1. Strip xmlns:w (wordprocessingml is DOCX-only, not valid in PPTX)
- * 2. Strip redundant xmlns:m (already declared at <p:sld> level)
- * 3. Inject <a:rPr> with Cambria Math font (and optional sz) into <m:r> and <m:ctrlPr>
+ * 对 OMML 进行后处理以确保 PPTX 兼容性：
+ * 1. 移除 xmlns:w（wordprocessingml 仅用于 DOCX，在 PPTX 中无效）
+ * 2. 移除冗余的 xmlns:m（已在 <p:sld> 层级声明）
+ * 3. 将包含 Cambria Math 字体（和可选 sz）的 <a:rPr> 注入到 <m:r> 和 <m:ctrlPr> 中
  */
 function postProcessOmml(omml: string, szHundredths?: number): string {
   let result = omml;
   const rpr = buildMathRPr(szHundredths);
 
-  // Strip DOCX-only xmlns:w and redundant xmlns:m from <m:oMath>
+  // 从 <m:oMath> 中移除仅用于 DOCX 的 xmlns:w 和冗余的 xmlns:m
   result = result.replace(/ xmlns:w="[^"]*"/g, '');
   result = result.replace(/ xmlns:m="[^"]*"/g, '');
 
-  // Insert <a:rPr> before <m:t> inside <m:r> (only if not already present)
+  // 在 <m:r> 内的 <m:t> 前插入 <a:rPr>（仅当不存在时）
   result = result.replace(/<m:r>(\s*)<m:t/g, `<m:r>$1${rpr}$1<m:t`);
 
-  // Fill empty <m:ctrlPr/> with <a:rPr>
+  // 用 <a:rPr> 填充空的 <m:ctrlPr/>
   result = result.replace(/<m:ctrlPr\/>/g, `<m:ctrlPr>${rpr}</m:ctrlPr>`);
 
-  // Fill empty <m:ctrlPr></m:ctrlPr> with <a:rPr>
+  // 用 <a:rPr> 填充空的 <m:ctrlPr></m:ctrlPr>
   result = result.replace(/<m:ctrlPr><\/m:ctrlPr>/g, `<m:ctrlPr>${rpr}</m:ctrlPr>`);
 
   return result;
 }
 
 /**
- * Convert a LaTeX string to OMML (Office Math Markup Language) XML.
+ * 将 LaTeX 字符串转换为 OMML（Office Math Markup Language）XML。
  *
- * Pipeline: LaTeX → MathML (temml) → strip unsupported → OMML (mathml2omml) → inject font props
+ * 流水线：LaTeX → MathML (temml) → 移除不支持元素 → OMML (mathml2omml) → 注入字体属性
  *
- * @param latex - LaTeX math expression (without delimiters)
- * @param fontSize - Optional font size in points (e.g. 12). Applied as sz on every <a:rPr> in the OMML.
- * @returns OMML XML string (an `<m:oMath>` element), or `null` if conversion fails
+ * @param latex - LaTeX 数学表达式（不含分隔符）
+ * @param fontSize - 可选字号（单位：磅，如 12）。应用到 OMML 中每个 <a:rPr> 的 sz 属性。
+ * @returns OMML XML 字符串（一个 `<m:oMath>` 元素），转换失败时返回 `null`
  */
 export function latexToOmml(latex: string, fontSize?: number): string | null {
   try {

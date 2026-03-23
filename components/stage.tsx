@@ -15,7 +15,7 @@ import type { EngineMode, TriggerEvent, Effect } from '@/lib/playback';
 import { ActionEngine } from '@/lib/action/engine';
 import { createAudioPlayer } from '@/lib/utils/audio-player';
 import type { Action, DiscussionAction, SpeechAction } from '@/lib/types/action';
-// Playback state persistence removed — refresh always starts from the beginning
+// 播放状态持久化已移除 — 刷新始终从头开始
 import { ChatArea, type ChatAreaRef } from '@/components/chat/chat-area';
 import { agentsToParticipants, useAgentRegistry } from '@/lib/orchestration/registry/store';
 import type { AgentConfig } from '@/lib/orchestration/registry/types';
@@ -31,11 +31,11 @@ import { AlertTriangle } from 'lucide-react';
 import { VisuallyHidden } from 'radix-ui';
 
 /**
- * Stage Component
+ * Stage 组件
  *
- * The main container for the classroom/course.
- * Combines sidebar (scene navigation) and content area (scene viewer).
- * Supports two modes: autonomous and playback.
+ * 课堂/课程的主容器。
+ * 结合侧边栏（场景导航）和内容区域（场景查看器）。
+ * 支持两种模式：autonomous（自主）和 playback（播放）。
  */
 export function Stage({
   onRetryOutline,
@@ -49,7 +49,7 @@ export function Stage({
 
   const currentScene = getCurrentScene();
 
-  // Layout state from settings store (persisted via localStorage)
+  // 布局状态来自设置存储（通过 localStorage 持久化）
   const sidebarCollapsed = useSettingsStore((s) => s.sidebarCollapsed);
   const setSidebarCollapsed = useSettingsStore((s) => s.setSidebarCollapsed);
   const chatAreaWidth = useSettingsStore((s) => s.chatAreaWidth);
@@ -57,57 +57,57 @@ export function Stage({
   const chatAreaCollapsed = useSettingsStore((s) => s.chatAreaCollapsed);
   const setChatAreaCollapsed = useSettingsStore((s) => s.setChatAreaCollapsed);
 
-  // PlaybackEngine state
+  // PlaybackEngine 状态
   const [engineMode, setEngineMode] = useState<EngineMode>('idle');
-  const [playbackCompleted, setPlaybackCompleted] = useState(false); // Distinguishes "never played" idle from "finished" idle
-  const [lectureSpeech, setLectureSpeech] = useState<string | null>(null); // From PlaybackEngine (lecture)
-  const [liveSpeech, setLiveSpeech] = useState<string | null>(null); // From buffer (discussion/QA)
-  const [speechProgress, setSpeechProgress] = useState<number | null>(null); // StreamBuffer reveal progress (0–1)
+  const [playbackCompleted, setPlaybackCompleted] = useState(false); // 区分"从未播放"的空闲和"已完成"的空闲
+  const [lectureSpeech, setLectureSpeech] = useState<string | null>(null); // 来自 PlaybackEngine（讲课）
+  const [liveSpeech, setLiveSpeech] = useState<string | null>(null); // 来自缓冲区（讨论/问答）
+  const [speechProgress, setSpeechProgress] = useState<number | null>(null); // StreamBuffer 揭示进度（0–1）
   const [discussionTrigger, setDiscussionTrigger] = useState<TriggerEvent | null>(null);
 
-  // Speaking agent tracking (Issue 2)
+  // 说话智能体追踪（Issue 2）
   const [speakingAgentId, setSpeakingAgentId] = useState<string | null>(null);
 
-  // Thinking state (Issue 5)
+  // 思考状态（Issue 5）
   const [thinkingState, setThinkingState] = useState<{
     stage: string;
     agentId?: string;
   } | null>(null);
 
-  // Cue user state (Issue 7)
+  // 提示用户状态（Issue 7）
   const [isCueUser, setIsCueUser] = useState(false);
 
-  // End flash state (Issue 3)
+  // 结束闪烁状态（Issue 3）
   const [showEndFlash, setShowEndFlash] = useState(false);
   const [endFlashSessionType, setEndFlashSessionType] = useState<'qa' | 'discussion'>('discussion');
 
-  // Streaming state for stop button (Issue 1)
+  // 流式状态用于停止按钮（Issue 1）
   const [chatIsStreaming, setChatIsStreaming] = useState(false);
   const [chatSessionType, setChatSessionType] = useState<string | null>(null);
 
-  // Topic pending state: session is soft-paused, bubble stays visible, waiting for user input
+  // 话题待处理状态：会话软暂停，气泡保持可见，等待用户输入
   const [isTopicPending, setIsTopicPending] = useState(false);
 
-  // Active bubble ID for playback highlight in chat area (Issue 8)
+  // 用于聊天区域播放高亮的活跃气泡 ID（Issue 8）
   const [activeBubbleId, setActiveBubbleId] = useState<string | null>(null);
 
-  // Scene switch confirmation dialog state
+  // 场景切换确认对话框状态
   const [pendingSceneId, setPendingSceneId] = useState<string | null>(null);
 
-  // Whiteboard state (from canvas store so AI tools can open it)
+  // 白板状态（来自 canvas store，以便 AI 工具可以打开它）
   const whiteboardOpen = useCanvasStore.use.whiteboardOpen();
   const setWhiteboardOpen = useCanvasStore.use.setWhiteboardOpen();
 
-  // Selected agents from settings store (Zustand)
+  // 从设置存储中获取选中的智能体（Zustand）
   const selectedAgentIds = useSettingsStore((s) => s.selectedAgentIds);
 
-  // Generate participants from selected agents
+  // 从选中的智能体生成参与者
   const participants = useMemo(
     () => agentsToParticipants(selectedAgentIds, t),
     [selectedAgentIds, t],
   );
 
-  // Pick a student agent for discussion trigger (prioritize student > non-teacher > fallback)
+  // 为讨论触发选择一个学生智能体（优先级：学生 > 非教师 > 回退）
   const pickStudentAgent = useCallback((): string => {
     const registry = useAgentRegistry.getState();
     const agents = selectedAgentIds
@@ -130,52 +130,52 @@ export function Stage({
   const lectureSessionIdRef = useRef<string | null>(null);
   const lectureActionCounterRef = useRef(0);
   const discussionAbortRef = useRef<AbortController | null>(null);
-  // Guard to prevent double flash when manual stop triggers onDiscussionEnd
+  // 防止手动停止触发 onDiscussionEnd 时出现双重闪烁的守卫
   const manualStopRef = useRef(false);
-  // Monotonic counter incremented on each scene switch — used to discard stale SSE callbacks
+  // 单调计数器，每次场景切换时递增 — 用于丢弃过期的 SSE 回调
   const sceneEpochRef = useRef(0);
-  // When true, the next engine init will auto-start playback (for auto-play scene advance)
+  // 当为 true 时，下次引擎初始化将自动开始播放（用于自动播放场景切换）
   const autoStartRef = useRef(false);
 
   /**
-   * Soft-pause: interrupt current agent stream but keep the session active.
-   * Used when clicking the bubble pause button or opening input during QA/discussion.
-   * Does NOT end the topic — user can continue speaking in the same session.
-   * Preserves liveSpeech (with "..." appended) and speakingAgentId so the
-   * roundtable bubble stays on the interrupted agent's text.
+   * 软暂停：中断当前智能体流但保持会话活跃。
+   * 用于点击气泡暂停按钮或在问答/讨论期间打开输入框时。
+   * 不会结束话题 — 用户可以在同一会话中继续发言。
+   * 保留 liveSpeech（追加"..."）和 speakingAgentId，使圆桌气泡
+   * 停留在被中断智能体的文本上。
    */
   const doSoftPause = useCallback(async () => {
     await chatAreaRef.current?.softPauseActiveSession();
-    // Append "..." to live speech to show interruption in roundtable bubble.
-    // Only annotate when there's actual text being interrupted — during pure
-    // director-thinking (prev is null, no agent assigned), leave liveSpeech
-    // as-is so no spurious teacher bubble appears.
+    // 在 live speech 后追加 "..." 以在圆桌气泡中显示中断
+    // 仅在有实际文本被中断时才标注 — 在纯导演思考期间
+    // （prev 为 null，未分配智能体），保持 liveSpeech 不变
+    // 以避免出现虚假的教师气泡
     setLiveSpeech((prev) => (prev !== null ? prev + '...' : null));
-    // Keep speakingAgentId — bubble identity is preserved
+    // 保持 speakingAgentId — 气泡身份得以保留
     setThinkingState(null);
     setChatIsStreaming(false);
     setIsTopicPending(true);
-    // Don't clear chatSessionType, speakingAgentId, or liveSpeech
-    // Don't show end flash
-    // Don't call handleEndDiscussion — engine stays in current state
+    // 不清除 chatSessionType、speakingAgentId 或 liveSpeech
+    // 不显示结束闪烁
+    // 不调用 handleEndDiscussion — 引擎保持当前状态
   }, []);
 
   /**
-   * Resume a soft-paused topic: re-call /chat with existing session messages.
-   * The director picks the next agent to continue.
+   * 恢复软暂停的话题：使用现有会话消息重新调用 /chat。
+   * 导演选择下一个智能体继续。
    */
   const doResumeTopic = useCallback(async () => {
-    // Clear old bubble immediately — no lingering on interrupted text
+    // 立即清除旧气泡 — 不在被中断的文本上停留
     setIsTopicPending(false);
     setLiveSpeech(null);
     setSpeakingAgentId(null);
     setThinkingState({ stage: 'director' });
     setChatIsStreaming(true);
-    // Fire new chat round — SSE events will drive thinking → agent_start → speech
+    // 发起新的聊天轮次 — SSE 事件将驱动 thinking → agent_start → speech
     await chatAreaRef.current?.resumeActiveSession();
   }, []);
 
-  /** Reset all live/discussion state (shared by doSessionCleanup & onDiscussionEnd) */
+  /** 重置所有实时/讨论状态（由 doSessionCleanup 和 onDiscussionEnd 共享）*/
   const resetLiveState = useCallback(() => {
     setLiveSpeech(null);
     setSpeakingAgentId(null);
@@ -187,7 +187,7 @@ export function Stage({
     setChatSessionType(null);
   }, []);
 
-  /** Full scene reset (scene switch) — resetLiveState + lecture/visual state */
+  /** 完整场景重置（场景切换）— resetLiveState + 讲课/视觉状态 */
   const resetSceneState = useCallback(() => {
     resetLiveState();
     setPlaybackCompleted(false);
@@ -199,18 +199,18 @@ export function Stage({
   }, [resetLiveState]);
 
   /**
-   * Unified session cleanup — called by both roundtable stop button and chat area end button.
-   * Handles: engine transition, flash, roundtable state clearing.
+   * 统一会话清理 — 由圆桌停止按钮和聊天区域结束按钮共同调用。
+   * 处理：引擎状态转换、结束闪烁、圆桌状态清除。
    */
   const doSessionCleanup = useCallback(() => {
     const activeType = chatSessionType;
 
-    // Engine cleanup — guard to avoid double flash from onDiscussionEnd
+    // 引擎清理 — 设置守卫以避免 onDiscussionEnd 触发双重闪烁
     manualStopRef.current = true;
     engineRef.current?.handleEndDiscussion();
     manualStopRef.current = false;
 
-    // Show end flash with correct session type
+    // 显示结束闪烁，使用正确的会话类型
     if (activeType === 'qa' || activeType === 'discussion') {
       setEndFlashSessionType(activeType);
       setShowEndFlash(true);
@@ -220,29 +220,29 @@ export function Stage({
     resetLiveState();
   }, [chatSessionType, resetLiveState]);
 
-  // Shared stop-discussion handler (used by both Roundtable and Canvas toolbar)
+  // 共享的停止讨论处理器（由圆桌和画布工具栏共同使用）
   const handleStopDiscussion = useCallback(async () => {
     await chatAreaRef.current?.endActiveSession();
     doSessionCleanup();
   }, [doSessionCleanup]);
 
-  // Initialize playback engine when scene changes
+  // 场景切换时初始化播放引擎
   useEffect(() => {
-    // Bump epoch so any stale SSE callbacks from the previous scene are discarded
+    // 递增 epoch，以便丢弃来自前一个场景的过期 SSE 回调
     sceneEpochRef.current++;
 
-    // End any active QA/discussion session — this synchronously aborts the SSE
-    // stream inside use-chat-sessions (abortControllerRef.abort()), preventing
-    // stale onLiveSpeech callbacks from leaking into the new scene.
+    // 结束任何活跃的问答/讨论会话 — 这会同步中止 use-chat-sessions 内部的
+    // SSE 流（abortControllerRef.abort()），防止过期的 onLiveSpeech 回调
+    // 泄漏到新场景中。
     chatAreaRef.current?.endActiveSession();
 
-    // Also abort the engine-level discussion controller
+    // 同时中止引擎级别的讨论控制器
     if (discussionAbortRef.current) {
       discussionAbortRef.current.abort();
       discussionAbortRef.current = null;
     }
 
-    // Reset all roundtable/live state so scenes are fully isolated
+    // 重置所有圆桌/实时状态，确保场景完全隔离
     resetSceneState();
 
     if (!currentScene || !currentScene.actions || currentScene.actions.length === 0) {
@@ -252,26 +252,26 @@ export function Stage({
       return;
     }
 
-    // Stop previous engine
+    // 停止之前的引擎
     if (engineRef.current) {
       engineRef.current.stop();
     }
 
-    // Create ActionEngine for playback (with audioPlayer for TTS)
+    // 为播放创建 ActionEngine（带 audioPlayer 用于 TTS）
     const actionEngine = new ActionEngine(useStageStore, audioPlayerRef.current);
 
-    // Create new PlaybackEngine
+    // 创建新的 PlaybackEngine
     const engine = new PlaybackEngine([currentScene], actionEngine, audioPlayerRef.current, {
       onModeChange: (mode) => {
         setEngineMode(mode);
       },
       onSceneChange: (_sceneId) => {
-        // Scene change handled by engine
+        // 场景切换由引擎处理
       },
       onSpeechStart: (text) => {
         setLectureSpeech(text);
-        // Add to lecture session with incrementing index for dedup
-        // Chat area pacing is handled by the StreamBuffer (onTextReveal)
+        // 将讲课内容添加到会话中，使用递增索引进行去重
+        // 聊天区域的节奏由 StreamBuffer 控制（onTextReveal）
         if (lectureSessionIdRef.current) {
           const idx = lectureActionCounterRef.current++;
           const speechId = `speech-${Date.now()}`;
@@ -280,19 +280,18 @@ export function Stage({
             { id: speechId, type: 'speech', text } as Action,
             idx,
           );
-          // Track active bubble for highlight (Issue 8)
+          // 追踪活跃气泡用于高亮（Issue 8）
           const msgId = chatAreaRef.current?.getLectureMessageId(lectureSessionIdRef.current!);
           if (msgId) setActiveBubbleId(msgId);
         }
       },
       onSpeechEnd: () => {
-        // Don't clear lectureSpeech — let it persist until the next
-        // onSpeechStart replaces it or the scene transitions.
-        // Clearing here causes fallback to idleText (first sentence).
+        // 不要清除 lectureSpeech — 让它保持到下一个 onSpeechStart
+        // 替换它或场景切换时。在这里清除会导致回退到 idleText（第一句）。
         setActiveBubbleId(null);
       },
       onEffectFire: (effect: Effect) => {
-        // Add to lecture session with incrementing index
+        // 将效果添加到讲课会话中，使用递增索引
         if (
           lectureSessionIdRef.current &&
           (effect.kind === 'spotlight' || effect.kind === 'laser')
@@ -311,8 +310,8 @@ export function Stage({
       },
       onProactiveShow: (trigger) => {
         if (!trigger.agentId) {
-          // Mutate in-place so engine.currentTrigger also gets the agentId
-          // (confirmDiscussion reads agentId from the same object reference)
+          // 原地修改，使 engine.currentTrigger 也获得 agentId
+          // （confirmDiscussion 从同一对象引用读取 agentId）
           trigger.agentId = pickStudentAgent();
         }
         setDiscussionTrigger(trigger);
@@ -321,32 +320,32 @@ export function Stage({
         setDiscussionTrigger(null);
       },
       onDiscussionConfirmed: (topic, prompt, agentId) => {
-        // Start SSE discussion via ChatArea
+        // 通过 ChatArea 启动 SSE 讨论
         handleDiscussionSSE(topic, prompt, agentId);
       },
       onDiscussionEnd: () => {
-        // Abort any active SSE
+        // 中止任何活跃的 SSE
         if (discussionAbortRef.current) {
           discussionAbortRef.current.abort();
           discussionAbortRef.current = null;
         }
         setDiscussionTrigger(null);
-        // Clear roundtable state (idempotent — may already be cleared by doSessionCleanup)
+        // 清除圆桌状态（幂等 — 可能已被 doSessionCleanup 清除）
         resetLiveState();
-        // Only show flash for engine-initiated ends (not manual stop — that's handled by doSessionCleanup)
+        // 仅对引擎发起的结束显示闪烁（手动停止由 doSessionCleanup 处理）
         if (!manualStopRef.current) {
           setEndFlashSessionType('discussion');
           setShowEndFlash(true);
           setTimeout(() => setShowEndFlash(false), 1800);
         }
-        // If all actions are exhausted (discussion was the last action), mark
-        // playback as completed so the bubble shows reset instead of play.
+        // 如果所有动作已耗尽（讨论是最后一个动作），标记
+        // 播放已完成，以便气泡显示重置而不是播放。
         if (engineRef.current?.isExhausted()) {
           setPlaybackCompleted(true);
         }
       },
       onUserInterrupt: (text) => {
-        // User interrupted → start a discussion via chat
+        // 用户中断 → 通过聊天开始讨论
         chatAreaRef.current?.sendMessage(text);
       },
       isAgentSelected: (agentId) => {
@@ -355,17 +354,17 @@ export function Stage({
       },
       getPlaybackSpeed: () => useSettingsStore.getState().playbackSpeed || 1,
       onComplete: () => {
-        // lectureSpeech intentionally NOT cleared — last sentence stays visible
-        // until scene transition (auto-play) or user restarts. Scene change
-        // effect handles the reset.
+        // lectureSpeech 故意不清除 — 最后一句保持可见
+        // 直到场景切换（自动播放）或用户重新开始。
+        // 场景切换 effect 处理重置。
         setPlaybackCompleted(true);
 
-        // End lecture session on playback complete
+        // 播放完成时结束讲课会话
         if (lectureSessionIdRef.current) {
           chatAreaRef.current?.endSession(lectureSessionIdRef.current);
           lectureSessionIdRef.current = null;
         }
-        // Auto-play: advance to next scene after a short pause
+        // 自动播放：短暂暂停后切换到下一个场景
         const { autoPlayLecture } = useSettingsStore.getState();
         if (autoPlayLecture) {
           setTimeout(() => {
@@ -386,7 +385,7 @@ export function Stage({
               autoStartRef.current = true;
               stageState.setCurrentSceneId(allScenes[idx + 1].id);
             } else if (idx === allScenes.length - 1 && stageState.generatingOutlines.length > 0) {
-              // Last scene exhausted but next is still generating — go to pending page
+              // 最后一个场景已耗尽但下一个仍在生成 — 跳转到待处理页面
               const currentScene = allScenes[idx];
               if (
                 currentScene.type === 'quiz' ||
@@ -405,7 +404,7 @@ export function Stage({
 
     engineRef.current = engine;
 
-    // Auto-start if triggered by auto-play scene advance
+    // 如果由自动播放场景切换触发，则自动开始
     if (autoStartRef.current) {
       autoStartRef.current = false;
       (async () => {
@@ -417,12 +416,12 @@ export function Stage({
         engine.start();
       })();
     } else {
-      // Load saved playback state and restore position (but never auto-play).
+      // 加载保存的播放状态并恢复位置（但从不自动播放）。
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only re-run when scene changes, functions are stable refs
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅在场景切换时重新运行，函数是稳定的引用
   }, [currentScene]);
 
-  // Cleanup on unmount
+  // 卸载时清理
   useEffect(() => {
     const audioPlayer = audioPlayerRef.current;
     return () => {
@@ -436,13 +435,13 @@ export function Stage({
     };
   }, []);
 
-  // Sync mute state from settings store to audioPlayer
+  // 将静音状态从设置存储同步到 audioPlayer
   const ttsMuted = useSettingsStore((s) => s.ttsMuted);
   useEffect(() => {
     audioPlayerRef.current.setMuted(ttsMuted);
   }, [ttsMuted]);
 
-  // Sync volume from settings store to audioPlayer
+  // 将音量从设置存储同步到 audioPlayer
   const ttsVolume = useSettingsStore((s) => s.ttsVolume);
   useEffect(() => {
     if (!ttsMuted) {
@@ -450,48 +449,48 @@ export function Stage({
     }
   }, [ttsVolume, ttsMuted]);
 
-  // Sync playback speed to audio player (for live-updating current audio)
+  // 将播放速度同步到音频播放器（用于实时更新当前音频）
   const playbackSpeed = useSettingsStore((s) => s.playbackSpeed);
   useEffect(() => {
     audioPlayerRef.current.setPlaybackRate(playbackSpeed);
   }, [playbackSpeed]);
 
   /**
-   * Handle discussion SSE — POST /api/chat and push events to engine
+   * 处理讨论 SSE — POST /api/chat 并将事件推送到引擎
    */
   const handleDiscussionSSE = useCallback(
     async (topic: string, prompt?: string, agentId?: string) => {
-      // Start discussion display in ChatArea (lecture speech is preserved independently)
+      // 在 ChatArea 中开始讨论显示（讲课语音独立保留）
       chatAreaRef.current?.startDiscussion({
         topic,
         prompt,
         agentId: agentId || 'default-1',
       });
-      // Auto-switch to chat tab when discussion starts
+      // 讨论开始时自动切换到聊天标签页
       chatAreaRef.current?.switchToTab('chat');
-      // Immediately mark streaming for synchronized stop button
+      // 立即标记为流式传输，用于同步停止按钮
       setChatIsStreaming(true);
       setChatSessionType('discussion');
-      // Optimistic thinking: show thinking dots immediately (same as onMessageSend)
+      // 乐观思考：立即显示思考动画（与 onMessageSend 相同）
       setThinkingState({ stage: 'director' });
     },
     [],
   );
 
-  // First speech text for idle display (extracted here for playbackView)
+  // 用于空闲显示的第一段讲课文本（在此处提取用于 playbackView）
   const firstSpeechText = useMemo(
     () => currentScene?.actions?.find((a): a is SpeechAction => a.type === 'speech')?.text ?? null,
     [currentScene],
   );
 
-  // Whether the speaking agent is a student (for bubble role derivation)
+  // 正在发言的智能体是否为学生（用于气泡角色派生）
   const speakingStudentFlag = useMemo(() => {
     if (!speakingAgentId) return false;
     const agent = useAgentRegistry.getState().getAgent(speakingAgentId);
     return agent?.role !== 'teacher';
   }, [speakingAgentId]);
 
-  // Centralised derived playback view
+  // 集中派生的播放视图
   const playbackView = useMemo(
     () =>
       computePlaybackView({
@@ -529,8 +528,8 @@ export function Stage({
   const isTopicActive = playbackView.isTopicActive;
 
   /**
-   * Gated scene switch — if a topic is active, show AlertDialog before switching.
-   * Returns true if the switch was immediate, false if gated (dialog shown).
+   * 受控场景切换 — 如果有活跃话题，切换前显示确认对话框。
+   * 如果立即切换返回 true，如果被拦截（显示对话框）返回 false。
    */
   const gatedSceneSwitch = useCallback(
     (targetSceneId: string): boolean => {
@@ -545,7 +544,7 @@ export function Stage({
     [currentSceneId, isTopicActive, setCurrentSceneId],
   );
 
-  /** User confirmed scene switch via AlertDialog */
+  /** 用户通过 AlertDialog 确认场景切换 */
   const confirmSceneSwitch = useCallback(() => {
     if (!pendingSceneId) return;
     chatAreaRef.current?.endActiveSession();
@@ -554,12 +553,12 @@ export function Stage({
     setPendingSceneId(null);
   }, [pendingSceneId, setCurrentSceneId, doSessionCleanup]);
 
-  /** User cancelled scene switch via AlertDialog */
+  /** 用户通过 AlertDialog 取消场景切换 */
   const cancelSceneSwitch = useCallback(() => {
     setPendingSceneId(null);
   }, []);
 
-  // play/pause toggle
+  // 播放/暂停切换
   const handlePlayPause = async () => {
     const engine = engineRef.current;
     if (!engine) return;
@@ -567,39 +566,39 @@ export function Stage({
     const mode = engine.getMode();
     if (mode === 'playing' || mode === 'live') {
       engine.pause();
-      // Pause lecture buffer so text stops immediately
+      // 暂停讲课缓冲区，使文本立即停止
       if (lectureSessionIdRef.current) {
         chatAreaRef.current?.pauseBuffer(lectureSessionIdRef.current);
       }
     } else if (mode === 'paused') {
       engine.resume();
-      // Resume lecture buffer
+      // 恢复讲课缓冲区
       if (lectureSessionIdRef.current) {
         chatAreaRef.current?.resumeBuffer(lectureSessionIdRef.current);
       }
     } else {
       const wasCompleted = playbackCompleted;
       setPlaybackCompleted(false);
-      // Starting playback - create/reuse lecture session
+      // 开始播放 — 创建/复用讲课会话
       if (currentScene && chatAreaRef.current) {
         const sessionId = await chatAreaRef.current.startLecture(currentScene.id);
         lectureSessionIdRef.current = sessionId;
       }
       if (wasCompleted) {
-        // Restart from beginning (user clicked restart after completion)
+        // 从头开始（用户在完成后点击重新开始）
         lectureActionCounterRef.current = 0;
         engine.start();
       } else {
-        // Continue from current position (e.g. after discussion end)
+        // 从当前位置继续（例如讨论结束后）
         engine.continuePlayback();
       }
     }
   };
 
-  // previous scene (gated)
+  // 上一个场景（受控）
   const handlePreviousScene = () => {
     if (isPendingScene) {
-      // From pending page → go to last real scene
+      // 从待处理页 → 跳转到最后一个真实场景
       if (scenes.length > 0) {
         gatedSceneSwitch(scenes[scenes.length - 1].id);
       }
@@ -611,19 +610,19 @@ export function Stage({
     }
   };
 
-  // next scene (gated)
+  // 下一个场景（受控）
   const handleNextScene = () => {
-    if (isPendingScene) return; // Already on pending, nowhere to go
+    if (isPendingScene) return; // 已在待处理页，无处可去
     const currentIndex = scenes.findIndex((s) => s.id === currentSceneId);
     if (currentIndex < scenes.length - 1) {
       gatedSceneSwitch(scenes[currentIndex + 1].id);
     } else if (hasNextPending) {
-      // On last real scene → advance to pending page
+      // 在最后一个真实场景 → 前进到待处理页
       setCurrentSceneId(PENDING_SCENE_ID);
     }
   };
 
-  // get scene information
+  // 获取场景信息
   const isPendingScene = currentSceneId === PENDING_SCENE_ID;
   const hasNextPending = generatingOutlines.length > 0;
   const currentSceneIndex = isPendingScene
@@ -631,15 +630,15 @@ export function Stage({
     : scenes.findIndex((s) => s.id === currentSceneId);
   const totalScenesCount = scenes.length + (hasNextPending ? 1 : 0);
 
-  // get action information
+  // 获取动作信息
   const totalActions = currentScene?.actions?.length || 0;
 
-  // whiteboard toggle
+  // 白板切换
   const handleWhiteboardToggle = () => {
     setWhiteboardOpen(!whiteboardOpen);
   };
 
-  // Map engine mode to the CanvasArea's expected engine state
+  // 将引擎模式映射到 CanvasArea 期望的引擎状态
   const canvasEngineState = (() => {
     switch (engineMode) {
       case 'playing':
@@ -652,7 +651,7 @@ export function Stage({
     }
   })();
 
-  // Build discussion request for Roundtable ProactiveCard from trigger
+  // 从触发器构建圆桌 ProactiveCard 的讨论请求
   const discussionRequest: DiscussionAction | null = discussionTrigger
     ? {
         type: 'discussion',
@@ -663,18 +662,18 @@ export function Stage({
       }
     : null;
 
-  // Calculate scene viewer height (subtract Header's 80px height)
+  // 计算场景查看器高度（减去 Header 的 80px 高度）
   const sceneViewerHeight = (() => {
     const headerHeight = 80; // Header h-20 = 80px
     if (mode === 'playback') {
-      return `calc(100% - ${headerHeight + 192}px)`; // Header + Roundtable
+      return `calc(100% - ${headerHeight + 192}px)`; // Header + 圆桌
     }
     return `calc(100% - ${headerHeight}px)`;
   })();
 
   return (
     <div className="flex-1 flex overflow-hidden bg-gray-50 dark:bg-gray-900">
-      {/* Scene Sidebar */}
+      {/* 场景侧边栏 */}
       <SceneSidebar
         collapsed={sidebarCollapsed}
         onCollapseChange={setSidebarCollapsed}
@@ -682,12 +681,12 @@ export function Stage({
         onRetryOutline={onRetryOutline}
       />
 
-      {/* Main Content Area */}
+      {/* 主内容区域 */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0 relative">
-        {/* Header */}
+        {/* 头部 */}
         <Header currentSceneTitle={currentScene?.title || ''} />
 
-        {/* Canvas Area */}
+        {/* 画布区域 */}
         <div
           className="overflow-hidden relative flex-1 min-h-0 isolate"
           style={{
@@ -731,7 +730,7 @@ export function Stage({
           />
         </div>
 
-        {/* Roundtable Area */}
+        {/* 圆桌区域 */}
         {mode === 'playback' && (
           <Roundtable
             mode={mode}
@@ -759,18 +758,17 @@ export function Stage({
             isCueUser={isCueUser}
             isTopicPending={isTopicPending}
             onMessageSend={(msg) => {
-              // Clear soft-paused state — user is continuing the topic
+              // 清除软暂停状态 — 用户正在继续话题
               if (isTopicPending) {
                 setIsTopicPending(false);
                 setLiveSpeech(null);
                 setSpeakingAgentId(null);
               }
-              // User interrupts during playback — handleUserInterrupt triggers
-              // onUserInterrupt callback which already calls sendMessage, so skip
-              // the direct sendMessage below to avoid sending twice.
-              // Include 'paused' because onInputActivate pauses the engine before
-              // the user finishes typing — without this the interrupt position
-              // would never be saved and resuming after QA skips to the next sentence.
+              // 用户在播放期间中断 — handleUserInterrupt 触发 onUserInterrupt
+              // 回调，该回调已调用 sendMessage，所以跳过下面的直接 sendMessage
+              // 以避免发送两次。
+              // 包含 'paused' 因为 onInputActivate 在用户完成输入前暂停引擎 —
+              // 如果不这样做，中断位置永远不会被保存，问答结束后恢复会跳到下一句。
               if (
                 engineRef.current &&
                 (engineMode === 'playing' || engineMode === 'live' || engineMode === 'paused')
@@ -779,32 +777,32 @@ export function Stage({
               } else {
                 chatAreaRef.current?.sendMessage(msg);
               }
-              // Auto-switch to chat tab when user sends a message
+              // 用户发送消息时自动切换到聊天标签页
               chatAreaRef.current?.switchToTab('chat');
               setIsCueUser(false);
-              // Immediately mark streaming for synchronized stop button
+              // 立即标记为流式传输，用于同步停止按钮
               setChatIsStreaming(true);
               setChatSessionType(chatSessionType || 'qa');
-              // Optimistic thinking: show thinking dots immediately so there's
-              // no blank gap between userMessage expiry and the SSE thinking event.
-              // The real SSE event will overwrite this with the same or updated value.
+              // 乐观思考：立即显示思考动画，以便在 userMessage 过期
+              // 和 SSE 思考事件之间没有空白间隙。
+              // 真实的 SSE 事件会用相同或更新的值覆盖此值。
               setThinkingState({ stage: 'director' });
             }}
             onDiscussionStart={() => {
-              // User clicks "Join" on ProactiveCard
+              // 用户点击 ProactiveCard 上的"加入"
               engineRef.current?.confirmDiscussion();
             }}
             onDiscussionSkip={() => {
-              // User clicks "Skip" on ProactiveCard
+              // 用户点击 ProactiveCard 上的"跳过"
               engineRef.current?.skipDiscussion();
             }}
             onStopDiscussion={handleStopDiscussion}
             onInputActivate={async () => {
-              // Soft-pause QA/Discussion if streaming (opening input = implicit pause)
+              // 如果正在流式传输，软暂停问答/讨论（打开输入 = 隐式暂停）
               if (chatIsStreaming) {
                 await doSoftPause();
               }
-              // Also pause playback engine
+              // 同时暂停播放引擎
               if (engineRef.current && (engineMode === 'playing' || engineMode === 'live')) {
                 engineRef.current.pause();
               }
@@ -828,7 +826,7 @@ export function Stage({
         )}
       </div>
 
-      {/* Chat Area */}
+      {/* 聊天区域 */}
       <ChatArea
         ref={chatAreaRef}
         width={chatAreaWidth}
@@ -839,11 +837,11 @@ export function Stage({
         onActiveBubble={(id) => setActiveBubbleId(id)}
         currentSceneId={currentSceneId}
         onLiveSpeech={(text, agentId) => {
-          // Capture epoch at call time — discard if scene has changed since
+          // 在调用时捕获 epoch — 如果场景已切换则丢弃
           const epoch = sceneEpochRef.current;
-          // Use queueMicrotask to let any pending scene-switch reset settle first
+          // 使用 queueMicrotask 让任何待处理的场景切换重置先完成
           queueMicrotask(() => {
-            if (sceneEpochRef.current !== epoch) return; // stale — scene changed
+            if (sceneEpochRef.current !== epoch) return; // 过期 — 场景已切换
             setLiveSpeech(text);
             if (agentId !== undefined) {
               setSpeakingAgentId(agentId);
@@ -854,9 +852,9 @@ export function Stage({
               setIsTopicPending(false);
             } else if (text === null && agentId === null) {
               setChatIsStreaming(false);
-              // Don't clear chatSessionType here — it's needed by the stop
-              // button when director cues user (cue_user → done → liveSpeech null).
-              // It gets properly cleared in doSessionCleanup and scene change.
+              // 不要在这里清除 chatSessionType — 导演提示用户时
+              // 停止按钮需要它（cue_user → done → liveSpeech null）。
+              // 它会在 doSessionCleanup 和场景切换时正确清除。
             }
           });
         }}
@@ -880,7 +878,7 @@ export function Stage({
         onStopSession={doSessionCleanup}
       />
 
-      {/* Scene switch confirmation dialog */}
+      {/* 场景切换确认对话框 */}
       <AlertDialog
         open={!!pendingSceneId}
         onOpenChange={(open) => {
@@ -891,19 +889,19 @@ export function Stage({
           <VisuallyHidden.Root>
             <AlertDialogTitle>{t('stage.confirmSwitchTitle')}</AlertDialogTitle>
           </VisuallyHidden.Root>
-          {/* Top accent bar */}
+          {/* 顶部强调条 */}
           <div className="h-1 bg-gradient-to-r from-amber-400 via-orange-400 to-red-400" />
 
           <div className="px-6 pt-5 pb-2 flex flex-col items-center text-center">
-            {/* Icon */}
+            {/* 图标 */}
             <div className="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mb-4 ring-1 ring-amber-200/50 dark:ring-amber-700/30">
               <AlertTriangle className="w-6 h-6 text-amber-500 dark:text-amber-400" />
             </div>
-            {/* Title */}
+            {/* 标题 */}
             <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-1.5">
               {t('stage.confirmSwitchTitle')}
             </h3>
-            {/* Description */}
+            {/* 描述 */}
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
               {t('stage.confirmSwitchMessage')}
             </p>

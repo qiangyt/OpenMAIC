@@ -23,7 +23,7 @@ import type { QuizQuestion } from '@/lib/types/stage';
 import { useDraftCache } from '@/lib/hooks/use-draft-cache';
 import { SpeechButton } from '@/components/audio/speech-button';
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+// ─── 类型定义 ──────────────────────────────────────────────────────────────────
 
 type Phase = 'not_started' | 'answering' | 'grading' | 'reviewing';
 
@@ -40,7 +40,7 @@ interface QuizViewProps {
   readonly sceneId: string;
 }
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+// ─── 辅助函数 ────────────────────────────────────────────────────────────────
 
 function arraysEqual(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false;
@@ -58,7 +58,7 @@ function isShortAnswer(q: QuizQuestion): boolean {
   return q.type === 'short_answer' || (!q.hasAnswer && (!q.answer || q.answer.length === 0));
 }
 
-/** Grade choice questions locally. Returns results only for non-short-answer questions. */
+/** 本地批改选择题。仅返回非简答题的结果。 */
 function gradeChoiceQuestions(
   questions: QuizQuestion[],
   answers: Record<string, string | string[]>,
@@ -79,7 +79,7 @@ function gradeChoiceQuestions(
     });
 }
 
-/** Call /api/quiz-grade for a single short-answer question. */
+/** 调用 /api/quiz-grade 批改单个简答题。 */
 async function gradeShortAnswerQuestion(
   q: QuizQuestion,
   userAnswer: string,
@@ -121,7 +121,7 @@ async function gradeShortAnswerQuestion(
     };
   } catch (err) {
     log.error('[quiz-view] AI grading failed for', q.id, err);
-    // Fallback: give half credit
+    // 降级处理：给予一半基础分
     return {
       questionId: q.id,
       correct: null,
@@ -135,7 +135,7 @@ async function gradeShortAnswerQuestion(
   }
 }
 
-// ─── Sub-components ─────────────────────────────────────────────────────────
+// ─── 子组件 ─────────────────────────────────────────────────────────────────
 
 function QuizCover({
   questionCount,
@@ -150,7 +150,7 @@ function QuizCover({
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-4 relative overflow-hidden">
-      {/* Background decoration */}
+      {/* 背景装饰 */}
       <div className="absolute top-0 right-0 p-6 opacity-[0.03]">
         <PieChart className="w-52 h-52 text-violet-500" />
       </div>
@@ -249,14 +249,14 @@ function SingleChoiceQuestion({
               onClick={() => !disabled && onChange(opt.value)}
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all text-sm',
-                // Default state
+                // 默认状态
                 !isReview &&
                   !selected &&
                   'border-gray-200 dark:border-gray-600 hover:border-violet-200 dark:hover:border-violet-700 hover:bg-violet-50/50 dark:hover:bg-violet-900/30',
                 !isReview &&
                   selected &&
                   'border-violet-400 bg-violet-50 dark:bg-violet-900/30 ring-1 ring-violet-200 dark:ring-violet-700',
-                // Review states
+                // 答案回顾状态
                 isReview &&
                   isCorrectOpt &&
                   'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/30',
@@ -430,7 +430,7 @@ function ShortAnswerQuestion({
 }) {
   const isReview = !!result;
   const { t } = useI18n();
-  // Ref to track latest value for voice transcription append
+  // 用于追踪最新值以便语音转写追加的 ref
   const valueRef = useRef(value);
   useEffect(() => {
     valueRef.current = value;
@@ -524,7 +524,7 @@ function QuestionCard({
           'border-red-200 dark:border-red-800 shadow-sm shadow-red-50 dark:shadow-red-900/20',
       )}
     >
-      {/* Left accent */}
+      {/* 左侧强调条 */}
       <div
         className={cn(
           'absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl',
@@ -534,7 +534,7 @@ function QuestionCard({
         )}
       />
 
-      {/* Header */}
+      {/* 标题栏 */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-start gap-3">
           <span
@@ -575,10 +575,10 @@ function QuestionCard({
         )}
       </div>
 
-      {/* Body */}
+      {/* 内容区域 */}
       {children}
 
-      {/* Analysis (review only) */}
+      {/* 解析（仅回顾模式） */}
       {isReview && question.analysis && (
         <div className="mt-3 p-3 rounded-lg bg-blue-50/70 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
           <span className="font-medium">{t('quiz.analysis')}</span>
@@ -649,7 +649,7 @@ function ScoreBanner({
           </div>
         </div>
 
-        {/* Percentage ring */}
+        {/* 百分比环形图 */}
         <div className="relative w-20 h-20">
           <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
             <circle
@@ -683,7 +683,7 @@ function ScoreBanner({
   );
 }
 
-// ─── Main Component ─────────────────────────────────────────────────────────
+// ─── 主组件 ─────────────────────────────────────────────────────────────────
 
 export function QuizView({ questions, sceneId }: QuizViewProps) {
   const { t, locale } = useI18n();
@@ -691,7 +691,7 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [results, setResults] = useState<QuestionResult[]>([]);
 
-  // Draft cache for quiz answers, keyed by sceneId to isolate across classrooms
+  // 测验答案草稿缓存，使用 sceneId 作为键以在不同课堂间隔离
   const {
     cachedValue: cachedAnswers,
     updateCache: updateAnswersCache,
@@ -700,7 +700,7 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
     key: `quizDraft:${sceneId}`,
   });
 
-  // Restore cached answers during render (derived state pattern)
+  // 在渲染时恢复缓存的答案（派生状态模式）
   const [prevCachedAnswers, setPrevCachedAnswers] = useState(cachedAnswers);
   if (cachedAnswers !== prevCachedAnswers) {
     setPrevCachedAnswers(cachedAnswers);
@@ -740,16 +740,16 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
     clearAnswersCache();
   }, [clearAnswersCache]);
 
-  // When entering grading phase, grade choice questions locally + call API for short-answer
+  // 进入批改阶段时，本地批改选择题 + 调用 API 批改简答题
   useEffect(() => {
     if (phase !== 'grading') return;
     let cancelled = false;
 
     (async () => {
-      // 1. Grade choice questions locally (instant)
+      // 1. 本地批改选择题（即时完成）
       const choiceResults = gradeChoiceQuestions(questions, answers);
 
-      // 2. Grade short-answer questions via AI API (parallel)
+      // 2. 通过 AI API 批改简答题（并行处理）
       const shortAnswerQs = questions.filter(isShortAnswer);
       const aiResults = await Promise.all(
         shortAnswerQs.map((q) =>
@@ -759,7 +759,7 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
 
       if (cancelled) return;
 
-      // 3. Merge results in original question order
+      // 3. 按原始题目顺序合并结果
       const allResultsMap = new Map<string, QuestionResult>();
       for (const r of [...choiceResults, ...aiResults]) {
         allResultsMap.set(r.questionId, r);
@@ -820,7 +820,7 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
             exit={{ opacity: 0, x: -20 }}
             className="flex-1 flex flex-col min-h-0"
           >
-            {/* Header bar */}
+            {/* 标题栏 */}
             <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur shrink-0">
               <div className="flex items-center gap-2">
                 <PieChart className="w-4 h-4 text-violet-500" />
@@ -852,7 +852,7 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
               </button>
             </div>
 
-            {/* Questions */}
+            {/* 题目列表 */}
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
               {questions.map((q, i) => {
                 if (q.type === 'single') {
@@ -935,7 +935,7 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
             animate={{ opacity: 1, x: 0 }}
             className="flex-1 flex flex-col min-h-0"
           >
-            {/* Header bar */}
+            {/* 标题栏 */}
             <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur shrink-0">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
@@ -952,7 +952,7 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
               </button>
             </div>
 
-            {/* Results */}
+            {/* 结果 */}
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
               <ScoreBanner score={earnedScore} total={totalPoints} results={results} />
 

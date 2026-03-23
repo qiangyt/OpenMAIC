@@ -1,8 +1,8 @@
 /**
- * PBL Generation System Prompt
+ * PBL 生成系统提示
  *
- * Migrated from PBL-Nano's anything2pbl_nano.ts systemPrompt.
- * Enhanced with multi-language support and configurable parameters.
+ * 从 PBL-Nano 的 anything2pbl_nano.ts systemPrompt 迁移而来。
+ * 增强了多语言支持和可配置参数。
  */
 
 export interface PBLSystemPromptConfig {

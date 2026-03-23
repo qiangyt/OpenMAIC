@@ -44,12 +44,12 @@ interface ProviderConfigPanelProps {
   initialRequiresApiKey: boolean;
   providersConfig: ProvidersConfig;
   onConfigChange: (apiKey: string, baseUrl: string, requiresApiKey: boolean) => void;
-  onSave: () => void; // Auto-save on blur
+  onSave: () => void; // 失焦时自动保存
   onEditModel: (index: number) => void;
   onDeleteModel: (index: number) => void;
   onAddModel: () => void;
-  onResetToDefault?: () => void; // Reset provider to default configuration
-  isBuiltIn: boolean; // To determine if reset button should be shown
+  onResetToDefault?: () => void; // 重置服务商为默认配置
+  isBuiltIn: boolean; // 用于判断是否显示重置按钮
 }
 
 export function ProviderConfigPanel({
@@ -68,7 +68,7 @@ export function ProviderConfigPanel({
 }: ProviderConfigPanelProps) {
   const { t } = useI18n();
 
-  // Local state for this provider
+  // 当前服务商的本地状态
   const [apiKey, setApiKey] = useState(initialApiKey);
   const [baseUrl, setBaseUrl] = useState(initialBaseUrl);
   const [requiresApiKey, setRequiresApiKey] = useState(initialRequiresApiKey);
@@ -77,9 +77,9 @@ export function ProviderConfigPanel({
   const [testMessage, setTestMessage] = useState('');
   const [showResetDialog, setShowResetDialog] = useState(false);
 
-  // Update local state when provider changes or initial values change
+  // 当服务商变更或初始值变更时更新本地状态
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Sync local state from props on provider change
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 在服务商变更时从 props 同步本地状态
     setApiKey(initialApiKey);
 
     setBaseUrl(initialBaseUrl);
@@ -91,7 +91,7 @@ export function ProviderConfigPanel({
     setTestMessage('');
   }, [provider.id, initialApiKey, initialBaseUrl, initialRequiresApiKey]);
 
-  // Notify parent of changes
+  // 通知父组件状态变更
   const handleApiKeyChange = (key: string) => {
     setApiKey(key);
     onConfigChange(key, baseUrl, requiresApiKey);
@@ -154,14 +154,14 @@ export function ProviderConfigPanel({
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {/* Server-configured notice */}
+      {/* 服务端配置提示 */}
       {isServerConfigured && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30 p-3 text-sm text-blue-700 dark:text-blue-300">
           {t('settings.serverConfiguredNotice')}
         </div>
       )}
 
-      {/* API Key */}
+      {/* API 密钥 */}
       <div className="space-y-2">
         <Label>{t('settings.apiSecret')}</Label>
         <div className="flex gap-2">
@@ -241,7 +241,7 @@ export function ProviderConfigPanel({
         </div>
       </div>
 
-      {/* API Host */}
+      {/* API 主机地址 */}
       <div className="space-y-2">
         <Label>{t('settings.apiHost')}</Label>
         <Input
@@ -261,7 +261,7 @@ export function ProviderConfigPanel({
           const effectiveBaseUrl = baseUrl || provider.defaultBaseUrl || '';
           if (!effectiveBaseUrl) return null;
 
-          // Generate endpoint path based on provider type
+          // 根据服务商类型生成端点路径
           let endpointPath = '';
           switch (provider.type) {
             case 'openai':
@@ -287,7 +287,7 @@ export function ProviderConfigPanel({
         })()}
       </div>
 
-      {/* Models - No selection state, just list for management */}
+      {/* 模型 - 无选择状态，仅用于管理 */}
       <div className="space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <Label className="text-base">{t('settings.models')}</Label>
@@ -321,7 +321,7 @@ export function ProviderConfigPanel({
                 <div className="flex-1">
                   <div className="font-mono text-sm font-medium mb-1.5">{model.name}</div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    {/* Capabilities */}
+                    {/* 能力 */}
                     <div className="flex items-center gap-1">
                       {model.capabilities?.vision && (
                         <div title={t('settings.capabilities.vision')}>
@@ -339,7 +339,7 @@ export function ProviderConfigPanel({
                         </div>
                       )}
                     </div>
-                    {/* Context Window */}
+                    {/* 上下文窗口 */}
                     {model.contextWindow && (
                       <span className="flex items-center gap-0.5">
                         <FileText className="h-3 w-3" />
@@ -348,7 +348,7 @@ export function ProviderConfigPanel({
                         </span>
                       </span>
                     )}
-                    {/* Output Window */}
+                    {/* 输出窗口 */}
                     {model.outputWindow && (
                       <span className="flex items-center gap-0.5">
                         <Send className="h-3 w-3" />
@@ -360,7 +360,7 @@ export function ProviderConfigPanel({
                   </div>
                 </div>
 
-                {/* Edit/Delete Buttons */}
+                {/* 编辑/删除按钮 */}
                 <div className="flex items-center gap-1">
                   <Button
                     variant="outline"
@@ -387,7 +387,7 @@ export function ProviderConfigPanel({
         </div>
       </div>
 
-      {/* Reset Confirmation Dialog */}
+      {/* 重置确认对话框 */}
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

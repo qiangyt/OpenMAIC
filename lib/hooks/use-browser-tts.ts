@@ -1,21 +1,21 @@
 /**
- * Browser Native TTS (Text-to-Speech) Hook
- * Uses Web Speech API for client-side text-to-speech
- * Completely free, no API key required
+ * 浏览器原生 TTS（文本转语音）Hook
+ * 使用 Web Speech API 进行客户端文本转语音
+ * 完全免费，无需 API 密钥
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 
-// Note: Window.SpeechSynthesis declaration is already in the global scope
+// 注意：Window.SpeechSynthesis 声明已在全局作用域中
 
 export interface UseBrowserTTSOptions {
   onStart?: () => void;
   onEnd?: () => void;
   onError?: (error: string) => void;
-  rate?: number; // 0.1 to 10
-  pitch?: number; // 0 to 2
-  volume?: number; // 0 to 1
-  lang?: string; // e.g., 'zh-CN', 'en-US'
+  rate?: number; // 0.1 到 10
+  pitch?: number; // 0 到 2
+  volume?: number; // 0 到 1
+  lang?: string; // 例如 'zh-CN'、'en-US'
 }
 
 export function useBrowserTTS(options: UseBrowserTTSOptions = {}) {
@@ -34,7 +34,7 @@ export function useBrowserTTS(options: UseBrowserTTSOptions = {}) {
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // Load available voices
+  // 加载可用语音
   useEffect(() => {
     if (typeof window === 'undefined' || !window.speechSynthesis) {
       return;
@@ -47,7 +47,7 @@ export function useBrowserTTS(options: UseBrowserTTSOptions = {}) {
 
     loadVoices();
 
-    // Some browsers load voices asynchronously
+    // 某些浏览器异步加载语音
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
       window.speechSynthesis.onvoiceschanged = loadVoices;
     }
@@ -66,7 +66,7 @@ export function useBrowserTTS(options: UseBrowserTTSOptions = {}) {
         return;
       }
 
-      // Cancel any ongoing speech
+      // 取消任何正在进行的语音
       window.speechSynthesis.cancel();
 
       const utterance = new SpeechSynthesisUtterance(text);
@@ -75,7 +75,7 @@ export function useBrowserTTS(options: UseBrowserTTSOptions = {}) {
       utterance.volume = volume;
       utterance.lang = lang;
 
-      // Set voice if specified
+      // 如果指定则设置语音
       if (voiceURI) {
         const voice = availableVoices.find((v) => v.voiceURI === voiceURI);
         if (voice) {

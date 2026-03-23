@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * PBL Chat Hook - Manages chat state, @mention parsing, and API calls
+ * PBL 聊天 Hook - 管理聊天状态、@提及解析和 API 调用
  */
 
 import { useState, useCallback } from 'react';
@@ -38,7 +38,7 @@ export function usePBLChat({ projectConfig, userRole, onConfigUpdate }: UsePBLCh
         },
       };
 
-      // Add user message
+      // 添加用户消息
       const userMsg: PBLChatMessage = {
         id: `msg_${Date.now()}_user`,
         agent_name: userRole,
@@ -49,7 +49,7 @@ export function usePBLChat({ projectConfig, userRole, onConfigUpdate }: UsePBLCh
       updatedConfig.chat.messages.push(userMsg);
       onConfigUpdate(updatedConfig);
 
-      // Parse @mention to determine target agent, fallback to question agent
+      // 解析 @提及以确定目标智能体，回退到问答智能体
       const targetAgent = resolveTargetAgent(text, currentIssue, projectConfig.agents);
       if (!targetAgent) return;
 
@@ -66,7 +66,7 @@ export function usePBLChat({ projectConfig, userRole, onConfigUpdate }: UsePBLCh
         if (modelConfig.providerType) headers['x-provider-type'] = modelConfig.providerType;
         if (modelConfig.requiresApiKey) headers['x-requires-api-key'] = 'true';
 
-        // Strip @mention prefix from message text if present
+        // 如果消息文本中有 @提及前缀，则移除
         const cleanMessage = text.replace(/^@\w+\s*/i, '').trim() || text;
 
         const isJudgeAgent = currentIssue && targetAgent.name === currentIssue.judge_agent_name;
@@ -103,7 +103,7 @@ export function usePBLChat({ projectConfig, userRole, onConfigUpdate }: UsePBLCh
             chat: { messages: [...updatedConfig.chat.messages, agentMsg] },
           };
 
-          // Check for COMPLETE from judge agent (excluding NEEDS_REVISION)
+          // 检查评判智能体返回的 COMPLETE（排除 NEEDS_REVISION）
           const msgUpper = data.message.toUpperCase();
           if (
             currentIssue &&
@@ -129,7 +129,7 @@ export function usePBLChat({ projectConfig, userRole, onConfigUpdate }: UsePBLCh
 }
 
 /**
- * Resolve target agent from @mention, or fallback to question agent for plain messages
+ * 从 @提及中解析目标智能体，或对普通消息回退到问答智能体
  */
 function resolveTargetAgent(
   text: string,
@@ -149,17 +149,17 @@ function resolveTargetAgent(
       return agents.find((a) => a.name === currentIssue.judge_agent_name) || null;
     }
 
-    // Direct agent name mention
+    // 直接提及智能体名称
     const matched = agents.find((a) => a.name.toLowerCase().includes(mentionType));
     if (matched) return matched;
   }
 
-  // No @mention or unrecognized mention → route to question agent by default
+  // 无 @提及或无法识别的提及 → 默认路由到问答智能体
   return agents.find((a) => a.name === currentIssue.question_agent_name) || null;
 }
 
 /**
- * Handle issue completion: mark done, activate next, generate questions for next issue
+ * 处理问题完成：标记完成、激活下一个、为下一个问题生成问题
  */
 async function handleIssueComplete(
   config: PBLProjectConfig,
@@ -167,7 +167,7 @@ async function handleIssueComplete(
   headers: Record<string, string>,
   t: (key: string) => string,
 ) {
-  // Mark current issue as done
+  // 标记当前问题为已完成
   const issue = config.issueboard.issues.find((i) => i.id === completedIssue.id);
   if (issue) {
     issue.is_done = true;
@@ -175,7 +175,7 @@ async function handleIssueComplete(
   }
   config.issueboard.current_issue_id = null;
 
-  // Activate next incomplete issue
+  // 激活下一个未完成的问题
   const nextIssue = config.issueboard.issues
     .filter((i) => !i.is_done)
     .sort((a, b) => a.index - b.index)[0];
@@ -184,7 +184,7 @@ async function handleIssueComplete(
     nextIssue.is_active = true;
     config.issueboard.current_issue_id = nextIssue.id;
 
-    // Generate questions for the new issue if not already generated
+    // 如果新问题尚未生成问题，则生成
     const questionAgent = config.agents.find((a) => a.name === nextIssue.question_agent_name);
     if (questionAgent && !nextIssue.generated_questions) {
       try {
@@ -222,7 +222,7 @@ async function handleIssueComplete(
         if (data.success && data.message) {
           nextIssue.generated_questions = data.message;
 
-          // Add Question Agent welcome message
+          // 添加问答智能体的欢迎消息
           config.chat.messages.push({
             id: `msg_${Date.now()}_welcome`,
             agent_name: nextIssue.question_agent_name,
@@ -237,7 +237,7 @@ async function handleIssueComplete(
         log.error('[usePBLChat] Failed to generate questions for next issue:', error);
       }
     } else if (questionAgent && nextIssue.generated_questions) {
-      // Questions already exist, just add welcome message
+      // 问题已存在，只需添加欢迎消息
       config.chat.messages.push({
         id: `msg_${Date.now()}_welcome`,
         agent_name: nextIssue.question_agent_name,
@@ -249,7 +249,7 @@ async function handleIssueComplete(
       });
     }
 
-    // System message about progression
+    // 关于进展的系统消息
     config.chat.messages.push({
       id: `msg_${Date.now()}_system`,
       agent_name: 'System',
@@ -260,7 +260,7 @@ async function handleIssueComplete(
       read_by: [],
     });
   } else {
-    // All issues complete
+    // 所有问题已完成
     config.chat.messages.push({
       id: `msg_${Date.now()}_system`,
       agent_name: 'System',

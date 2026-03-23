@@ -1,6 +1,6 @@
 /**
- * Settings Store
- * Global settings state synchronized with localStorage
+ * 设置 Store
+ * 与 localStorage 同步的全局设置状态
  */
 
 import { create } from 'zustand';
@@ -19,29 +19,29 @@ import { createLogger } from '@/lib/logger';
 
 const log = createLogger('Settings');
 
-/** Available playback speed tiers */
+/** 可用的播放速度档位 */
 export const PLAYBACK_SPEEDS = [1, 1.5, 2] as const;
 export type PlaybackSpeed = (typeof PLAYBACK_SPEEDS)[number];
 
 export interface SettingsState {
-  // Model selection
+  // 模型选择
   providerId: ProviderId;
   modelId: string;
 
-  // Provider configurations (unified JSON storage)
+  // 服务提供者配置（统一 JSON 存储）
   providersConfig: ProvidersConfig;
 
-  // TTS settings (legacy, kept for backward compatibility)
+  // TTS 设置（旧版，保留以向后兼容）
   ttsModel: string;
 
-  // Audio settings (new unified audio configuration)
+  // 音频设置（新的统一音频配置）
   ttsProviderId: TTSProviderId;
   ttsVoice: string;
   ttsSpeed: number;
   asrProviderId: ASRProviderId;
   asrLanguage: string;
 
-  // Audio provider configurations
+  // 音频服务提供者配置
   ttsProvidersConfig: Record<
     TTSProviderId,
     {
@@ -64,7 +64,7 @@ export interface SettingsState {
     }
   >;
 
-  // PDF settings
+  // PDF 设置
   pdfProviderId: PDFProviderId;
   pdfProvidersConfig: Record<
     PDFProviderId,
@@ -77,7 +77,7 @@ export interface SettingsState {
     }
   >;
 
-  // Image Generation settings
+  // 图像生成设置
   imageProviderId: ImageProviderId;
   imageModelId: string;
   imageProvidersConfig: Record<
@@ -92,7 +92,7 @@ export interface SettingsState {
     }
   >;
 
-  // Video Generation settings
+  // 视频生成设置
   videoProviderId: VideoProviderId;
   videoModelId: string;
   videoProvidersConfig: Record<
@@ -107,11 +107,11 @@ export interface SettingsState {
     }
   >;
 
-  // Media generation toggles
+  // 媒体生成开关
   imageGenerationEnabled: boolean;
   videoGenerationEnabled: boolean;
 
-  // Web Search settings
+  // 网络搜索设置
   webSearchProviderId: WebSearchProviderId;
   webSearchProvidersConfig: Record<
     WebSearchProviderId,
@@ -124,26 +124,26 @@ export interface SettingsState {
     }
   >;
 
-  // Global TTS/ASR toggles
+  // 全局 TTS/ASR 开关
   ttsEnabled: boolean;
   asrEnabled: boolean;
 
-  // Auto-config lifecycle flag (persisted)
+  // 自动配置生命周期标志（持久化）
   autoConfigApplied: boolean;
 
-  // Playback controls
+  // 播放控制
   ttsMuted: boolean;
-  ttsVolume: number; // 0-1, actual volume level
+  ttsVolume: number; // 0-1，实际音量级别
   autoPlayLecture: boolean;
   playbackSpeed: PlaybackSpeed;
 
-  // Agent settings
+  // 智能体设置
   selectedAgentIds: string[];
   maxTurns: string;
   agentMode: 'preset' | 'auto';
   autoAgentCount: number;
 
-  // Layout preferences (persisted via localStorage)
+  // 布局偏好（通过 localStorage 持久化）
   sidebarCollapsed: boolean;
   chatAreaCollapsed: boolean;
   chatAreaWidth: number;
@@ -162,12 +162,12 @@ export interface SettingsState {
   setAgentMode: (mode: 'preset' | 'auto') => void;
   setAutoAgentCount: (count: number) => void;
 
-  // Layout actions
+  // 布局操作
   setSidebarCollapsed: (collapsed: boolean) => void;
   setChatAreaCollapsed: (collapsed: boolean) => void;
   setChatAreaWidth: (width: number) => void;
 
-  // Audio actions
+  // 音频操作
   setTTSProvider: (providerId: TTSProviderId) => void;
   setTTSVoice: (voice: string) => void;
   setTTSSpeed: (speed: number) => void;
@@ -184,14 +184,14 @@ export interface SettingsState {
   setTTSEnabled: (enabled: boolean) => void;
   setASREnabled: (enabled: boolean) => void;
 
-  // PDF actions
+  // PDF 操作
   setPDFProvider: (providerId: PDFProviderId) => void;
   setPDFProviderConfig: (
     providerId: PDFProviderId,
     config: Partial<{ apiKey: string; baseUrl: string; enabled: boolean }>,
   ) => void;
 
-  // Image Generation actions
+  // 图像生成操作
   setImageProvider: (providerId: ImageProviderId) => void;
   setImageModelId: (modelId: string) => void;
   setImageProviderConfig: (
@@ -204,7 +204,7 @@ export interface SettingsState {
     }>,
   ) => void;
 
-  // Video Generation actions
+  // 视频生成操作
   setVideoProvider: (providerId: VideoProviderId) => void;
   setVideoModelId: (modelId: string) => void;
   setVideoProviderConfig: (
@@ -217,22 +217,22 @@ export interface SettingsState {
     }>,
   ) => void;
 
-  // Media generation toggle actions
+  // 媒体生成开关操作
   setImageGenerationEnabled: (enabled: boolean) => void;
   setVideoGenerationEnabled: (enabled: boolean) => void;
 
-  // Web Search actions
+  // 网络搜索操作
   setWebSearchProvider: (providerId: WebSearchProviderId) => void;
   setWebSearchProviderConfig: (
     providerId: WebSearchProviderId,
     config: Partial<{ apiKey: string; baseUrl: string; enabled: boolean }>,
   ) => void;
 
-  // Server provider actions
+  // 服务端服务提供者操作
   fetchServerProviders: () => Promise<void>;
 }
 
-// Initialize default providers config
+// 初始化默认服务提供者配置
 const getDefaultProvidersConfig = (): ProvidersConfig => {
   const config: ProvidersConfig = {} as ProvidersConfig;
   Object.keys(PROVIDERS).forEach((pid) => {
@@ -252,7 +252,7 @@ const getDefaultProvidersConfig = (): ProvidersConfig => {
   return config;
 };
 
-// Initialize default audio config
+// 初始化默认音频配置
 const getDefaultAudioConfig = () => ({
   ttsProviderId: 'browser-native-tts' as TTSProviderId,
   ttsVoice: 'default',
@@ -273,7 +273,7 @@ const getDefaultAudioConfig = () => ({
   } as Record<ASRProviderId, { apiKey: string; baseUrl: string; enabled: boolean }>,
 });
 
-// Initialize default PDF config
+// 初始化默认 PDF 配置
 const getDefaultPDFConfig = () => ({
   pdfProviderId: 'unpdf' as PDFProviderId,
   pdfProvidersConfig: {
@@ -282,7 +282,7 @@ const getDefaultPDFConfig = () => ({
   } as Record<PDFProviderId, { apiKey: string; baseUrl: string; enabled: boolean }>,
 });
 
-// Initialize default Image config
+// 初始化默认图像配置
 const getDefaultImageConfig = () => ({
   imageProviderId: 'seedream' as ImageProviderId,
   imageModelId: 'doubao-seedream-5-0-260128',
@@ -293,7 +293,7 @@ const getDefaultImageConfig = () => ({
   } as Record<ImageProviderId, { apiKey: string; baseUrl: string; enabled: boolean }>,
 });
 
-// Initialize default Video config
+// 初始化默认视频配置
 const getDefaultVideoConfig = () => ({
   videoProviderId: 'seedance' as VideoProviderId,
   videoModelId: 'doubao-seedance-1-5-pro-251215',
@@ -305,7 +305,7 @@ const getDefaultVideoConfig = () => ({
   } as Record<VideoProviderId, { apiKey: string; baseUrl: string; enabled: boolean }>,
 });
 
-// Initialize default Web Search config
+// 初始化默认网络搜索配置
 const getDefaultWebSearchConfig = () => ({
   webSearchProviderId: 'tavily' as WebSearchProviderId,
   webSearchProvidersConfig: {
@@ -314,9 +314,9 @@ const getDefaultWebSearchConfig = () => ({
 });
 
 /**
- * Ensure providersConfig includes all built-in providers and their latest models.
- * Called on every rehydrate (not just version migrations) so new providers
- * added in code are always picked up without clearing cache.
+ * 确保 providersConfig 包含所有内置服务提供者及其最新模型。
+ * 在每次 rehydrate 时调用（不仅仅是版本迁移），以便新添加的服务提供者
+ * 总是被自动识别，无需清除缓存。
  */
 function ensureBuiltInProviders(state: Partial<SettingsState>): void {
   if (!state.providersConfig) return;
@@ -324,10 +324,10 @@ function ensureBuiltInProviders(state: Partial<SettingsState>): void {
   Object.keys(PROVIDERS).forEach((pid) => {
     const providerId = pid as ProviderId;
     if (!state.providersConfig![providerId]) {
-      // New provider: add with defaults
+      // 新服务提供者：使用默认值添加
       state.providersConfig![providerId] = defaultConfig[providerId];
     } else {
-      // Existing provider: merge new models & metadata
+      // 已有服务提供者：合并新模型和元数据
       const provider = PROVIDERS[providerId];
       const existing = state.providersConfig![providerId];
 
@@ -350,24 +350,24 @@ function ensureBuiltInProviders(state: Partial<SettingsState>): void {
   });
 }
 
-// Migrate from old localStorage format
+// 从旧的 localStorage 格式迁移
 const migrateFromOldStorage = () => {
   if (typeof window === 'undefined') return null;
 
-  // Check if new storage already exists
+  // 检查新存储是否已存在
   const newStorage = localStorage.getItem('settings-storage');
-  if (newStorage) return null; // Already migrated or new install
+  if (newStorage) return null; // 已迁移或全新安装
 
-  // Read old localStorage keys
+  // 读取旧的 localStorage 键
   const oldLlmModel = localStorage.getItem('llmModel');
   const oldProvidersConfig = localStorage.getItem('providersConfig');
   const oldTtsModel = localStorage.getItem('ttsModel');
   const oldSelectedAgents = localStorage.getItem('selectedAgentIds');
   const oldMaxTurns = localStorage.getItem('maxTurns');
 
-  if (!oldLlmModel && !oldProvidersConfig) return null; // No old data
+  if (!oldLlmModel && !oldProvidersConfig) return null; // 无旧数据
 
-  // Parse model selection
+  // 解析模型选择
   let providerId: ProviderId = 'openai';
   let modelId = 'gpt-4o-mini';
   if (oldLlmModel) {
@@ -378,7 +378,7 @@ const migrateFromOldStorage = () => {
     }
   }
 
-  // Parse providers config
+  // 解析服务提供者配置
   let providersConfig = getDefaultProvidersConfig();
   if (oldProvidersConfig) {
     try {
@@ -389,7 +389,7 @@ const migrateFromOldStorage = () => {
     }
   }
 
-  // Parse other settings
+  // 解析其他设置
   let ttsModel = 'openai-tts';
   if (oldTtsModel) ttsModel = oldTtsModel;
 
@@ -421,7 +421,7 @@ const migrateFromOldStorage = () => {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => {
-      // Try to migrate from old storage
+      // 尝试从旧存储迁移
       const migratedData = migrateFromOldStorage();
       const defaultAudioConfig = getDefaultAudioConfig();
       const defaultPDFConfig = getDefaultPDFConfig();
@@ -430,7 +430,7 @@ export const useSettingsStore = create<SettingsState>()(
       const defaultWebSearchConfig = getDefaultWebSearchConfig();
 
       return {
-        // Initial state (use migrated data if available)
+        // 初始状态（如有迁移数据则使用）
         providerId: migratedData?.providerId || 'openai',
         modelId: migratedData?.modelId || '',
         providersConfig: migratedData?.providersConfig || getDefaultProvidersConfig(),
@@ -440,40 +440,40 @@ export const useSettingsStore = create<SettingsState>()(
         agentMode: 'auto' as const,
         autoAgentCount: 3,
 
-        // Playback controls
+        // 播放控制
         ttsMuted: false,
         ttsVolume: 1,
         autoPlayLecture: false,
         playbackSpeed: 1,
 
-        // Layout preferences
+        // 布局偏好
         sidebarCollapsed: true,
         chatAreaCollapsed: true,
         chatAreaWidth: 320,
 
-        // Audio settings (use defaults)
+        // 音频设置（使用默认值）
         ...defaultAudioConfig,
 
-        // PDF settings (use defaults)
+        // PDF 设置（使用默认值）
         ...defaultPDFConfig,
 
-        // Image settings (use defaults)
+        // 图像设置（使用默认值）
         ...defaultImageConfig,
 
-        // Video settings (use defaults)
+        // 视频设置（使用默认值）
         ...defaultVideoConfig,
 
-        // Media generation toggles (off by default)
+        // 媒体生成开关（默认关闭）
         imageGenerationEnabled: false,
         videoGenerationEnabled: false,
 
-        // Audio feature toggles (on by default)
+        // 音频功能开关（默认开启）
         ttsEnabled: true,
         asrEnabled: true,
 
         autoConfigApplied: false,
 
-        // Web Search settings (use defaults)
+        // 网络搜索设置（使用默认值）
         ...defaultWebSearchConfig,
 
         // Actions
@@ -516,7 +516,7 @@ export const useSettingsStore = create<SettingsState>()(
         // Audio actions
         setTTSProvider: (providerId) =>
           set((state) => {
-            // If switching provider, set default voice for that provider
+            // 如果切换服务提供者，为该服务提供者设置默认语音
             const shouldUpdateVoice = state.ttsProviderId !== providerId;
             return {
               ttsProviderId: providerId,
@@ -528,8 +528,8 @@ export const useSettingsStore = create<SettingsState>()(
 
         setTTSSpeed: (speed) => set({ ttsSpeed: speed }),
 
-        // Reset language when switching providers, since language code formats differ
-        // (e.g. browser-native uses BCP-47 "en-US", OpenAI Whisper uses ISO 639-1 "en")
+        // 切换服务提供者时重置语言，因为语言代码格式不同
+        //（例如 browser-native 使用 BCP-47 "en-US"，OpenAI Whisper 使用 ISO 639-1 "en"）
         setASRProvider: (providerId) =>
           set((state) => {
             const supportedLanguages = ASR_PROVIDERS[providerId]?.supportedLanguages || [];
@@ -627,7 +627,7 @@ export const useSettingsStore = create<SettingsState>()(
             },
           })),
 
-        // Fetch server-configured providers and merge into local state
+        // 获取服务端配置的服务提供者并合并到本地状态
         fetchServerProviders: async () => {
           try {
             const res = await fetch('/api/server-providers');
@@ -643,9 +643,9 @@ export const useSettingsStore = create<SettingsState>()(
             };
 
             set((state) => {
-              // Merge LLM providers
+              // 合并 LLM 服务提供者
               const newProvidersConfig = { ...state.providersConfig };
-              // First reset all server flags
+              // 首先重置所有服务端标志
               for (const pid of Object.keys(newProvidersConfig)) {
                 const key = pid as ProviderId;
                 if (newProvidersConfig[key]) {
@@ -657,7 +657,7 @@ export const useSettingsStore = create<SettingsState>()(
                   };
                 }
               }
-              // Set flags for server-configured providers
+              // 设置服务端配置的服务提供者标志
               for (const [pid, info] of Object.entries(data.providers)) {
                 const key = pid as ProviderId;
                 if (newProvidersConfig[key]) {
@@ -676,7 +676,7 @@ export const useSettingsStore = create<SettingsState>()(
                 }
               }
 
-              // Merge TTS providers
+              // 合并 TTS 服务提供者
               const newTTSConfig = { ...state.ttsProvidersConfig };
               for (const pid of Object.keys(newTTSConfig)) {
                 const key = pid as TTSProviderId;
@@ -699,7 +699,7 @@ export const useSettingsStore = create<SettingsState>()(
                 }
               }
 
-              // Merge ASR providers
+              // 合并 ASR 服务提供者
               const newASRConfig = { ...state.asrProvidersConfig };
               for (const pid of Object.keys(newASRConfig)) {
                 const key = pid as ASRProviderId;
@@ -722,7 +722,7 @@ export const useSettingsStore = create<SettingsState>()(
                 }
               }
 
-              // Merge PDF providers
+              // 合并 PDF 服务提供者
               const newPDFConfig = { ...state.pdfProvidersConfig };
               for (const pid of Object.keys(newPDFConfig)) {
                 const key = pid as PDFProviderId;
@@ -745,7 +745,7 @@ export const useSettingsStore = create<SettingsState>()(
                 }
               }
 
-              // Merge Image providers
+              // 合并图像服务提供者
               const newImageConfig = { ...state.imageProvidersConfig };
               for (const pid of Object.keys(newImageConfig)) {
                 const key = pid as ImageProviderId;
@@ -768,7 +768,7 @@ export const useSettingsStore = create<SettingsState>()(
                 }
               }
 
-              // Merge Video providers
+              // 合并视频服务提供者
               const newVideoConfig = { ...state.videoProvidersConfig };
               for (const pid of Object.keys(newVideoConfig)) {
                 const key = pid as VideoProviderId;
@@ -793,7 +793,7 @@ export const useSettingsStore = create<SettingsState>()(
                 }
               }
 
-              // Merge Web Search config — reset all first, then mark server-configured
+              // 合并网络搜索配置 — 先重置所有，再标记服务端配置的
               const newWebSearchConfig = { ...state.webSearchProvidersConfig };
               for (const key of Object.keys(newWebSearchConfig) as WebSearchProviderId[]) {
                 newWebSearchConfig[key] = {
@@ -815,7 +815,7 @@ export const useSettingsStore = create<SettingsState>()(
                 }
               }
 
-              // === Auto-select / auto-enable (only on first run) ===
+              // === 自动选择/自动启用（仅首次运行） ===
               let autoTtsProvider: TTSProviderId | undefined;
               let autoTtsVoice: string | undefined;
               let autoAsrProvider: ASRProviderId | undefined;
@@ -828,12 +828,12 @@ export const useSettingsStore = create<SettingsState>()(
               let autoVideoEnabled: boolean | undefined;
 
               if (!state.autoConfigApplied) {
-                // PDF: unpdf → mineru if server has it
+                // PDF：如果服务端有 mineru，则从 unpdf 切换到 mineru
                 if (newPDFConfig.mineru?.isServerConfigured && state.pdfProviderId === 'unpdf') {
                   autoPdfProvider = 'mineru' as PDFProviderId;
                 }
 
-                // TTS: select first server provider if current is not server-configured
+                // TTS：如果当前不是服务端配置的，选择第一个服务端服务提供者
                 const serverTtsIds = Object.keys(data.tts) as TTSProviderId[];
                 if (
                   serverTtsIds.length > 0 &&
@@ -843,7 +843,7 @@ export const useSettingsStore = create<SettingsState>()(
                   autoTtsVoice = DEFAULT_TTS_VOICES[autoTtsProvider] || 'default';
                 }
 
-                // ASR: select first server provider if current is not server-configured
+                // ASR：如果当前不是服务端配置的，选择第一个服务端服务提供者
                 const serverAsrIds = Object.keys(data.asr) as ASRProviderId[];
                 if (
                   serverAsrIds.length > 0 &&
@@ -852,7 +852,7 @@ export const useSettingsStore = create<SettingsState>()(
                   autoAsrProvider = serverAsrIds[0];
                 }
 
-                // Image: first server provider
+                // 图像：第一个服务端服务提供者
                 const serverImageIds = Object.keys(data.image) as ImageProviderId[];
                 if (
                   serverImageIds.length > 0 &&
@@ -866,7 +866,7 @@ export const useSettingsStore = create<SettingsState>()(
                   autoImageEnabled = true;
                 }
 
-                // Video: first server provider
+                // 视频：第一个服务端服务提供者
                 const serverVideoIds = Object.keys(data.video || {}) as VideoProviderId[];
                 if (
                   serverVideoIds.length > 0 &&
@@ -881,13 +881,13 @@ export const useSettingsStore = create<SettingsState>()(
                 }
               }
 
-              // LLM auto-select: when modelId is empty
+              // LLM 自动选择：当 modelId 为空时
               let autoProviderId: ProviderId | undefined;
               let autoModelId: string | undefined;
               if (!state.modelId) {
                 for (const [pid, cfg] of Object.entries(newProvidersConfig)) {
                   if (cfg.isServerConfigured) {
-                    // Prefer server-restricted models, fall back to built-in list
+                    // 优先使用服务端限制的模型，回退到内置列表
                     const serverModels = cfg.serverModels;
                     const modelId = serverModels?.length
                       ? serverModels[0]
@@ -935,7 +935,7 @@ export const useSettingsStore = create<SettingsState>()(
               };
             });
           } catch (e) {
-            // Silently fail — server providers are optional
+            // 静默失败 — 服务端服务提供者是可选的
             log.warn('Failed to fetch server providers:', e);
           }
         },
@@ -944,64 +944,64 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: 'settings-storage',
       version: 2,
-      // Migrate persisted state
+      // 迁移持久化状态
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as Partial<SettingsState>;
 
-        // v0 → v1: clear hardcoded default model so user must actively select
+        // v0 → v1：清除硬编码的默认模型，以便用户必须主动选择
         if (version === 0) {
           if (state.providerId === 'openai' && state.modelId === 'gpt-4o-mini') {
             state.modelId = '';
           }
         }
 
-        // Ensure providersConfig has all built-in providers (also in merge below)
+        // 确保 providersConfig 包含所有内置服务提供者（在下面的 merge 中也会执行）
         ensureBuiltInProviders(state);
 
-        // Migrate from old ttsModel to new ttsProviderId
+        // 从旧的 ttsModel 迁移到新的 ttsProviderId
         if (state.ttsModel && !state.ttsProviderId) {
-          // Map old ttsModel values to new ttsProviderId
+          // 将旧的 ttsModel 值映射到新的 ttsProviderId
           if (state.ttsModel === 'openai-tts') {
             state.ttsProviderId = 'openai-tts';
           } else if (state.ttsModel === 'azure-tts') {
             state.ttsProviderId = 'azure-tts';
           } else {
-            // Default to OpenAI
+            // 默认使用 OpenAI
             state.ttsProviderId = 'openai-tts';
           }
         }
 
-        // Add default audio config if missing
+        // 如果缺少则添加默认音频配置
         if (!state.ttsProvidersConfig || !state.asrProvidersConfig) {
           const defaultAudioConfig = getDefaultAudioConfig();
           Object.assign(state, defaultAudioConfig);
         }
 
-        // Add default PDF config if missing
+        // 如果缺少则添加默认 PDF 配置
         if (!state.pdfProvidersConfig) {
           const defaultPDFConfig = getDefaultPDFConfig();
           Object.assign(state, defaultPDFConfig);
         }
 
-        // Add default Image config if missing
+        // 如果缺少则添加默认图像配置
         if (!state.imageProvidersConfig) {
           const defaultImageConfig = getDefaultImageConfig();
           Object.assign(state, defaultImageConfig);
         }
 
-        // Add default Video config if missing
+        // 如果缺少则添加默认视频配置
         if (!state.videoProvidersConfig) {
           const defaultVideoConfig = getDefaultVideoConfig();
           Object.assign(state, defaultVideoConfig);
         }
 
-        // v1 → v2: Replace deep research with web search
+        // v1 → v2：用网络搜索替换深度研究
         if (version < 2) {
           delete (state as Record<string, unknown>).deepResearchProviderId;
           delete (state as Record<string, unknown>).deepResearchProvidersConfig;
         }
 
-        // Add default media generation toggles if missing
+        // 如果缺少则添加默认媒体生成开关
         if (state.imageGenerationEnabled === undefined) {
           state.imageGenerationEnabled = false;
         }
@@ -1009,7 +1009,7 @@ export const useSettingsStore = create<SettingsState>()(
           state.videoGenerationEnabled = false;
         }
 
-        // Add default audio toggles if missing
+        // 如果缺少则添加默认音频开关
         if ((state as Record<string, unknown>).ttsEnabled === undefined) {
           (state as Record<string, unknown>).ttsEnabled = true;
         }
@@ -1017,7 +1017,7 @@ export const useSettingsStore = create<SettingsState>()(
           (state as Record<string, unknown>).asrEnabled = true;
         }
 
-        // Existing users already have their config set up — mark auto-config as done
+        // 现有用户已完成配置 — 标记自动配置为已完成
         if ((state as Record<string, unknown>).autoConfigApplied === undefined) {
           (state as Record<string, unknown>).autoConfigApplied = true;
         }
@@ -1029,7 +1029,7 @@ export const useSettingsStore = create<SettingsState>()(
           (state as Record<string, unknown>).autoAgentCount = 3;
         }
 
-        // Migrate Web Search: old flat fields → new provider-based config
+        // 迁移网络搜索：旧的扁平字段 → 新的基于服务提供者的配置
         if (!state.webSearchProvidersConfig) {
           const stateRecord = state as Record<string, unknown>;
           const oldApiKey = (stateRecord.webSearchApiKey as string) || '';
@@ -1050,8 +1050,8 @@ export const useSettingsStore = create<SettingsState>()(
 
         return state;
       },
-      // Custom merge: always sync built-in providers on every rehydrate,
-      // so newly added providers/models appear without clearing cache.
+      // 自定义合并：每次 rehydrate 时始终同步内置服务提供者，
+      // 以便新添加的服务提供者/模型无需清除缓存即可出现。
       merge: (persistedState, currentState) => {
         const merged = { ...currentState, ...(persistedState as object) };
         ensureBuiltInProviders(merged as Partial<SettingsState>);

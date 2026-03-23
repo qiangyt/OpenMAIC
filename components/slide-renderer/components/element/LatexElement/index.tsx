@@ -11,8 +11,8 @@ export interface LatexElementProps {
 }
 
 /**
- * Latex element component (editable mode).
- * Renders KaTeX HTML if available, falls back to legacy SVG path.
+ * LaTeX 元素组件（可编辑模式）
+ * 如果可用则渲染 KaTeX HTML，否则回退到旧的 SVG 路径
  */
 export function LatexElement({ elementInfo, selectElement }: LatexElementProps) {
   const handleSelectElement = (e: React.MouseEvent | React.TouchEvent) => {

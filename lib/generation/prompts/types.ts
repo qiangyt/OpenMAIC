@@ -1,9 +1,9 @@
 /**
- * Simplified prompt system type definitions
+ * 简化的 Prompt 系统类型定义
  */
 
 /**
- * Prompt template identifier
+ * Prompt 模板标识符
  */
 export type PromptId =
   | 'requirements-to-outlines'
@@ -17,12 +17,12 @@ export type PromptId =
   | 'pbl-actions';
 
 /**
- * Snippet identifier
+ * 片段标识符
  */
 export type SnippetId = 'json-output-rules' | 'element-types' | 'action-types';
 
 /**
- * Loaded prompt template
+ * 已加载的 Prompt 模板
  */
 export interface LoadedPrompt {
   id: PromptId;

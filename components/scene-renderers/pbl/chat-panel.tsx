@@ -29,14 +29,14 @@ export function ChatPanel({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const composingRef = useRef(false);
 
-  // Draft cache
+  // 草稿缓存
   const {
     cachedValue: cachedDraft,
     updateCache: updateDraftCache,
     clearCache: clearDraftCache,
   } = useDraftCache<string>({ key: 'pblChatDraft' });
 
-  // Restore draft: use lazy initializer for first render, then sync via derived state
+  // 恢复草稿：首次渲染使用惰性初始化器，然后通过派生状态同步
   const [prevCachedDraft, setPrevCachedDraft] = useState(cachedDraft);
   if (cachedDraft !== prevCachedDraft) {
     setPrevCachedDraft(cachedDraft);
@@ -45,7 +45,7 @@ export function ChatPanel({
     }
   }
 
-  // Auto-scroll on new messages
+  // 新消息时自动滚动
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
@@ -71,7 +71,7 @@ export function ChatPanel({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
+      {/* 标题栏 */}
       <div className="px-4 py-3 border-b">
         <h2 className="font-semibold text-sm">{t('pbl.chat.title')}</h2>
         {currentIssue && (
@@ -81,7 +81,7 @@ export function ChatPanel({
         )}
       </div>
 
-      {/* Messages */}
+      {/* 消息列表 */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.map((msg) => (
           <ChatMessage key={msg.id} message={msg} isUser={msg.agent_name === userRole} />
@@ -104,7 +104,7 @@ export function ChatPanel({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
+      {/* 输入区域 */}
       <div className="border-t p-3">
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground mb-2">
           <span>{t('pbl.chat.mentionHint')}</span>

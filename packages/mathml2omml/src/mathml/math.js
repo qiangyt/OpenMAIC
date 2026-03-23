@@ -10,6 +10,6 @@ export function math(element, targetParent, previousSibling, nextSibling, ancest
 }
 
 export function semantics(element, targetParent, previousSibling, nextSibling, ancestors) {
-  // Ignore as default behavior
+  // 默认行为：忽略
   return targetParent
 }

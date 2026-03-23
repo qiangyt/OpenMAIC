@@ -2,16 +2,16 @@ import { useCallback } from 'react';
 import { useSnapshotStore } from '@/lib/store/snapshot';
 
 /**
- * Hook for managing history snapshots (undo/redo)
+ * 管理历史快照的 Hook（撤销/重做）
  *
- * Usage:
+ * 用法：
  * ```tsx
  * const { addHistorySnapshot, canUndo, canRedo, undo, redo } = useHistorySnapshot();
  *
- * // After making changes
+ * // 进行更改后
  * await addHistorySnapshot();
  *
- * // Undo/Redo
+ * // 撤销/重做
  * if (canUndo) await undo();
  * if (canRedo) await redo();
  * ```
@@ -24,8 +24,8 @@ export function useHistorySnapshot() {
   const canRedo = useSnapshotStore((state) => state.canRedo);
 
   /**
-   * Add a snapshot to the history
-   * Call this after any significant state change that should be undoable
+   * 向历史记录添加快照
+   * 在任何应可撤销的重要状态更改后调用
    */
   const addHistorySnapshot = useCallback(async () => {
     await addSnapshot();

@@ -17,9 +17,9 @@ interface WhiteboardHistoryProps {
 }
 
 /**
- * Whiteboard history dropdown panel.
- * Shows a list of saved whiteboard snapshots with timestamps and element counts.
- * Clicking "Restore" replaces the current whiteboard content with the snapshot.
+ * 白板历史下拉面板。
+ * 显示保存的白板快照列表，包含时间戳和元素数量。
+ * 点击"恢复"将当前白板内容替换为快照内容。
  */
 export function WhiteboardHistory({ isOpen, onClose }: WhiteboardHistoryProps) {
   const { t } = useI18n();
@@ -27,7 +27,7 @@ export function WhiteboardHistory({ isOpen, onClose }: WhiteboardHistoryProps) {
   const isClearing = useCanvasStore.use.whiteboardClearing();
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
+  // 点击外部关闭
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: MouseEvent) => {
@@ -35,7 +35,7 @@ export function WhiteboardHistory({ isOpen, onClose }: WhiteboardHistoryProps) {
         onClose();
       }
     };
-    // Delay listener so the click that opens the panel doesn't immediately close it
+    // 延迟添加监听器，以免打开面板的点击立即关闭它
     const id = setTimeout(() => document.addEventListener('mousedown', handler), 0);
     return () => {
       clearTimeout(id);
@@ -44,8 +44,7 @@ export function WhiteboardHistory({ isOpen, onClose }: WhiteboardHistoryProps) {
   }, [isOpen, onClose]);
 
   const handleRestore = (index: number) => {
-    // P1: Block restore while a clear animation is in flight — the pending
-    // delete/update would overwrite the restored content moments later.
+    // P1：清除动画进行时阻止恢复 — 待处理的删除/更新会立即覆盖恢复的内容。
     if (isClearing) {
       toast.error(t('whiteboard.restoreError'));
       return;
@@ -57,16 +56,15 @@ export function WhiteboardHistory({ isOpen, onClose }: WhiteboardHistoryProps) {
     const stageStore = useStageStore;
     const stageAPI = createStageAPI(stageStore);
 
-    // Get or create whiteboard
+    // 获取或创建白板
     const wbResult = stageAPI.whiteboard.get();
     if (!wbResult.success || !wbResult.data) {
       return;
     }
     const whiteboardId = wbResult.data.id;
 
-    // P2a: Skip no-op restores — if the snapshot matches what's already
-    // on screen, applying it would not change elementsKey, leaving
-    // restoredKey armed indefinitely and suppressing a future snapshot.
+    // P2a：跳过无操作恢复 — 如果快照与当前屏幕内容匹配，应用它不会改变 elementsKey，
+    // 导致 restoredKey 无限期保持激活状态，从而抑制未来的快照。
     const restoredElementsKey = snapshot.fingerprint;
     const currentKey = elementFingerprint(wbResult.data.elements ?? []);
     if (restoredElementsKey === currentKey) {
@@ -75,18 +73,18 @@ export function WhiteboardHistory({ isOpen, onClose }: WhiteboardHistoryProps) {
       return;
     }
 
-    // Set restoredKey so auto-snapshot skips the incoming change
+    // 设置 restoredKey，以便自动快照跳过即将到来的变更
     useWhiteboardHistoryStore.getState().setRestoredKey(restoredElementsKey);
 
-    // Transactional restore: replace all elements in one update() call
-    // instead of looping delete/add which produces intermediate states.
+    // 事务性恢复：在一次 update() 调用中替换所有元素，
+    // 而不是循环删除/添加，后者会产生中间状态。
     const result = stageAPI.whiteboard.update({ elements: snapshot.elements }, whiteboardId);
 
     if (!result.success) {
-      // Restore failed — clear restoredKey so auto-snapshot isn't stuck
+      // 恢复失败 — 清除 restoredKey，以免自动快照卡住
       useWhiteboardHistoryStore.getState().setRestoredKey(null);
       console.error('Failed to restore whiteboard snapshot:', result.error);
-      // P3: Dedicated restoreError key (not clearError)
+      // P3：专用的 restoreError 键（不是 clearError）
       toast.error(t('whiteboard.restoreError') + (result.error ?? ''));
       return;
     }
@@ -111,7 +109,7 @@ export function WhiteboardHistory({ isOpen, onClose }: WhiteboardHistoryProps) {
           transition={{ duration: 0.15 }}
           className="absolute top-14 right-4 z-[130] w-72 max-h-80 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col"
         >
-          {/* Header */}
+          {/* 头部 */}
           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
             <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
               {t('whiteboard.history')}
@@ -121,7 +119,7 @@ export function WhiteboardHistory({ isOpen, onClose }: WhiteboardHistoryProps) {
             </span>
           </div>
 
-          {/* Snapshot list */}
+          {/* 快照列表 */}
           <div className="flex-1 overflow-y-auto">
             {snapshots.length === 0 ? (
               <div className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">

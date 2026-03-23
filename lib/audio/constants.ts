@@ -1,28 +1,28 @@
 /**
- * Audio Provider Constants
+ * 音频提供商常量
  *
- * Registry of all TTS and ASR providers with their metadata.
- * Separated from tts-providers.ts and asr-providers.ts to avoid importing
- * Node.js libraries (like sharp, buffer) in client components.
+ * 所有 TTS 和 ASR 提供商及其元数据的注册表。
+ * 与 tts-providers.ts 和 asr-providers.ts 分离，以避免在客户端组件中导入
+ * Node.js 库（如 sharp、buffer）。
  *
- * This file is client-safe and can be imported in both client and server components.
+ * 此文件对客户端安全，可在客户端和服务器端组件中导入。
  *
- * To add a new provider:
- * 1. Add the provider ID to TTSProviderId or ASRProviderId in types.ts
- * 2. Add provider configuration to TTS_PROVIDERS or ASR_PROVIDERS below
- * 3. Implement provider logic in tts-providers.ts or asr-providers.ts
- * 4. Add i18n translations in lib/i18n.ts
+ * 添加新提供商：
+ * 1. 在 types.ts 中将提供商 ID 添加到 TTSProviderId 或 ASRProviderId
+ * 2. 在下方的 TTS_PROVIDERS 或 ASR_PROVIDERS 中添加提供商配置
+ * 3. 在 tts-providers.ts 或 asr-providers.ts 中实现提供商逻辑
+ * 4. 在 lib/i18n.ts 中添加 i18n 翻译
  *
- * Provider configuration should include:
- * - id: Unique identifier matching the type definition
- * - name: Display name for the provider
- * - requiresApiKey: Whether the provider needs an API key
- * - defaultBaseUrl: Default API endpoint (optional)
- * - icon: Path to provider icon (optional)
- * - voices: Array of available voices (TTS only)
- * - supportedFormats: Audio formats supported by the provider
- * - speedRange: Min/max/default speed settings (TTS only)
- * - supportedLanguages: Languages supported by the provider (ASR only)
+ * 提供商配置应包含：
+ * - id：与类型定义匹配的唯一标识符
+ * - name：提供商的显示名称
+ * - requiresApiKey：提供商是否需要 API 密钥
+ * - defaultBaseUrl：默认 API 端点（可选）
+ * - icon：提供商图标路径（可选）
+ * - voices：可用语音数组（仅 TTS）
+ * - supportedFormats：提供商支持的音频格式
+ * - speedRange：最小/最大/默认语速设置（仅 TTS）
+ * - supportedLanguages：提供商支持的语言（仅 ASR）
  */
 
 import type {
@@ -34,10 +34,10 @@ import type {
 } from './types';
 
 /**
- * TTS Provider Registry
+ * TTS 提供商注册表
  *
- * Central registry for all TTS providers.
- * Keep in sync with TTSProviderId type definition.
+ * 所有 TTS 提供商的中央注册表。
+ * 与 TTSProviderId 类型定义保持同步。
  */
 export const TTS_PROVIDERS: Record<TTSProviderId, TTSProviderConfig> = {
   'openai-tts': {
@@ -47,7 +47,7 @@ export const TTS_PROVIDERS: Record<TTSProviderId, TTSProviderConfig> = {
     defaultBaseUrl: 'https://api.openai.com/v1',
     icon: '/logos/openai.svg',
     voices: [
-      // Recommended voices (best quality)
+      // 推荐语音（最佳质量）
       {
         id: 'marin',
         name: 'Marin',
@@ -62,7 +62,7 @@ export const TTS_PROVIDERS: Record<TTSProviderId, TTSProviderConfig> = {
         gender: 'neutral',
         description: 'voiceCedar',
       },
-      // Standard voices (alphabetical)
+      // 标准语音（按字母排序）
       {
         id: 'alloy',
         name: 'Alloy',
@@ -256,7 +256,7 @@ export const TTS_PROVIDERS: Record<TTSProviderId, TTSProviderConfig> = {
     defaultBaseUrl: 'https://dashscope.aliyuncs.com/api/v1',
     icon: '/logos/bailian.svg',
     voices: [
-      // Standard Mandarin voices
+      // 标准普通话语音
       {
         id: 'Cherry',
         name: '芊悦 (Cherry)',
@@ -460,7 +460,7 @@ export const TTS_PROVIDERS: Record<TTSProviderId, TTSProviderConfig> = {
         gender: 'female',
         description: 'qwenVoiceStella',
       },
-      // International voices
+      // 国际语音
       {
         id: 'Bodega',
         name: '博德加 (Bodega)',
@@ -531,7 +531,7 @@ export const TTS_PROVIDERS: Record<TTSProviderId, TTSProviderConfig> = {
         gender: 'male',
         description: 'qwenVoiceRadioGol',
       },
-      // Dialect voices
+      // 方言语音
       {
         id: 'Jada',
         name: '上海-阿珍 (Jada)',
@@ -612,20 +612,20 @@ export const TTS_PROVIDERS: Record<TTSProviderId, TTSProviderConfig> = {
     requiresApiKey: false,
     icon: '/logos/browser.svg',
     voices: [
-      // Note: Actual voices are determined by the browser and OS
-      // These are placeholder - real voices are fetched dynamically via speechSynthesis.getVoices()
+      // 注意：实际语音由浏览器和操作系统决定
+      // 这些是占位符 —— 实际语音通过 speechSynthesis.getVoices() 动态获取
       { id: 'default', name: '默认', language: 'zh-CN', gender: 'neutral' },
     ],
-    supportedFormats: ['browser'], // Browser native audio
+    supportedFormats: ['browser'], // 浏览器原生音频
     speedRange: { min: 0.1, max: 10.0, default: 1.0 },
   },
 };
 
 /**
- * ASR Provider Registry
+ * ASR 提供商注册表
  *
- * Central registry for all ASR providers.
- * Keep in sync with ASRProviderId type definition.
+ * 所有 ASR 提供商的中央注册表。
+ * 与 ASRProviderId 类型定义保持同步。
  */
 export const ASR_PROVIDERS: Record<ASRProviderId, ASRProviderConfig> = {
   'openai-whisper': {
@@ -635,68 +635,68 @@ export const ASR_PROVIDERS: Record<ASRProviderId, ASRProviderConfig> = {
     defaultBaseUrl: 'https://api.openai.com/v1',
     icon: '/logos/openai.svg',
     supportedLanguages: [
-      // OpenAI Whisper supports 58 languages (as of official docs)
-      // Source: https://platform.openai.com/docs/guides/speech-to-text
-      'auto', // Auto-detect
-      // Hot languages (commonly used)
-      'zh', // Chinese
-      'en', // English
-      'ja', // Japanese
-      'ko', // Korean
-      'es', // Spanish
-      'fr', // French
-      'de', // German
-      'ru', // Russian
-      'ar', // Arabic
-      'pt', // Portuguese
-      'it', // Italian
-      'hi', // Hindi
-      // Other languages (alphabetical)
-      'af', // Afrikaans
-      'hy', // Armenian
-      'az', // Azerbaijani
-      'be', // Belarusian
-      'bs', // Bosnian
-      'bg', // Bulgarian
-      'ca', // Catalan
-      'hr', // Croatian
-      'cs', // Czech
-      'da', // Danish
-      'nl', // Dutch
-      'et', // Estonian
-      'fi', // Finnish
-      'gl', // Galician
-      'el', // Greek
-      'he', // Hebrew
-      'hu', // Hungarian
-      'is', // Icelandic
-      'id', // Indonesian
-      'kn', // Kannada
-      'kk', // Kazakh
-      'lv', // Latvian
-      'lt', // Lithuanian
-      'mk', // Macedonian
-      'ms', // Malay
-      'mr', // Marathi
-      'mi', // Maori
-      'ne', // Nepali
-      'no', // Norwegian
-      'fa', // Persian
-      'pl', // Polish
-      'ro', // Romanian
-      'sr', // Serbian
-      'sk', // Slovak
-      'sl', // Slovenian
-      'sw', // Swahili
-      'sv', // Swedish
-      'tl', // Tagalog
-      'ta', // Tamil
-      'th', // Thai
-      'tr', // Turkish
-      'uk', // Ukrainian
-      'ur', // Urdu
-      'vi', // Vietnamese
-      'cy', // Welsh
+      // OpenAI Whisper 支持 58 种语言（根据官方文档）
+      // 来源：https://platform.openai.com/docs/guides/speech-to-text
+      'auto', // 自动检测
+      // 热门语言（常用）
+      'zh', // 中文
+      'en', // 英语
+      'ja', // 日语
+      'ko', // 韩语
+      'es', // 西班牙语
+      'fr', // 法语
+      'de', // 德语
+      'ru', // 俄语
+      'ar', // 阿拉伯语
+      'pt', // 葡萄牙语
+      'it', // 意大利语
+      'hi', // 印地语
+      // 其他语言（按字母排序）
+      'af', // 南非荷兰语
+      'hy', // 亚美尼亚语
+      'az', // 阿塞拜疆语
+      'be', // 白俄罗斯语
+      'bs', // 波斯尼亚语
+      'bg', // 保加利亚语
+      'ca', // 加泰罗尼亚语
+      'hr', // 克罗地亚语
+      'cs', // 捷克语
+      'da', // 丹麦语
+      'nl', // 荷兰语
+      'et', // 爱沙尼亚语
+      'fi', // 芬兰语
+      'gl', // 加利西亚语
+      'el', // 希腊语
+      'he', // 希伯来语
+      'hu', // 匈牙利语
+      'is', // 冰岛语
+      'id', // 印尼语
+      'kn', // 卡纳达语
+      'kk', // 哈萨克语
+      'lv', // 拉脱维亚语
+      'lt', // 立陶宛语
+      'mk', // 马其顿语
+      'ms', // 马来语
+      'mr', // 马拉地语
+      'mi', // 毛利语
+      'ne', // 尼泊尔语
+      'no', // 挪威语
+      'fa', // 波斯语
+      'pl', // 波兰语
+      'ro', // 罗马尼亚语
+      'sr', // 塞尔维亚语
+      'sk', // 斯洛伐克语
+      'sl', // 斯洛文尼亚语
+      'sw', // 斯瓦希里语
+      'sv', // 瑞典语
+      'tl', // 他加禄语
+      'ta', // 泰米尔语
+      'th', // 泰语
+      'tr', // 土耳其语
+      'uk', // 乌克兰语
+      'ur', // 乌尔都语
+      'vi', // 越南语
+      'cy', // 威尔士语
     ],
     supportedFormats: ['mp3', 'mp4', 'mpeg', 'mpga', 'm4a', 'wav', 'webm'],
   },
@@ -708,38 +708,38 @@ export const ASR_PROVIDERS: Record<ASRProviderId, ASRProviderConfig> = {
     defaultBaseUrl: 'https://dashscope.aliyuncs.com/api/v1',
     icon: '/logos/bailian.svg',
     supportedLanguages: [
-      // Qwen ASR supports 27 languages + auto-detect
-      // If language is uncertain or mixed (e.g. Chinese-English-Japanese-Korean), use "auto" (do not specify language parameter)
-      'auto', // Auto-detect (do not specify language parameter)
-      // Hot languages (commonly used)
-      'zh', // Chinese (Mandarin, Sichuanese, Minnan, Wu dialects)
-      'yue', // Cantonese
-      'en', // English
-      'ja', // Japanese
-      'ko', // Korean
-      'de', // German
-      'fr', // French
-      'ru', // Russian
-      'es', // Spanish
-      'pt', // Portuguese
-      'ar', // Arabic
-      'it', // Italian
-      'hi', // Hindi
-      // Other languages (alphabetical)
-      'cs', // Czech
-      'da', // Danish
-      'fi', // Finnish
-      'fil', // Filipino
-      'id', // Indonesian
-      'is', // Icelandic
-      'ms', // Malay
-      'no', // Norwegian
-      'pl', // Polish
-      'sv', // Swedish
-      'th', // Thai
-      'tr', // Turkish
-      'uk', // Ukrainian
-      'vi', // Vietnamese
+      // Qwen ASR 支持 27 种语言 + 自动检测
+      // 如果语言不确定或混合（如中日英韩混合），使用 "auto"（不指定语言参数）
+      'auto', // 自动检测（不指定语言参数）
+      // 热门语言（常用）
+      'zh', // 中文（普通话、四川话、闽南语、吴语等）
+      'yue', // 粤语
+      'en', // 英语
+      'ja', // 日语
+      'ko', // 韩语
+      'de', // 德语
+      'fr', // 法语
+      'ru', // 俄语
+      'es', // 西班牙语
+      'pt', // 葡萄牙语
+      'ar', // 阿拉伯语
+      'it', // 意大利语
+      'hi', // 印地语
+      // 其他语言（按字母排序）
+      'cs', // 捷克语
+      'da', // 丹麦语
+      'fi', // 芬兰语
+      'fil', // 菲律宾语
+      'id', // 印尼语
+      'is', // 冰岛语
+      'ms', // 马来语
+      'no', // 挪威语
+      'pl', // 波兰语
+      'sv', // 瑞典语
+      'th', // 泰语
+      'tr', // 土耳其语
+      'uk', // 乌克兰语
+      'vi', // 越南语
     ],
     supportedFormats: ['mp3', 'wav', 'webm', 'm4a', 'flac'],
   },
@@ -750,83 +750,83 @@ export const ASR_PROVIDERS: Record<ASRProviderId, ASRProviderConfig> = {
     requiresApiKey: false,
     icon: '/logos/browser.svg',
     supportedLanguages: [
-      // Chinese variants
-      'zh-CN', // Mandarin (Simplified, China)
-      'zh-TW', // Mandarin (Traditional, Taiwan)
-      'zh-HK', // Cantonese (Hong Kong)
-      'yue-Hant-HK', // Cantonese (Traditional)
-      // English variants
-      'en-US', // English (United States)
-      'en-GB', // English (United Kingdom)
-      'en-AU', // English (Australia)
-      'en-CA', // English (Canada)
-      'en-IN', // English (India)
-      'en-NZ', // English (New Zealand)
-      'en-ZA', // English (South Africa)
-      // Japanese & Korean
-      'ja-JP', // Japanese (Japan)
-      'ko-KR', // Korean (South Korea)
-      // European languages
-      'de-DE', // German (Germany)
-      'fr-FR', // French (France)
-      'es-ES', // Spanish (Spain)
-      'es-MX', // Spanish (Mexico)
-      'es-AR', // Spanish (Argentina)
-      'es-CO', // Spanish (Colombia)
-      'it-IT', // Italian (Italy)
-      'pt-BR', // Portuguese (Brazil)
-      'pt-PT', // Portuguese (Portugal)
-      'ru-RU', // Russian (Russia)
-      'nl-NL', // Dutch (Netherlands)
-      'pl-PL', // Polish (Poland)
-      'cs-CZ', // Czech (Czech Republic)
-      'da-DK', // Danish (Denmark)
-      'fi-FI', // Finnish (Finland)
-      'sv-SE', // Swedish (Sweden)
-      'no-NO', // Norwegian (Norway)
-      'tr-TR', // Turkish (Turkey)
-      'el-GR', // Greek (Greece)
-      'hu-HU', // Hungarian (Hungary)
-      'ro-RO', // Romanian (Romania)
-      'sk-SK', // Slovak (Slovakia)
-      'bg-BG', // Bulgarian (Bulgaria)
-      'hr-HR', // Croatian (Croatia)
-      'ca-ES', // Catalan (Spain)
-      // Middle East & Asia
-      'ar-SA', // Arabic (Saudi Arabia)
-      'ar-EG', // Arabic (Egypt)
-      'he-IL', // Hebrew (Israel)
-      'hi-IN', // Hindi (India)
-      'th-TH', // Thai (Thailand)
-      'vi-VN', // Vietnamese (Vietnam)
-      'id-ID', // Indonesian (Indonesia)
-      'ms-MY', // Malay (Malaysia)
-      'fil-PH', // Filipino (Philippines)
-      // Other
-      'af-ZA', // Afrikaans (South Africa)
-      'uk-UA', // Ukrainian (Ukraine)
+      // 中文变体
+      'zh-CN', // 普通话（简体，中国）
+      'zh-TW', // 普通话（繁体，台湾）
+      'zh-HK', // 粤语（香港）
+      'yue-Hant-HK', // 粤语（繁体）
+      // 英语变体
+      'en-US', // 英语（美国）
+      'en-GB', // 英语（英国）
+      'en-AU', // 英语（澳大利亚）
+      'en-CA', // 英语（加拿大）
+      'en-IN', // 英语（印度）
+      'en-NZ', // 英语（新西兰）
+      'en-ZA', // 英语（南非）
+      // 日语和韩语
+      'ja-JP', // 日语（日本）
+      'ko-KR', // 韩语（韩国）
+      // 欧洲语言
+      'de-DE', // 德语（德国）
+      'fr-FR', // 法语（法国）
+      'es-ES', // 西班牙语（西班牙）
+      'es-MX', // 西班牙语（墨西哥）
+      'es-AR', // 西班牙语（阿根廷）
+      'es-CO', // 西班牙语（哥伦比亚）
+      'it-IT', // 意大利语（意大利）
+      'pt-BR', // 葡萄牙语（巴西）
+      'pt-PT', // 葡萄牙语（葡萄牙）
+      'ru-RU', // 俄语（俄罗斯）
+      'nl-NL', // 荷兰语（荷兰）
+      'pl-PL', // 波兰语（波兰）
+      'cs-CZ', // 捷克语（捷克共和国）
+      'da-DK', // 丹麦语（丹麦）
+      'fi-FI', // 芬兰语（芬兰）
+      'sv-SE', // 瑞典语（瑞典）
+      'no-NO', // 挪威语（挪威）
+      'tr-TR', // 土耳其语（土耳其）
+      'el-GR', // 希腊语（希腊）
+      'hu-HU', // 匈牙利语（匈牙利）
+      'ro-RO', // 罗马尼亚语（罗马尼亚）
+      'sk-SK', // 斯洛伐克语（斯洛伐克）
+      'bg-BG', // 保加利亚语（保加利亚）
+      'hr-HR', // 克罗地亚语（克罗地亚）
+      'ca-ES', // 加泰罗尼亚语（西班牙）
+      // 中东和亚洲
+      'ar-SA', // 阿拉伯语（沙特阿拉伯）
+      'ar-EG', // 阿拉伯语（埃及）
+      'he-IL', // 希伯来语（以色列）
+      'hi-IN', // 印地语（印度）
+      'th-TH', // 泰语（泰国）
+      'vi-VN', // 越南语（越南）
+      'id-ID', // 印尼语（印尼）
+      'ms-MY', // 马来语（马来西亚）
+      'fil-PH', // 菲律宾语（菲律宾）
+      // 其他
+      'af-ZA', // 南非荷兰语（南非）
+      'uk-UA', // 乌克兰语（乌克兰）
     ],
-    supportedFormats: ['webm'], // MediaRecorder format
+    supportedFormats: ['webm'], // MediaRecorder 格式
   },
 };
 
 /**
- * Get all available TTS providers
+ * 获取所有可用的 TTS 提供商
  */
 export function getAllTTSProviders(): TTSProviderConfig[] {
   return Object.values(TTS_PROVIDERS);
 }
 
 /**
- * Get TTS provider by ID
+ * 根据 ID 获取 TTS 提供商
  */
 export function getTTSProvider(providerId: TTSProviderId): TTSProviderConfig | undefined {
   return TTS_PROVIDERS[providerId];
 }
 
 /**
- * Default voice for each TTS provider.
- * Used when switching providers or testing a non-active provider.
+ * 每个 TTS 提供商的默认语音。
+ * 用于切换提供商或测试非活动提供商时。
  */
 export const DEFAULT_TTS_VOICES: Record<TTSProviderId, string> = {
   'openai-tts': 'alloy',
@@ -837,28 +837,28 @@ export const DEFAULT_TTS_VOICES: Record<TTSProviderId, string> = {
 };
 
 /**
- * Get voices for a specific TTS provider
+ * 获取特定 TTS 提供商的语音列表
  */
 export function getTTSVoices(providerId: TTSProviderId): TTSVoiceInfo[] {
   return TTS_PROVIDERS[providerId]?.voices || [];
 }
 
 /**
- * Get all available ASR providers
+ * 获取所有可用的 ASR 提供商
  */
 export function getAllASRProviders(): ASRProviderConfig[] {
   return Object.values(ASR_PROVIDERS);
 }
 
 /**
- * Get ASR provider by ID
+ * 根据 ID 获取 ASR 提供商
  */
 export function getASRProvider(providerId: ASRProviderId): ASRProviderConfig | undefined {
   return ASR_PROVIDERS[providerId];
 }
 
 /**
- * Get supported languages for a specific ASR provider
+ * 获取特定 ASR 提供商支持的语言列表
  */
 export function getASRSupportedLanguages(providerId: ASRProviderId): string[] {
   return ASR_PROVIDERS[providerId]?.supportedLanguages || [];

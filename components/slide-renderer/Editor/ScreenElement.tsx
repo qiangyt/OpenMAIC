@@ -32,7 +32,7 @@ export function ScreenElement({ elementInfo, elementIndex, animate }: ScreenElem
       [ElementTypes.LATEX]: BaseLatexElement,
       [ElementTypes.TABLE]: BaseTableElement,
       [ElementTypes.VIDEO]: BaseVideoElement,
-      // TODO: Add other element types
+      // TODO: 添加其他元素类型
       // [ElementTypes.AUDIO]: BaseAudioElement,
     };
     return elementTypeMap[elementInfo.type] || null;

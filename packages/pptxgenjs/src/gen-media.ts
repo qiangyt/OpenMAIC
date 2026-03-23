@@ -1,40 +1,40 @@
 /**
- * PptxGenJS: Media Methods
+ * PptxGenJS: 媒体方法
  */
 
-import { IMG_BROKEN } from './core-enums'
-import { PresSlide, SlideLayout, ISlideRelMedia } from './core-interfaces'
+import { IMG_BROKEN } from ‘./core-enums’
+import { PresSlide, SlideLayout, ISlideRelMedia } from ‘./core-interfaces’
 
 /**
- * Encode Image/Audio/Video into base64
- * @param {PresSlide | SlideLayout} layout - slide layout
+ * 将图片/音频/视频编码为 base64
+ * @param {PresSlide | SlideLayout} layout - 幻灯片布局
  * @return {Promise} promise
  */
 export function encodeSlideMediaRels(layout: PresSlide | SlideLayout): Array<Promise<string>> {
-	// STEP 1: Detect real Node runtime once
-	const isNode = typeof process !== 'undefined' && !!process.versions?.node && process.release?.name === 'node'
-	// These will be filled only when we’re in Node
-	let fs: typeof import('node:fs') | undefined
-	let https: typeof import('node:https') | undefined
+	// 步骤 1: 检测一次真实的 Node 运行时
+	const isNode = typeof process !== ‘undefined’ && !!process.versions?.node && process.release?.name === ‘node’
+	// 这些仅在 Node 环境中填充
+	let fs: typeof import(‘node:fs’) | undefined
+	let https: typeof import(‘node:https’) | undefined
 
-	// STEP 2: Lazy-load Node built-ins if needed
+	// 步骤 2: 如有需要，延迟加载 Node 内置模块
 	const loadNodeDeps = isNode
 		? async () => {
-			; ({ default: fs } = await import('node:fs')); ({ default: https } = await import('node:https'))
+			; ({ default: fs } = await import(‘node:fs’)); ({ default: https } = await import(‘node:https’))
 		}
 		: async () => { }
-	// Immediately start it when we know we’re in Node
+	// 当确定在 Node 中时立即启动
 	if (isNode) loadNodeDeps()
 
-	// STEP 3: Prepare promises list
+	// 步骤 3: 准备 promise 列表
 	const imageProms: Array<Promise<string>> = []
 
-	// A: Capture all audio/image/video candidates for encoding (filtering online/pre-encoded)
+	// A: 捕获所有需要编码的音频/图片/视频候选项（过滤掉在线/预编码的）
 	const candidateRels = layout._relsMedia.filter(
-		rel => rel.type !== 'online' && !rel.data && (!rel.path || (rel.path && !rel.path.includes('preencoded')))
+		rel => rel.type !== ‘online’ && !rel.data && (!rel.path || (rel.path && !rel.path.includes(‘preencoded’)))
 	)
 
-	// B: PERF: Mark dupes (same `path`) to avoid loading the same media over-and-over!
+	// B: 性能优化：标记重复项（相同的 `path`）以避免重复加载相同的媒体！
 	const unqPaths: string[] = []
 	candidateRels.forEach(rel => {
 		if (!unqPaths.includes(rel.path)) {
@@ -45,7 +45,7 @@ export function encodeSlideMediaRels(layout: PresSlide | SlideLayout): Array<Pro
 		}
 	})
 
-	// STEP 4: Read/Encode each unique media item
+	// 步骤 4: 读取/编码每个唯一的媒体项
 	candidateRels
 		.filter(rel => !rel.isDuplicate)
 		.forEach(rel => {
@@ -53,52 +53,52 @@ export function encodeSlideMediaRels(layout: PresSlide | SlideLayout): Array<Pro
 				(async () => {
 					if (!https) await loadNodeDeps()
 
-					// ────────────  NODE LOCAL FILE  ────────────
-					if (isNode && fs && rel.path.indexOf('http') !== 0) {
+					// ────────────  Node 本地文件  ────────────
+					if (isNode && fs && rel.path.indexOf(‘http’) !== 0) {
 						try {
 							const bitmap = fs.readFileSync(rel.path)
-							rel.data = Buffer.from(bitmap).toString('base64')
+							rel.data = Buffer.from(bitmap).toString(‘base64’)
 							candidateRels
 								.filter(dupe => dupe.isDuplicate && dupe.path === rel.path)
 								.forEach(dupe => (dupe.data = rel.data))
-							return 'done'
+							return ‘done’
 						} catch (ex) {
 							rel.data = IMG_BROKEN
 							candidateRels
 								.filter(dupe => dupe.isDuplicate && dupe.path === rel.path)
 								.forEach(dupe => (dupe.data = rel.data))
-							throw new Error(`ERROR: Unable to read media: "${rel.path}"\n${String(ex)}`)
+							throw new Error(`错误：无法读取媒体："${rel.path}"\n${String(ex)}`)
 						}
 					}
 
-					// ────────────  NODE HTTP(S)  ────────────
-					if (isNode && https && rel.path.startsWith('http')) {
+					// ────────────  Node HTTP(S)  ────────────
+					if (isNode && https && rel.path.startsWith(‘http’)) {
 						return await new Promise<string>((resolve, reject) => {
 							https.get(rel.path, res => {
-								let raw = ''
-								res.setEncoding('binary') // IMPORTANT: Only binary encoding works
-								res.on('data', chunk => (raw += chunk))
-								res.on('end', () => {
-									rel.data = Buffer.from(raw, 'binary').toString('base64')
+								let raw = ‘’
+								res.setEncoding(‘binary’) // 重要：只有二进制编码有效
+								res.on(‘data’, chunk => (raw += chunk))
+								res.on(‘end’, () => {
+									rel.data = Buffer.from(raw, ‘binary’).toString(‘base64’)
 									candidateRels
 										.filter(dupe => dupe.isDuplicate && dupe.path === rel.path)
 										.forEach(dupe => (dupe.data = rel.data))
-									resolve('done')
+									resolve(‘done’)
 								})
-								res.on('error', () => {
+								res.on(‘error’, () => {
 									rel.data = IMG_BROKEN
 									candidateRels
 										.filter(dupe => dupe.isDuplicate && dupe.path === rel.path)
 										.forEach(dupe => (dupe.data = rel.data))
-									reject(new Error(`ERROR! Unable to load image (https.get): ${rel.path}`))
+									reject(new Error(`错误！无法加载图片 (https.get)：${rel.path}`))
 								})
 							})
 						})
 					}
 
-					// ────────────  BROWSER  ────────────
+					// ────────────  浏览器  ────────────
 					return await new Promise<string>((resolve, reject) => {
-						// A: build request
+						// A: 构建请求
 						const xhr = new XMLHttpRequest()
 						xhr.onload = () => {
 							const reader = new FileReader()
@@ -108,10 +108,10 @@ export function encodeSlideMediaRels(layout: PresSlide | SlideLayout): Array<Pro
 									.filter(dupe => dupe.isDuplicate && dupe.path === rel.path)
 									.forEach(dupe => (dupe.data = rel.data))
 								if (!rel.isSvgPng) {
-									resolve('done')
+									resolve(‘done’)
 								} else {
 									createSvgPngPreview(rel)
-										.then(() => resolve('done'))
+										.then(() => resolve(‘done’))
 										.catch(reject)
 								}
 							}
@@ -122,29 +122,29 @@ export function encodeSlideMediaRels(layout: PresSlide | SlideLayout): Array<Pro
 							candidateRels
 								.filter(dupe => dupe.isDuplicate && dupe.path === rel.path)
 								.forEach(dupe => (dupe.data = rel.data))
-							reject(new Error(`ERROR! Unable to load image (xhr.onerror): ${rel.path}`))
+							reject(new Error(`错误！无法加载图片 (xhr.onerror)：${rel.path}`))
 						}
-						// B: execute request
-						xhr.open('GET', rel.path)
-						xhr.responseType = 'blob'
+						// B: 执行请求
+						xhr.open(‘GET’, rel.path)
+						xhr.responseType = ‘blob’
 						xhr.send()
 					})
 				})(),
 			)
 		})
 
-	// STEP 5: SVG-PNG previews
-	// ......: "SVG:" base64 data still requires a png to be generated
-	// ......: (`isSvgPng` flag this as the preview image, not the SVG itself)
+	// 步骤 5: SVG-PNG 预览
+	// ......: "SVG:" base64 数据仍需要生成 png
+	// ......: （`isSvgPng` 将此标记为预览图片，而不是 SVG 本身）
 	layout._relsMedia
 		.filter(rel => rel.isSvgPng && rel.data)
 		.forEach(rel => {
 			(async () => {
 				if (isNode && !fs) await loadNodeDeps()
 				if (isNode && fs) {
-					// console.log('Sorry, SVG is not supported in Node (more info: https://github.com/gitbrent/PptxGenJS/issues/401)')
+					// console.log(‘抱歉，Node 中不支持 SVG（更多信息：https://github.com/gitbrent/PptxGenJS/issues/401）’)
 					rel.data = IMG_BROKEN
-					imageProms.push(Promise.resolve('done'))
+					imageProms.push(Promise.resolve(‘done’))
 				} else {
 					imageProms.push(createSvgPngPreview(rel))
 				}
@@ -155,32 +155,32 @@ export function encodeSlideMediaRels(layout: PresSlide | SlideLayout): Array<Pro
 }
 
 /**
- * Create SVG preview image
- * @param {ISlideRelMedia} rel - slide rel
+ * 创建 SVG 预览图片
+ * @param {ISlideRelMedia} rel - 幻灯片关联
  * @return {Promise} promise
  */
 async function createSvgPngPreview(rel: ISlideRelMedia): Promise<string> {
 	return await new Promise((resolve, reject) => {
-		// A: Create
+		// A: 创建
 		const image = new Image()
 
-		// B: Set onload event
+		// B: 设置 onload 事件
 		image.onload = () => {
-			// First: Check for any errors: This is the best method (try/catch wont work, etc.)
+			// 首先：检查任何错误：这是最好的方法（try/catch 不起作用等）
 			if (image.width + image.height === 0) {
-				image.onerror('h/w=0')
+				image.onerror(‘h/w=0’)
 			}
-			let canvas: HTMLCanvasElement = document.createElement('CANVAS') as HTMLCanvasElement
-			const ctx = canvas.getContext('2d')
+			let canvas: HTMLCanvasElement = document.createElement(‘CANVAS’) as HTMLCanvasElement
+			const ctx = canvas.getContext(‘2d’)
 			canvas.width = image.width
 			canvas.height = image.height
 			ctx.drawImage(image, 0, 0)
-			// Users running on local machine will get the following error:
-			// "SecurityError: Failed to execute 'toDataURL' on 'HTMLCanvasElement': Tainted canvases may not be exported."
-			// when the canvas.toDataURL call executes below.
+			// 在本地机器上运行的用户将收到以下错误：
+			// "SecurityError: Failed to execute ‘toDataURL’ on ‘HTMLCanvasElement’: Tainted canvases may not be exported."
+			// 当下面的 canvas.toDataURL 调用执行时。
 			try {
 				rel.data = canvas.toDataURL(rel.type)
-				resolve('done')
+				resolve(‘done’)
 			} catch (ex) {
 				image.onerror(ex.toString())
 			}
@@ -188,37 +188,37 @@ async function createSvgPngPreview(rel: ISlideRelMedia): Promise<string> {
 		}
 		image.onerror = () => {
 			rel.data = IMG_BROKEN
-			reject(new Error(`ERROR! Unable to load image (image.onerror): ${rel.path}`))
+			reject(new Error(`错误！无法加载图片 (image.onerror)：${rel.path}`))
 		}
 
-		// C: Load image
-		image.src = typeof rel.data === 'string' ? rel.data : IMG_BROKEN
+		// C: 加载图片
+		image.src = typeof rel.data === ‘string’ ? rel.data : IMG_BROKEN
 	})
 }
 
 /**
- * FIXME: TODO: currently unused
- * TODO: Should return a Promise
+ * 修复：待办：目前未使用
+ * 待办：应该返回一个 Promise
  */
 /*
 function getSizeFromImage (inImgUrl: string): { width: number, height: number } {
-	const sizeOf = typeof require !== 'undefined' ? require('sizeof') : null // NodeJS
+	const sizeOf = typeof require !== ‘undefined’ ? require(‘sizeof’) : null // NodeJS
 
 	if (sizeOf) {
 		try {
 			const dimensions = sizeOf(inImgUrl)
 			return { width: dimensions.width, height: dimensions.height }
 		} catch (ex) {
-			console.error('ERROR: sizeOf: Unable to load image: ' + inImgUrl)
+			console.error(‘错误：sizeOf：无法加载图片：’ + inImgUrl)
 			return { width: 0, height: 0 }
 		}
-	} else if (Image && typeof Image === 'function') {
-		// A: Create
+	} else if (Image && typeof Image === ‘function’) {
+		// A: 创建
 		const image = new Image()
 
-		// B: Set onload event
+		// B: 设置 onload 事件
 		image.onload = () => {
-			// FIRST: Check for any errors: This is the best method (try/catch wont work, etc.)
+			// 首先：检查任何错误：这是最好的方法（try/catch 不起作用等）
 			if (image.width + image.height === 0) {
 				return { width: 0, height: 0 }
 			}
@@ -226,10 +226,10 @@ function getSizeFromImage (inImgUrl: string): { width: number, height: number } 
 			return obj
 		}
 		image.onerror = () => {
-			console.error(`ERROR: image.onload: Unable to load image: ${inImgUrl}`)
+			console.error(`错误：image.onload：无法加载图片：${inImgUrl}`)
 		}
 
-		// C: Load image
+		// C: 加载图片
 		image.src = inImgUrl
 	}
 }

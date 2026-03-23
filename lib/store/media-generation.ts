@@ -1,9 +1,9 @@
 /**
- * Media Generation Store
+ * 媒体生成 Store
  *
- * Tracks per-element media generation status (pending → generating → done/failed).
- * Drives skeleton loading in slide renderer components.
- * Persistence is handled by IndexedDB (mediaFiles table), not Zustand middleware.
+ * 跟踪每个元素的媒体生成状态（pending → generating → done/failed）。
+ * 驱动幻灯片渲染器组件中的骨架屏加载。
+ * 持久化由 IndexedDB（mediaFiles 表）处理，而非 Zustand 中间件。
  */
 
 import { create } from 'zustand';
@@ -13,7 +13,7 @@ import { createLogger } from '@/lib/logger';
 
 const log = createLogger('MediaGenerationStore');
 
-// ==================== Types ====================
+// ==================== 类型 ====================
 
 export type MediaTaskStatus = 'pending' | 'generating' | 'done' | 'failed';
 
@@ -27,10 +27,10 @@ export interface MediaTask {
     style?: string;
     duration?: number;
   };
-  objectUrl?: string; // URL.createObjectURL() for rendering
-  poster?: string; // Video poster objectUrl
+  objectUrl?: string; // URL.createObjectURL() 用于渲染
+  poster?: string; // 视频封面 objectUrl
   error?: string;
-  errorCode?: string; // Structured error code (e.g. 'CONTENT_SENSITIVE')
+  errorCode?: string; // 结构化错误码（例如 'CONTENT_SENSITIVE'）
   retryCount: number;
   stageId: string;
 }
@@ -38,37 +38,37 @@ export interface MediaTask {
 interface MediaGenerationState {
   tasks: Record<string, MediaTask>;
 
-  // Batch enqueue
+  // 批量入队
   enqueueTasks: (stageId: string, requests: MediaGenerationRequest[]) => void;
 
-  // Status transitions
+  // 状态转换
   markGenerating: (elementId: string) => void;
   markDone: (elementId: string, objectUrl: string, poster?: string) => void;
   markFailed: (elementId: string, error: string, errorCode?: string) => void;
 
-  // Retry support
+  // 重试支持
   markPendingForRetry: (elementId: string) => void;
 
-  // Queries
+  // 查询
   getTask: (elementId: string) => MediaTask | undefined;
   isReady: (elementId: string) => boolean;
 
-  // Restore from IndexedDB on page load
+  // 页面加载时从 IndexedDB 恢复
   restoreFromDB: (stageId: string) => Promise<void>;
 
-  // Cleanup
+  // 清理
   clearStage: (stageId: string) => void;
   revokeObjectUrls: () => void;
 }
 
-// ==================== Helper ====================
+// ==================== 辅助函数 ====================
 
-/** Check if a src string is a generated media placeholder ID */
+/** 检查 src 字符串是否为生成的媒体占位符 ID */
 export function isMediaPlaceholder(src: string): boolean {
   return /^gen_(img|vid)_[\w-]+$/i.test(src);
 }
 
-// ==================== Store ====================
+// ==================== Store 实现 ====================
 
 export const useMediaGenerationStore = create<MediaGenerationState>()((set, get) => ({
   tasks: {},
@@ -76,7 +76,7 @@ export const useMediaGenerationStore = create<MediaGenerationState>()((set, get)
   enqueueTasks: (stageId, requests) => {
     const newTasks: Record<string, MediaTask> = {};
     for (const req of requests) {
-      // Skip if already tracked
+      // 如果已跟踪则跳过
       if (get().tasks[req.elementId]) continue;
       newTasks[req.elementId] = {
         elementId: req.elementId,
@@ -162,12 +162,12 @@ export const useMediaGenerationStore = create<MediaGenerationState>()((set, get)
       const records = await db.mediaFiles.where('stageId').equals(stageId).toArray();
       const restored: Record<string, MediaTask> = {};
       for (const rec of records) {
-        // Extract elementId from compound key (stageId:elementId)
+        // 从复合键（stageId:elementId）中提取 elementId
         const elementId = rec.id.includes(':') ? rec.id.split(':').slice(1).join(':') : rec.id;
         const params = JSON.parse(rec.params || '{}');
 
         if (rec.error) {
-          // Restore as failed task (persisted non-retryable error)
+          // 恢复为失败任务（持久化的不可重试错误）
           restored[elementId] = {
             elementId,
             type: rec.type,
@@ -180,7 +180,7 @@ export const useMediaGenerationStore = create<MediaGenerationState>()((set, get)
             stageId,
           };
         } else {
-          // Re-wrap blob with stored mimeType — IndexedDB may drop Blob.type
+          // 用存储的 mimeType 重新包装 blob — IndexedDB 可能会丢失 Blob.type
           const blob = rec.blob.type ? rec.blob : new Blob([rec.blob], { type: rec.mimeType });
           const objectUrl = URL.createObjectURL(blob);
           const poster = rec.poster ? URL.createObjectURL(rec.poster) : undefined;

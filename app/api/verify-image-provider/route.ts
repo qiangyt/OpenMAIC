@@ -1,15 +1,15 @@
 /**
- * Verify Image Provider API
+ * 图像服务提供商验证 API
  *
- * Lightweight endpoint that validates provider credentials without generating images.
+ * 轻量级端点，用于验证服务提供商凭证但不生成图像。
  *
  * POST /api/verify-image-provider
  *
  * Headers:
  *   x-image-provider: ImageProviderId
- *   x-image-model: string (optional)
- *   x-api-key: string (optional, server fallback)
- *   x-base-url: string (optional, server fallback)
+ *   x-image-model: string (可选)
+ *   x-api-key: string (可选，服务器备用)
+ *   x-base-url: string (可选，服务器备用)
  *
  * Response: { success: boolean, message: string }
  */

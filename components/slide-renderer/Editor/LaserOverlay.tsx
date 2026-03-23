@@ -10,12 +10,12 @@ interface LaserOverlayProps {
 }
 
 /**
- * Laser pointer overlay component
+ * 激光笔覆盖层组件
  *
- * Features:
- * - Smoothly flies in from the nearest corner to the element center
- * - Elegant light dot with soft breathing glow
- * - Uses percentage positioning (0-100)
+ * 功能：
+ * - 从最近的角落平滑飞入到元素中心
+ * - 优雅的光点带有柔和的呼吸发光效果
+ * - 使用百分比定位 (0-100)
  */
 export function LaserOverlay({
   geometry,
@@ -56,7 +56,7 @@ export function LaserOverlay({
       className="absolute z-[101] pointer-events-none"
     >
       <div className="relative -translate-x-1/2 -translate-y-1/2">
-        {/* Ring pulse */}
+        {/* 环形脉冲 */}
         <motion.div
           animate={{ scale: [1, 2.8], opacity: [0.6, 0] }}
           transition={{
@@ -69,7 +69,7 @@ export function LaserOverlay({
           style={{ border: `1.5px solid ${color}` }}
         />
 
-        {/* Light core */}
+        {/* 光芯 */}
         <div
           className="w-2.5 h-2.5 rounded-full"
           style={{

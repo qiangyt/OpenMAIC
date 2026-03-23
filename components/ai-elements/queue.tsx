@@ -159,14 +159,14 @@ export const QueueList = ({ children, className, ...props }: QueueListProps) => 
   </ScrollArea>
 );
 
-// QueueSection - collapsible section container
+// QueueSection - 可折叠的区块容器
 export type QueueSectionProps = ComponentProps<typeof Collapsible>;
 
 export const QueueSection = ({ className, defaultOpen = true, ...props }: QueueSectionProps) => (
   <Collapsible className={cn(className)} defaultOpen={defaultOpen} {...props} />
 );
 
-// QueueSectionTrigger - section header/trigger
+// QueueSectionTrigger - 区块标题/触发器
 export type QueueSectionTriggerProps = ComponentProps<'button'>;
 
 export const QueueSectionTrigger = ({
@@ -188,7 +188,7 @@ export const QueueSectionTrigger = ({
   </CollapsibleTrigger>
 );
 
-// QueueSectionLabel - label content with icon and count
+// QueueSectionLabel - 带图标和计数的标签内容
 export type QueueSectionLabelProps = ComponentProps<'span'> & {
   count?: number;
   label: string;
@@ -211,7 +211,7 @@ export const QueueSectionLabel = ({
   </span>
 );
 
-// QueueSectionContent - collapsible content area
+// QueueSectionContent - 可折叠的内容区域
 export type QueueSectionContentProps = ComponentProps<typeof CollapsibleContent>;
 
 export const QueueSectionContent = ({ className, ...props }: QueueSectionContentProps) => (

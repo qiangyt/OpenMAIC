@@ -1,9 +1,9 @@
 /**
- * Scene Actions Generation API
+ * 场景动作生成 API
  *
- * Generates actions for a scene given its outline and content,
- * then assembles the complete Scene object.
- * This is the second half of the two-step scene generation pipeline.
+ * 根据大纲和内容为场景生成动作，
+ * 然后组装完整的 Scene 对象。
+ * 这是两步场景生成流水线的第二步。
  */
 
 import { NextRequest } from 'next/server';
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       userProfile?: string;
     };
 
-    // Validate required fields
+    // 验证必填字段
     if (!outline) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'outline is required');
     }
@@ -74,13 +74,13 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'stageId is required');
     }
 
-    // ── Model resolution from request headers ──
+    // ── 从请求 headers 解析模型 ──
     const { model: languageModel, modelInfo, modelString } = resolveModelFromHeaders(req);
 
-    // Detect vision capability
+    // 检测视觉能力
     const hasVision = !!modelInfo?.capabilities?.vision;
 
-    // AI call function (actions typically don't use vision, but kept for consistency)
+    // AI 调用函数（动作通常不使用视觉，但保持一致性）
     const aiCall = async (
       systemPrompt: string,
       userPrompt: string,
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
       return result.text;
     };
 
-    // ── Build cross-scene context ──
+    // ── 构建跨场景上下文 ──
     const allTitles = allOutlines.map((o) => o.title);
     const pageIndex = allOutlines.findIndex((o) => o.id === outline.id);
     const ctx: SceneGenerationContext = {
@@ -125,14 +125,14 @@ export async function POST(req: NextRequest) {
       previousSpeeches: incomingPreviousSpeeches ?? [],
     };
 
-    // ── Generate actions ──
+    // ── 生成动作 ──
     log.info(`Generating actions: "${outline.title}" (${outline.type}) [model=${modelString}]`);
 
     const actions = await generateSceneActions(outline, content, aiCall, ctx, agents, userProfile);
 
     log.info(`Generated ${actions.length} actions for: "${outline.title}"`);
 
-    // ── Build complete scene ──
+    // ── 构建完整场景 ──
     const scene = buildCompleteScene(outline, content, actions, stageId);
 
     if (!scene) {
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
       return apiError('GENERATION_FAILED', 500, `Failed to build scene: ${outline.title}`);
     }
 
-    // ── Extract speeches for cross-scene coherence ──
+    // ── 提取语音以保持跨场景连贯性 ──
     const outputPreviousSpeeches = (scene.actions || [])
       .filter((a): a is SpeechAction => a.type === 'speech')
       .map((a) => a.text);

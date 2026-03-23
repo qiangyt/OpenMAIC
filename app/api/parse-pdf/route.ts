@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'No PDF file provided');
     }
 
-    // providerId is required from the client — no server-side store to fall back to
+    // providerId 必须由客户端提供 — 没有服务器端存储可以回退
     const effectiveProviderId = providerId || ('unpdf' as PDFProviderId);
 
     const clientBaseUrl = baseUrl || undefined;
@@ -51,18 +51,18 @@ export async function POST(req: NextRequest) {
         : resolvePDFBaseUrl(effectiveProviderId, baseUrl || undefined),
     };
 
-    // Convert PDF to buffer
+    // 将 PDF 转换为 buffer
     const arrayBuffer = await pdfFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Parse PDF using the provider system
+    // 使用提供商系统解析 PDF
     const result = await parsePDF(config, buffer);
 
-    // Add file metadata
+    // 添加文件元数据
     const resultWithMetadata: ParsedPdfContent = {
       ...result,
       metadata: {
-        pageCount: result.metadata?.pageCount || 0, // Ensure pageCount is always a number
+        pageCount: result.metadata?.pageCount || 0, // 确保 pageCount 始终为数字
         ...result.metadata,
         fileName: pdfFile.name,
         fileSize: pdfFile.size,

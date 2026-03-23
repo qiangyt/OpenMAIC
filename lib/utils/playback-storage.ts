@@ -1,8 +1,8 @@
 /**
- * Playback Storage - Persist playback engine state to IndexedDB
+ * 播放存储 - 将播放引擎状态持久化到 IndexedDB
  *
- * Stores minimal state needed to resume playback from a breakpoint:
- * position (sceneIndex + actionIndex) and consumed discussions.
+ * 存储从断点恢复播放所需的最小状态：
+ * 位置（sceneIndex + actionIndex）和已消费的讨论。
  */
 
 import { db } from './database';
@@ -11,12 +11,12 @@ export interface PlaybackSnapshot {
   sceneIndex: number;
   actionIndex: number;
   consumedDiscussions: string[];
-  sceneId?: string; // Scene this snapshot belongs to; discard on mismatch
+  sceneId?: string; // 此快照所属的场景；不匹配时丢弃
 }
 
 /**
- * Save playback state for a stage.
- * Each stage has at most one playback state record.
+ * 保存课程的播放状态。
+ * 每个课程最多有一条播放状态记录。
  */
 export async function savePlaybackState(
   stageId: string,
@@ -34,8 +34,8 @@ export async function savePlaybackState(
 }
 
 /**
- * Load playback state for a stage.
- * Returns null if no saved state exists.
+ * 加载课程的播放状态。
+ * 如果没有保存的状态则返回 null。
  */
 export async function loadPlaybackState(stageId: string): Promise<PlaybackSnapshot | null> {
   const record = await db.playbackState.get(stageId);
@@ -51,7 +51,7 @@ export async function loadPlaybackState(stageId: string): Promise<PlaybackSnapsh
 }
 
 /**
- * Clear playback state for a stage (e.g. on playback complete or stop).
+ * 清除课程的播放状态（例如播放完成或停止时）。
  */
 export async function clearPlaybackState(stageId: string): Promise<void> {
   await db.playbackState.delete(stageId);

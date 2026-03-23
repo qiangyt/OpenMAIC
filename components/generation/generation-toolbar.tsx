@@ -22,24 +22,24 @@ import type { ProviderId } from '@/lib/ai/providers';
 import type { SettingsSection } from '@/lib/types/settings';
 import { MediaPopover } from '@/components/generation/media-popover';
 
-// ─── Constants ───────────────────────────────────────────────
+// ─── 常量 ───────────────────────────────────────────────
 const MAX_PDF_SIZE_MB = 50;
 const MAX_PDF_SIZE_BYTES = MAX_PDF_SIZE_MB * 1024 * 1024;
 
-// ─── Types ───────────────────────────────────────────────────
+// ─── 类型定义 ───────────────────────────────────────────────────
 export interface GenerationToolbarProps {
   language: 'zh-CN' | 'en-US';
   onLanguageChange: (lang: 'zh-CN' | 'en-US') => void;
   webSearch: boolean;
   onWebSearchChange: (v: boolean) => void;
   onSettingsOpen: (section?: SettingsSection) => void;
-  // PDF
+  // PDF 文件
   pdfFile: File | null;
   onPdfFileChange: (file: File | null) => void;
   onPdfError: (error: string | null) => void;
 }
 
-// ─── Component ───────────────────────────────────────────────
+// ─── 组件 ───────────────────────────────────────────────
 export function GenerationToolbar({
   language,
   onLanguageChange,
@@ -64,7 +64,7 @@ export function GenerationToolbar({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Check if the selected web search provider has a valid config (API key or server-configured)
+  // 检查选中的网页搜索提供商是否有有效配置（API 密钥或服务器配置）
   const webSearchProvider = WEB_SEARCH_PROVIDERS[webSearchProviderId];
   const webSearchConfig = webSearchProvidersConfig[webSearchProviderId];
   const webSearchAvailable = webSearchProvider
@@ -73,7 +73,7 @@ export function GenerationToolbar({
       !!webSearchConfig?.isServerConfigured
     : false;
 
-  // Configured LLM providers (only those with valid credentials + models + endpoint)
+  // 已配置的 LLM 提供商（仅包含有效凭证 + 模型 + 端点的提供商）
   const configuredProviders = providersConfig
     ? Object.entries(providersConfig)
         .filter(
@@ -96,7 +96,7 @@ export function GenerationToolbar({
 
   const currentProviderConfig = providersConfig?.[currentProviderId];
 
-  // PDF handler
+  // PDF 处理器
   const handleFileSelect = (file: File) => {
     if (file.type !== 'application/pdf') return;
     if (file.size > MAX_PDF_SIZE_BYTES) {
@@ -107,7 +107,7 @@ export function GenerationToolbar({
     onPdfFileChange(file);
   };
 
-  // ─── Pill button helper ─────────────────────────────
+  // ─── 胶囊按钮辅助类 ─────────────────────────────
   const pillCls =
     'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all cursor-pointer select-none whitespace-nowrap border';
   const pillMuted = `${pillCls} border-border/50 text-muted-foreground/70 hover:text-foreground hover:bg-muted/60`;
@@ -115,7 +115,7 @@ export function GenerationToolbar({
 
   return (
     <div className="flex items-center gap-1 flex-wrap">
-      {/* ── Model selector ── */}
+      {/* ── 模型选择器 ── */}
       {configuredProviders.length > 0 ? (
         <ModelSelectorPopover
           configuredProviders={configuredProviders}
@@ -144,10 +144,10 @@ export function GenerationToolbar({
         </Tooltip>
       )}
 
-      {/* ── Separator ── */}
+      {/* ── 分隔符 ── */}
       <div className="w-px h-4 bg-border/60 mx-1" />
 
-      {/* ── PDF (parser + upload) combined Popover ── */}
+      {/* ── PDF（解析器 + 上传）组合弹出框 ── */}
       <Popover>
         <PopoverTrigger asChild>
           {pdfFile ? (
@@ -172,7 +172,7 @@ export function GenerationToolbar({
           )}
         </PopoverTrigger>
         <PopoverContent align="start" className="w-72 p-0">
-          {/* Parser selector */}
+          {/* 解析器选择器 */}
           <div className="flex items-center gap-2 px-3 pt-3 pb-2">
             <span className="text-xs font-medium text-muted-foreground shrink-0">
               {t('toolbar.pdfParser')}
@@ -206,7 +206,7 @@ export function GenerationToolbar({
             </Select>
           </div>
 
-          {/* Upload area / file info */}
+          {/* 上传区域 / 文件信息 */}
           <div className="px-3 pb-3">
             <input
               type="file"
@@ -271,7 +271,7 @@ export function GenerationToolbar({
         </PopoverContent>
       </Popover>
 
-      {/* ── Web Search ── */}
+      {/* ── 网页搜索 ── */}
       {webSearchAvailable ? (
         <Popover>
           <PopoverTrigger asChild>
@@ -283,7 +283,7 @@ export function GenerationToolbar({
             </button>
           </PopoverTrigger>
           <PopoverContent align="start" className="w-64 p-3 space-y-3">
-            {/* Toggle */}
+            {/* 开关 */}
             <button
               onClick={() => onWebSearchChange(!webSearch)}
               className={cn(
@@ -309,7 +309,7 @@ export function GenerationToolbar({
               </div>
             </button>
 
-            {/* Provider selector */}
+            {/* 提供商选择器 */}
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-muted-foreground shrink-0">
                 {t('toolbar.webSearchProvider')}
@@ -357,7 +357,7 @@ export function GenerationToolbar({
         </Tooltip>
       )}
 
-      {/* ── Language pill ── */}
+      {/* ── 语言胶囊 ── */}
       <Tooltip>
         <TooltipTrigger asChild>
           <button
@@ -371,16 +371,16 @@ export function GenerationToolbar({
         <TooltipContent>{t('toolbar.languageHint')}</TooltipContent>
       </Tooltip>
 
-      {/* ── Separator ── */}
+      {/* ── 分隔符 ── */}
       <div className="w-px h-4 bg-border/60 mx-1" />
 
-      {/* ── Media popover ── */}
+      {/* ── 媒体弹出框 ── */}
       <MediaPopover onSettingsOpen={onSettingsOpen} />
     </div>
   );
 }
 
-// ─── ModelSelectorPopover (two-level: provider → model) ─────
+// ─── 模型选择弹出框（两级：提供商 → 模型）─────
 interface ConfiguredProvider {
   id: ProviderId;
   name: string;
@@ -405,7 +405,7 @@ function ModelSelectorPopover({
   t: (key: string) => string;
 }) {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  // null = provider list, ProviderId = model list for that provider
+  // null = 提供商列表，ProviderId = 该提供商的模型列表
   const [drillProvider, setDrillProvider] = useState<ProviderId | null>(null);
 
   const activeProvider = useMemo(
@@ -452,7 +452,7 @@ function ModelSelectorPopover({
       </Tooltip>
 
       <PopoverContent align="start" className="w-64 p-0">
-        {/* Level 1: Provider list */}
+        {/* 第一层：提供商列表 */}
         {!drillProvider && (
           <div className="max-h-72 overflow-y-auto">
             <div className="px-3 py-2 border-b">
@@ -499,10 +499,10 @@ function ModelSelectorPopover({
           </div>
         )}
 
-        {/* Level 2: Model list for selected provider */}
+        {/* 第二层：选中提供商的模型列表 */}
         {drillProvider && activeProvider && (
           <div className="max-h-72 overflow-y-auto">
-            {/* Back header */}
+            {/* 返回头部 */}
             <button
               onClick={() => setDrillProvider(null)}
               className="w-full flex items-center gap-2 px-3 py-2 border-b bg-muted/40 hover:bg-muted/60 transition-colors"
@@ -522,7 +522,7 @@ function ModelSelectorPopover({
                 {activeProvider.models.length} {t('settings.modelCount')}
               </span>
             </button>
-            {/* Models */}
+            {/* 模型列表 */}
             {activeProvider.models.map((model) => {
               const isSelected = currentProviderId === drillProvider && currentModelId === model.id;
               return (

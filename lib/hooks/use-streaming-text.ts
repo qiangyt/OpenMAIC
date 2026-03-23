@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 export interface StreamingTextOptions {
   text: string;
-  speed?: number; // characters/second, default 30
+  speed?: number; // 每秒字符数，默认 30
   onComplete?: () => void;
-  enabled?: boolean; // whether to enable streaming, default true
+  enabled?: boolean; // 是否启用流式显示，默认 true
 }
 
 export interface StreamingTextResult {
@@ -15,12 +15,12 @@ export interface StreamingTextResult {
 }
 
 /**
- * Streaming Text Hook
+ * 流式文本 Hook
  *
- * Implements a character-by-character text display effect
+ * 实现逐字符文本显示效果
  *
- * @param options - Configuration options
- * @returns Streaming text state and control functions
+ * @param options - 配置选项
+ * @returns 流式文本状态和控制函数
  */
 export function useStreamingText(options: StreamingTextOptions): StreamingTextResult {
   const { text, speed = 30, onComplete, enabled = true } = options;
@@ -33,7 +33,7 @@ export function useStreamingText(options: StreamingTextOptions): StreamingTextRe
   const lastIndexRef = useRef(0);
 
   /**
-   * Skip streaming animation and display all text immediately
+   * 跳过流式动画，立即显示所有文本
    */
   const skip = useCallback(() => {
     if (frameRef.current) {
@@ -48,7 +48,7 @@ export function useStreamingText(options: StreamingTextOptions): StreamingTextRe
   }, [text, onComplete]);
 
   /**
-   * Reset streaming state
+   * 重置流式状态
    */
   const reset = useCallback(() => {
     if (frameRef.current) {
@@ -62,15 +62,15 @@ export function useStreamingText(options: StreamingTextOptions): StreamingTextRe
   }, []);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- Animation driver: synchronous state transitions are intentional for streaming text display */
-    // If streaming is disabled or text is empty, display all text immediately
+    /* eslint-disable react-hooks/set-state-in-effect -- 动画驱动器：流式文本显示的同步状态转换是有意为之 */
+    // 如果流式显示禁用或文本为空，立即显示所有文本
     if (!enabled || !text) {
       setDisplayedText((prev) => (prev !== text ? text : prev));
       setIsStreaming((prev) => (prev ? false : prev));
       return;
     }
 
-    // Limit max text length (disable streaming for text over 500 characters)
+    // 限制最大文本长度（超过 500 字符的文本禁用流式显示）
     if (text.length > 500) {
       setDisplayedText(text);
       setIsStreaming(false);
@@ -78,7 +78,7 @@ export function useStreamingText(options: StreamingTextOptions): StreamingTextRe
       return;
     }
 
-    // Start streaming display
+    // 开始流式显示
     setIsStreaming(true);
     setDisplayedText('');
     /* eslint-enable react-hooks/set-state-in-effect */

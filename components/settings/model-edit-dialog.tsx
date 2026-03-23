@@ -18,7 +18,7 @@ interface ModelEditDialogProps {
   editingModel: EditingModel | null;
   setEditingModel: (model: EditingModel | null) => void;
   onSave: () => void;
-  onAutoSave?: () => void; // Auto-save on blur
+  onAutoSave?: () => void; // 失焦时自动保存
   providerId: ProviderId;
   apiKey: string;
   baseUrl?: string;
@@ -43,10 +43,10 @@ export function ModelEditDialog({
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [testMessage, setTestMessage] = useState('');
 
-  // Reset test status when dialog closes
+  // 对话框关闭时重置测试状态
   useEffect(() => {
     if (!open) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Reset state when dialog closes
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- 对话框关闭时重置状态
       setTestStatus('idle');
 
       setTestMessage('');
@@ -118,7 +118,7 @@ export function ModelEditDialog({
             </h2>
           </div>
 
-          {/* Model ID */}
+          {/* 模型 ID */}
           <div className="space-y-2">
             <Label>{t('settings.modelId')}</Label>
             <Input
@@ -129,7 +129,7 @@ export function ModelEditDialog({
                 const currentName = editingModel.model.name;
                 const currentId = editingModel.model.id;
 
-                // Auto-sync name if it's empty or matches the old ID
+                // 如果名称为空或与旧 ID 相同，则自动同步名称
                 const shouldSyncName = !currentName || currentName === currentId;
 
                 setEditingModel({
@@ -141,7 +141,7 @@ export function ModelEditDialog({
                   },
                 });
 
-                // Reset test status when model ID changes
+                // 模型 ID 变更时重置测试状态
                 setTestStatus('idle');
                 setTestMessage('');
               }}
@@ -149,7 +149,7 @@ export function ModelEditDialog({
             />
           </div>
 
-          {/* Display Name */}
+          {/* 显示名称 */}
           <div className="space-y-2">
             <Label>{t('settings.modelName')}</Label>
             <Input
@@ -165,7 +165,7 @@ export function ModelEditDialog({
             />
           </div>
 
-          {/* Capabilities */}
+          {/* 能力 */}
           <div className="space-y-2">
             <Label>{t('settings.modelCapabilities')}</Label>
             <div className="flex gap-4">
@@ -252,7 +252,7 @@ export function ModelEditDialog({
             </div>
           </div>
 
-          {/* Advanced Settings */}
+          {/* 高级设置 */}
           <div className="space-y-3 pt-3 border-t">
             <Label className="text-base">{t('settings.advancedSettings')}</Label>
 
@@ -297,7 +297,7 @@ export function ModelEditDialog({
             </div>
           </div>
 
-          {/* Test Model */}
+          {/* 测试模型 */}
           <div className="space-y-3 pt-3 border-t">
             <div className="flex items-center justify-between">
               <Label className="text-base">{t('settings.testModel')}</Label>
@@ -334,7 +334,7 @@ export function ModelEditDialog({
             )}
           </div>
 
-          {/* Footer */}
+          {/* 底部 */}
           <div className="flex items-center justify-end gap-2 pt-3 border-t">
             <Button variant="outline" size="sm" onClick={handleClose}>
               {t('settings.cancelEdit')}

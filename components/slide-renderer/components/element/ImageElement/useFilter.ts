@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import type { ImageElementFilters } from '@/lib/types/slides';
 
 /**
- * Calculate CSS filter string from image filters array
- * @param filters Array of image filters
+ * 从图片滤镜数组计算 CSS filter 字符串
+ * @param filters 图片滤镜数组
  */
 export function useFilter(filters?: ImageElementFilters) {
   const filter = useMemo(() => {

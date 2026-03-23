@@ -1,6 +1,6 @@
 /**
- * Agent Configuration Panel
- * UI for viewing and managing AI agents in the registry
+ * 智能体配置面板
+ * 查看和管理注册表中 AI 智能体的 UI
  */
 
 'use client';

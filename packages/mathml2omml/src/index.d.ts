@@ -1,6 +1,6 @@
 export interface MML2OMMLOptions {
   /**
-   * Whether to disable XML decoding of input
+   * 是否禁用 XML解码输入
    */
   disableDecode?: boolean
 }

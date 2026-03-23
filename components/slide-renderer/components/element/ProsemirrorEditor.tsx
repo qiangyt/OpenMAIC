@@ -47,8 +47,8 @@ export interface ProsemirrorEditorRef {
 }
 
 /**
- * ProseMirror rich text Editor component
- * Handles complex text editing with support for formatting, lists, links, etc.
+ * ProseMirror 富文本编辑器组件
+ * 处理复杂文本编辑，支持格式化、列表、链接等功能
  */
 export const ProsemirrorEditor = forwardRef<ProsemirrorEditorRef, ProsemirrorEditorProps>(
   (
@@ -78,7 +78,7 @@ export const ProsemirrorEditor = forwardRef<ProsemirrorEditorRef, ProsemirrorEdi
     const setTextFormatPainter = useCanvasStore.use.setTextFormatPainter();
     const ctrlOrShiftKeyActive = useKeyboardStore((state) => state.ctrlOrShiftKeyActive());
 
-    // Handle input with debounce
+    // 使用防抖处理输入
 
     const handleInput = useMemo(
       () =>
@@ -101,23 +101,23 @@ export const ProsemirrorEditor = forwardRef<ProsemirrorEditorRef, ProsemirrorEdi
       [value, onUpdate],
     );
 
-    // Handle focus
+    // 处理聚焦
     const handleFocus = useCallback(() => {
-      // Don't disable hotkeys if ctrl/shift is pressed and multiple elements are selected
+      // 如果按下 ctrl/shift 且选中多个元素，不禁用快捷键
       if (!ctrlOrShiftKeyActive || activeElementIdList.length <= 1) {
         setDisableHotkeysState(true);
       }
       onFocus?.();
     }, [ctrlOrShiftKeyActive, activeElementIdList.length, setDisableHotkeysState, onFocus]);
 
-    // Handle blur
+    // 处理失焦
     const handleBlur = useCallback(() => {
       setDisableHotkeysState(false);
       onBlur?.();
     }, [setDisableHotkeysState, onBlur]);
 
-    // Handle click
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- debounce returns a stable function reference
+    // 处理点击
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- debounce 返回稳定的函数引用
     const handleClick = useCallback(
       debounce(
         () => {
@@ -134,7 +134,7 @@ export const ProsemirrorEditor = forwardRef<ProsemirrorEditorRef, ProsemirrorEdi
       [defaultColor, defaultFontName, setRichtextAttrs],
     );
 
-    // Handle keydown
+    // 处理键盘按下
     const handleKeydown = useCallback(
       (view: EditorView, e: KeyboardEvent) => {
         const { ctrlKey, shiftKey, metaKey } = e;
@@ -149,7 +149,7 @@ export const ProsemirrorEditor = forwardRef<ProsemirrorEditorRef, ProsemirrorEdi
       [handleInput, handleClick],
     );
 
-    // Execute rich text command
+    // 执行富文本命令
     const execCommand = useCallback(
       ({ target, action }: RichTextCommand) => {
         if (!editorView.current) return;
@@ -360,7 +360,7 @@ export const ProsemirrorEditor = forwardRef<ProsemirrorEditorRef, ProsemirrorEdi
       [handleElementId, elementId, richTextAttrs, handleInput, handleClick],
     );
 
-    // Handle mouseup for format painter
+    // 处理格式刷的鼠标抬起事件
     const handleMouseup = useCallback(() => {
       if (!textFormatPainter || !editorView.current) return;
       const { keep, ...newProps } = textFormatPainter;
@@ -376,13 +376,13 @@ export const ProsemirrorEditor = forwardRef<ProsemirrorEditorRef, ProsemirrorEdi
       if (!keep) setTextFormatPainter(null);
     }, [textFormatPainter, execCommand, setTextFormatPainter]);
 
-    // Sync attrs to store
+    // 同步属性到 store
     const syncAttrsToStore = useCallback(() => {
       if (handleElementId !== elementId) return;
       handleClick();
     }, [handleElementId, elementId, handleClick]);
 
-    // Initialize ProseMirror Editor
+    // 初始化 ProseMirror 编辑器
     useEffect(() => {
       if (!editorViewRef.current) return;
 
@@ -409,7 +409,7 @@ export const ProsemirrorEditor = forwardRef<ProsemirrorEditorRef, ProsemirrorEdi
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Sync content to DOM
+    // 同步内容到 DOM
     useEffect(() => {
       if (!editorView.current) return;
       if (editorView.current.hasFocus()) return;
@@ -418,13 +418,13 @@ export const ProsemirrorEditor = forwardRef<ProsemirrorEditorRef, ProsemirrorEdi
       editorView.current.dispatch(tr.replaceRangeWith(0, doc.content.size, createDocument(value)));
     }, [value]);
 
-    // Toggle editable mode
+    // 切换可编辑模式
     useEffect(() => {
       if (!editorView.current) return;
       editorView.current.setProps({ editable: () => editable });
     }, [editable]);
 
-    // Setup emitter listeners
+    // 设置事件监听器
     useEffect(() => {
       emitter.on(EmitterEvents.RICH_TEXT_COMMAND, execCommand);
       emitter.on(EmitterEvents.SYNC_RICH_TEXT_ATTRS_TO_STORE, syncAttrsToStore);
@@ -435,7 +435,7 @@ export const ProsemirrorEditor = forwardRef<ProsemirrorEditorRef, ProsemirrorEdi
       };
     }, [execCommand, syncAttrsToStore]);
 
-    // Expose focus method
+    // 暴露 focus 方法
     useImperativeHandle(ref, () => ({
       focus: () => {
         if (editorView.current) {

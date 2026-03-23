@@ -10,7 +10,7 @@ export interface ImageEllipseOutlineProps {
 }
 
 /**
- * Ellipse outline for image element
+ * 图片元素的椭圆边框
  */
 export function ImageEllipseOutline({ width, height, outline }: ImageEllipseOutlineProps) {
   const { outlineWidth, outlineColor, strokeDashArray } = useElementOutline(outline);

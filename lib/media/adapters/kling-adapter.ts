@@ -1,20 +1,20 @@
 /**
- * Kling (Kuaishou) Video Generation Adapter
+ * Kling（快手）视频生成适配器
  *
- * Async task pattern: submit → poll → return video URL.
+ * 异步任务模式：提交 → 轮询 → 返回视频 URL。
  *
- * REST endpoints:
- * - Submit: POST /v1/videos/text2video
- * - Poll:   GET  /v1/videos/text2video/{task_id}
+ * REST 端点：
+ * - 提交：POST /v1/videos/text2video
+ * - 轮询：GET  /v1/videos/text2video/{task_id}
  *
- * Authentication: JWT Bearer token generated from Access Key + Secret Key.
- * The apiKey field should be formatted as "accessKey:secretKey".
+ * 认证：由 Access Key + Secret Key 生成的 JWT Bearer token。
+ * apiKey 字段应格式化为 "accessKey:secretKey"。
  *
- * Supported models:
- * - kling-v2-6     (latest)
- * - kling-v1-6     (v1)
+ * 支持的模型：
+ * - kling-v2-6（最新）
+ * - kling-v1-6（v1）
  *
- * API docs: https://docs.klingai.com/api
+ * API 文档：https://docs.klingai.com/api
  */
 
 import crypto from 'crypto';
@@ -31,7 +31,7 @@ const MAX_POLL_ATTEMPTS = 120; // 10 minutes max
 const JWT_EXPIRY_SECS = 1800; // 30 minutes
 
 // ---------------------------------------------------------------------------
-// JWT helper (HS256, no external deps)
+// JWT 辅助函数（HS256，无外部依赖）
 // ---------------------------------------------------------------------------
 
 function base64url(data: Buffer | string): string {
@@ -71,7 +71,7 @@ function parseApiKey(apiKey: string): { accessKey: string; secretKey: string } {
 }
 
 // ---------------------------------------------------------------------------
-// REST types
+// REST 类型
 // ---------------------------------------------------------------------------
 
 interface KlingSubmitResponse {
@@ -101,7 +101,7 @@ interface KlingPollResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Dimension helpers
+// 尺寸辅助函数
 // ---------------------------------------------------------------------------
 
 function getDimensions(aspectRatio?: string): {
@@ -121,8 +121,8 @@ function getDimensions(aspectRatio?: string): {
 }
 
 /**
- * Lightweight connectivity test — validates API key by generating a JWT
- * and making a GET request. 401/403 means key invalid.
+ * 轻量级连接测试 —— 通过生成 JWT 并发送 GET 请求验证 API 密钥。
+ * 401/403 表示密钥无效。
  */
 export async function testKlingConnectivity(
   config: VideoGenerationConfig,
@@ -131,7 +131,7 @@ export async function testKlingConnectivity(
   try {
     const { accessKey, secretKey } = parseApiKey(config.apiKey);
     const token = generateJWT(accessKey, secretKey);
-    // Use a GET to a non-existent task to validate auth
+    // 使用 GET 请求访问不存在的任务以验证认证
     const response = await fetch(`${baseUrl}/v1/videos/text2video/connectivity-test`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${token}` },
@@ -150,7 +150,7 @@ export async function testKlingConnectivity(
 }
 
 // ---------------------------------------------------------------------------
-// Submit
+// 提交
 // ---------------------------------------------------------------------------
 
 async function submitTask(
@@ -195,7 +195,7 @@ async function submitTask(
 }
 
 // ---------------------------------------------------------------------------
-// Poll
+// 轮询
 // ---------------------------------------------------------------------------
 
 async function pollTask(
@@ -222,7 +222,7 @@ async function pollTask(
 }
 
 // ---------------------------------------------------------------------------
-// Public entry point
+// 公共入口点
 // ---------------------------------------------------------------------------
 
 export async function generateWithKling(
@@ -234,10 +234,10 @@ export async function generateWithKling(
   const { accessKey, secretKey } = parseApiKey(config.apiKey);
   const token = generateJWT(accessKey, secretKey);
 
-  // 1. Submit
+  // 1. 提交
   const taskId = await submitTask(baseUrl, token, model, options);
 
-  // 2. Poll until done
+  // 2. 轮询直到完成
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
     const result = await pollTask(baseUrl, token, taskId);

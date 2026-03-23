@@ -66,7 +66,7 @@ export function Operate({
   const canvasScale = useCanvasStore.use.canvasScale();
   const toolbarState = useCanvasStore.use.toolbarState();
 
-  // Get the formatted animations using a proper selector to avoid infinite loops
+  // 使用适当的选择器获取格式化的动画以避免无限循环
   const currentSlide = useSceneSelector<SlideContent, Slide>((content) => content.canvas);
 
   const formatedAnimations = useMemo(() => {
@@ -139,10 +139,10 @@ export function Operate({
         left: elementInfo.left * canvasScale + 'px',
         transform: `rotate(${rotate}deg)`,
         transformOrigin: `${(elementInfo.width * canvasScale) / 2}px ${(height * canvasScale) / 2}px`,
-        pointerEvents: 'auto', // Enable mouse events for operate controls
+        pointerEvents: 'auto', // 启用操作控件鼠标事件
       }}
     >
-      {/* eslint-disable @typescript-eslint/no-explicit-any -- dynamic component dispatch requires type widening */}
+      {/* eslint-disable @typescript-eslint/no-explicit-any -- 动态组件分发需要类型放宽 */}
       {isSelected && CurrentOperateComponent && (
         <CurrentOperateComponent
           elementInfo={elementInfo as any}
@@ -155,7 +155,7 @@ export function Operate({
       )}
       {/* eslint-enable @typescript-eslint/no-explicit-any */}
 
-      {/* Animation index display */}
+      {/* 动画索引显示 */}
       {toolbarState === 'elAnimation' && elementIndexListInAnimation.length > 0 && (
         <div className="animation-index absolute top-0 -left-6 text-xs">
           {elementIndexListInAnimation.map((index) => (

@@ -1,6 +1,6 @@
 /**
- * Agent Registry Store
- * Manages configurable AI agents using Zustand with localStorage persistence
+ * 智能体注册表存储
+ * 使用 Zustand 管理可配置的 AI 智能体，支持 localStorage 持久化
  */
 
 import { create } from 'zustand';
@@ -13,9 +13,9 @@ import { useUserProfileStore } from '@/lib/store/user-profile';
 import type { AgentInfo } from '@/lib/generation/pipeline-types';
 
 interface AgentRegistryState {
-  agents: Record<string, AgentConfig>; // Map of agentId -> config
+  agents: Record<string, AgentConfig>; // 智能体 ID -> 配置的映射
 
-  // Actions
+  // 操作
   addAgent: (agent: AgentConfig) => void;
   updateAgent: (id: string, updates: Partial<AgentConfig>) => void;
   deleteAgent: (id: string) => void;
@@ -23,7 +23,7 @@ interface AgentRegistryState {
   listAgents: () => AgentConfig[];
 }
 
-// Action types available to agents
+// 智能体可用的动作类型
 const WHITEBOARD_ACTIONS = [
   'wb_open',
   'wb_close',
@@ -39,7 +39,7 @@ const WHITEBOARD_ACTIONS = [
 
 const SLIDE_ACTIONS = ['spotlight', 'laser', 'play_video'];
 
-// Default agents - always available on both server and client
+// 默认智能体 - 在服务端和客户端都始终可用
 const DEFAULT_AGENTS: Record<string, AgentConfig> = {
   'default-1': {
     id: 'default-1',
@@ -188,8 +188,8 @@ Tone: Thoughtful, measured, intellectually curious. You pause before speaking. Y
 };
 
 /**
- * Return the built-in default agents as lightweight AgentInfo objects
- * suitable for the generation pipeline (no UI-only fields like avatar/color).
+ * 返回内置默认智能体作为轻量级 AgentInfo 对象
+ * 适用于生成流水线（不包含 avatar/color 等仅 UI 字段）。
  */
 export function getDefaultAgents(): AgentInfo[] {
   return Object.values(DEFAULT_AGENTS).map((a) => ({
@@ -203,7 +203,7 @@ export function getDefaultAgents(): AgentInfo[] {
 export const useAgentRegistry = create<AgentRegistryState>()(
   persist(
     (set, get) => ({
-      // Initialize with default agents so they're available on server
+      // 使用默认智能体初始化，以便在服务端可用
       agents: { ...DEFAULT_AGENTS },
 
       addAgent: (agent) =>
@@ -231,18 +231,18 @@ export const useAgentRegistry = create<AgentRegistryState>()(
     }),
     {
       name: 'agent-registry-storage',
-      version: 10, // Bumped: exclude generated agents from persisted cache
+      version: 10, // 版本升级：从持久化缓存中排除生成的智能体
       migrate: (persistedState: unknown) => persistedState,
-      // Merge persisted state with default agents
-      // Default agents always use code-defined values (not cached)
-      // Custom agents use persisted values
+      // 合并持久化状态与默认智能体
+      // 默认智能体始终使用代码定义的值（不使用缓存）
+      // 自定义智能体使用持久化的值
       merge: (persistedState: unknown, currentState) => {
         const persisted = persistedState as Record<string, unknown> | undefined;
         const persistedAgents = (persisted?.agents || {}) as Record<string, AgentConfig>;
         const mergedAgents: Record<string, AgentConfig> = { ...DEFAULT_AGENTS };
 
-        // Only preserve non-default, non-generated (custom) agents from cache
-        // Generated agents are loaded on-demand from IndexedDB per stage
+        // 仅从缓存中保留非默认、非生成（自定义）的智能体
+        // 生成的智能体按阶段从 IndexedDB 按需加载
         for (const [id, agent] of Object.entries(persistedAgents)) {
           const agentConfig = agent as AgentConfig;
           if (!id.startsWith('default-') && !agentConfig.isGenerated) {
@@ -260,9 +260,9 @@ export const useAgentRegistry = create<AgentRegistryState>()(
 );
 
 /**
- * Convert agents to roundtable participants
- * Maps agent roles to participant roles for the UI
- * @param t - i18n translation function for localized display names
+ * 将智能体转换为圆桌参与者
+ * 将智能体角色映射为 UI 参与者角色
+ * @param t - i18n 翻译函数，用于本地化显示名称
  */
 export function agentsToParticipants(
   agentIds: string[],
@@ -272,7 +272,7 @@ export function agentsToParticipants(
   const participants: Participant[] = [];
   let hasTeacher = false;
 
-  // Resolve agents and sort: teacher first (by role then priority desc)
+  // 解析智能体并排序：老师优先（按角色，然后按优先级降序）
   const resolved = agentIds
     .map((id) => registry.getAgent(id))
     .filter((a): a is AgentConfig => a != null);
@@ -283,16 +283,16 @@ export function agentsToParticipants(
   });
 
   for (const agent of resolved) {
-    // Map agent role to participant role:
-    // The first agent with role "teacher" becomes the left-side teacher.
-    // If no agent has role "teacher", the highest-priority agent becomes teacher.
+    // 将智能体角色映射为参与者角色：
+    // 第一个角色为 "teacher" 的智能体成为左侧老师。
+    // 如果没有智能体的角色是 "teacher"，则最高优先级的智能体成为老师。
     let role: ParticipantRole = 'student';
     if (!hasTeacher) {
       role = 'teacher';
       hasTeacher = true;
     }
 
-    // Use i18n name for default agents, fall back to registry name
+    // 对默认智能体使用 i18n 名称，否则使用注册表中的名称
     const i18nName = t?.(`settings.agentNames.${agent.id}`);
     const displayName =
       i18nName && i18nName !== `settings.agentNames.${agent.id}` ? i18nName : agent.name;
@@ -307,7 +307,7 @@ export function agentsToParticipants(
     });
   }
 
-  // Always add user participant — use profile store when available
+  // 始终添加用户参与者 — 当可用时使用资料存储
   const userProfile = useUserProfileStore.getState();
   const userName = userProfile.nickname || t?.('common.you') || 'You';
   const userAvatar = userProfile.avatar || USER_AVATAR;
@@ -325,9 +325,9 @@ export function agentsToParticipants(
 }
 
 /**
- * Load generated agents for a stage from IndexedDB into the registry.
- * Clears any previously loaded generated agents first.
- * Returns the loaded agent IDs.
+ * 从 IndexedDB 加载某阶段的生成智能体到注册表中。
+ * 首先清除任何先前加载的生成智能体。
+ * 返回加载的智能体 ID。
  */
 export async function loadGeneratedAgentsForStage(stageId: string): Promise<string[]> {
   const { getGeneratedAgentsByStageId } = await import('@/lib/utils/database');
@@ -337,7 +337,7 @@ export async function loadGeneratedAgentsForStage(stageId: string): Promise<stri
 
   const registry = useAgentRegistry.getState();
 
-  // Clear previously loaded generated agents
+  // 清除先前加载的生成智能体
   const currentAgents = registry.listAgents();
   for (const agent of currentAgents) {
     if (agent.isGenerated) {
@@ -345,7 +345,7 @@ export async function loadGeneratedAgentsForStage(stageId: string): Promise<stri
     }
   }
 
-  // Add new ones
+  // 添加新的智能体
   const ids: string[] = [];
   for (const record of records) {
     registry.addAgent({
@@ -364,8 +364,8 @@ export async function loadGeneratedAgentsForStage(stageId: string): Promise<stri
 }
 
 /**
- * Save generated agents to IndexedDB and registry.
- * Clears old generated agents for this stage first.
+ * 将生成的智能体保存到 IndexedDB 和注册表。
+ * 首先清除此阶段的旧生成智能体。
  */
 export async function saveGeneratedAgents(
   stageId: string,
@@ -381,20 +381,20 @@ export async function saveGeneratedAgents(
 ): Promise<string[]> {
   const { db } = await import('@/lib/utils/database');
 
-  // Clear old generated agents for this stage
+  // 清除此阶段的旧生成智能体
   await db.generatedAgents.where('stageId').equals(stageId).delete();
 
-  // Clear from registry
+  // 从注册表中清除
   const registry = useAgentRegistry.getState();
   for (const agent of registry.listAgents()) {
     if (agent.isGenerated) registry.deleteAgent(agent.id);
   }
 
-  // Write to IndexedDB
+  // 写入 IndexedDB
   const records = agents.map((a) => ({ ...a, stageId, createdAt: Date.now() }));
   await db.generatedAgents.bulkPut(records);
 
-  // Add to registry
+  // 添加到注册表
   for (const record of records) {
     registry.addAgent({
       ...record,

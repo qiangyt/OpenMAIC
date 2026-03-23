@@ -1,25 +1,25 @@
 /**
- * Veo (Google) Video Generation Adapter
+ * Veo（Google）视频生成适配器
  *
- * Direct REST API calls for video generation with Google's Veo models.
- * Async task pattern: submit → poll → return inline base64 video.
+ * 使用 Google Veo 模型进行视频生成的直接 REST API 调用。
+ * 异步任务模式：提交 → 轮询 → 返回内联 base64 视频。
  *
- * REST endpoints (Gemini API):
- * - Submit:   POST /v1beta/models/{model}:predictLongRunning
- * - Poll:     POST /v1beta/models/{model}:fetchPredictOperation  { operationName }
- *   Returns inline base64 video data in response.videos[]
+ * REST 端点（Gemini API）：
+ * - 提交：POST /v1beta/models/{model}:predictLongRunning
+ * - 轮询：POST /v1beta/models/{model}:fetchPredictOperation  { operationName }
+ *   在 response.videos[] 中返回内联 base64 视频数据
  *
- * Supported models:
- * - veo-3.1-fast-generate-001  (fast, $0.15/sec)
- * - veo-3.1-generate-001       (quality, $0.40/sec)
- * - veo-3.0-fast-generate-001  (fast, $0.15/sec)
- * - veo-3.0-generate-001       (quality, $0.40/sec)
- * - veo-2.0-generate-001       (legacy, $0.50/sec)
+ * 支持的模型：
+ * - veo-3.1-fast-generate-001（快速，$0.15/秒）
+ * - veo-3.1-generate-001（高质量，$0.40/秒）
+ * - veo-3.0-fast-generate-001（快速，$0.15/秒）
+ * - veo-3.0-generate-001（高质量，$0.40/秒）
+ * - veo-2.0-generate-001（旧版，$0.50/秒）
  *
- * Authentication: x-goog-api-key header
+ * 认证：x-goog-api-key header
  *
- * Stateless: video content is returned as a base64 data URL.
- * No files are saved on the server.
+ * 无状态：视频内容以 base64 data URL 形式返回。
+ * 服务器上不保存任何文件。
  */
 
 import type {
@@ -37,7 +37,7 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Dimension defaults per aspect ratio */
+/** 各宽高比的默认尺寸 */
 function getDimensions(aspectRatio?: string): {
   width: number;
   height: number;
@@ -54,7 +54,7 @@ function getDimensions(aspectRatio?: string): {
   }
 }
 
-/** Common headers for all Veo API calls */
+/** 所有 Veo API 调用的通用 headers */
 function apiHeaders(apiKey: string): Record<string, string> {
   return {
     'Content-Type': 'application/json',
@@ -63,24 +63,24 @@ function apiHeaders(apiKey: string): Record<string, string> {
 }
 
 // ---------------------------------------------------------------------------
-// REST types (matches official Gemini API response format)
+// REST 类型（与官方 Gemini API 响应格式匹配）
 // ---------------------------------------------------------------------------
 
 interface VeoOperation {
   name: string;
   done?: boolean;
   response?: {
-    /** fetchPredictOperation returns inline base64 video data */
+    /** fetchPredictOperation 返回内联 base64 视频数据 */
     videos?: Array<{
-      bytesBase64Encoded?: string; // base64-encoded video bytes
-      mimeType?: string; // e.g. "video/mp4"
+      bytesBase64Encoded?: string; // base64 编码的视频字节
+      mimeType?: string; // 例如 "video/mp4"
     }>;
   };
   error?: { code: number; message: string; status: string };
 }
 
 // ---------------------------------------------------------------------------
-// Submit
+// 提交
 // ---------------------------------------------------------------------------
 
 async function submitVideoGeneration(
@@ -95,7 +95,7 @@ async function submitVideoGeneration(
     instances: [{ prompt: options.prompt }],
   };
 
-  // Parameters are optional — only include if we have values
+  // 参数可选 —— 仅在有值时包含
   const parameters: Record<string, unknown> = {};
   if (options.aspectRatio) parameters.aspectRatio = options.aspectRatio;
   if (options.duration) parameters.durationSeconds = options.duration;
@@ -118,7 +118,7 @@ async function submitVideoGeneration(
 }
 
 // ---------------------------------------------------------------------------
-// Poll
+// 轮询
 // ---------------------------------------------------------------------------
 
 async function pollOperation(
@@ -144,12 +144,12 @@ async function pollOperation(
 }
 
 // ---------------------------------------------------------------------------
-// Public entry point
+// 公共入口点
 // ---------------------------------------------------------------------------
 
 /**
- * Lightweight connectivity test — validates API key by fetching model info.
- * Uses GET /v1beta/models/{model} which does not trigger generation.
+ * 轻量级连接测试 —— 通过获取模型信息验证 API 密钥。
+ * 使用 GET /v1beta/models/{model}，不会触发生成。
  */
 export async function testVeoConnectivity(
   config: VideoGenerationConfig,
@@ -158,12 +158,12 @@ export async function testVeoConnectivity(
   const baseUrl = config.baseUrl || DEFAULT_BASE_URL;
   const url = `${baseUrl}/v1beta/models`;
 
-  // Try ?key= query param first (direct Google API), fall back to x-goog-api-key header (proxy)
+  // 首先尝试 ?key= 查询参数（直接 Google API），回退到 x-goog-api-key header（代理）
   let response: Response | null = null;
   try {
     response = await fetch(`${url}?key=${config.apiKey}`, { method: 'GET' });
   } catch {
-    // Direct API unreachable, try header auth
+    // 直接 API 不可达，尝试 header 认证
   }
   if (!response || !response.ok) {
     try {
@@ -183,7 +183,7 @@ export async function testVeoConnectivity(
     return { success: true, message: `Connected to Veo (${model})` };
   }
 
-  // Parse error body for user-friendly message
+  // 解析错误响应体以获取用户友好的消息
   const text = await response.text().catch(() => '');
   if (response.status === 400 || response.status === 401 || response.status === 403) {
     return {
@@ -204,14 +204,14 @@ export async function generateWithVeo(
   const model = config.model || DEFAULT_MODEL;
   const baseUrl = config.baseUrl || DEFAULT_BASE_URL;
 
-  // 1. Submit
+  // 1. 提交
   const operation = await submitVideoGeneration(baseUrl, config.apiKey, model, options);
 
   if (!operation.name) {
     throw new Error('Veo returned operation without name');
   }
 
-  // 2. Poll until done
+  // 2. 轮询直到完成
   let current = operation;
   let pollCount = 0;
   while (!current.done) {
@@ -223,12 +223,12 @@ export async function generateWithVeo(
     pollCount++;
   }
 
-  // 3. Check for errors
+  // 3. 检查错误
   if (current.error) {
     throw new Error(`Veo generation failed: ${current.error.code} - ${current.error.message}`);
   }
 
-  // 4. Extract inline base64 video from response.videos[]
+  // 4. 从 response.videos[] 中提取内联 base64 视频
   const videos = current.response?.videos;
   if (!videos || videos.length === 0) {
     throw new Error('Veo returned no generated videos');

@@ -22,7 +22,7 @@ export function useMouseSelection(
   const setActiveElementIdList = useCanvasStore.use.setActiveElementIdList();
   const ctrlOrShiftKeyActive = useKeyboardStore((state) => state.ctrlOrShiftKeyActive());
 
-  // Update mouse selection range
+  // 更新鼠标选区范围
   const updateMouseSelection = useCallback(
     (e: React.MouseEvent) => {
       if (!viewportRef.current) return;
@@ -38,7 +38,7 @@ export function useMouseSelection(
       const left = (startPageX - viewportRect.x) / canvasScale;
       const top = (startPageY - viewportRect.y) / canvasScale;
 
-      // Initialize selection start position and defaults
+      // 初始化选区起始位置和默认值
       setMouseSelection({
         top: top,
         left: left,
@@ -62,15 +62,15 @@ export function useMouseSelection(
 
         if (width < minSelectionRange || height < minSelectionRange) return;
 
-        // Determine mouse selection (movement) direction
-        // Classified by quadrant position, e.g. bottom-right is quadrant 4
+        // 确定鼠标选区（移动）方向
+        // 按象限位置分类，例如右下为第4象限
         let quadrant = 0;
         if (offsetWidth > 0 && offsetHeight > 0) quadrant = 4;
         else if (offsetWidth < 0 && offsetHeight < 0) quadrant = 2;
         else if (offsetWidth > 0 && offsetHeight < 0) quadrant = 1;
         else if (offsetWidth < 0 && offsetHeight > 0) quadrant = 3;
 
-        // Update selection range
+        // 更新选区范围
         setMouseSelection((prev) => ({
           ...prev,
           width: width,
@@ -85,7 +85,7 @@ export function useMouseSelection(
         document.onmouseup = null;
         isMouseDown = false;
 
-        // Check which canvas elements are within the mouse selection range and set them as selected
+        // 检查哪些画布元素在鼠标选区范围内并将它们设为选中
         let inRangeElementList: PPTElement[] = [];
         for (const element of elementListRef.current) {
           const mouseSelectionLeft = mouseSelection.left;
@@ -95,7 +95,7 @@ export function useMouseSelection(
 
           const { minX, maxX, minY, maxY } = getElementRange(element);
 
-          // Inclusion check differs for each quadrant direction
+          // 每个象限方向的包含检查不同
           let isInclude = false;
           if (ctrlOrShiftKeyActive) {
             if (mouseSelectionQuadrant === 4) {
@@ -151,12 +151,12 @@ export function useMouseSelection(
             }
           }
 
-          // Locked or hidden elements should not be selected even if within range
+          // 锁定或隐藏的元素即使在范围内也不应被选中
           if (isInclude && !element.lock && !hiddenElementIdList.includes(element.id))
             inRangeElementList.push(element);
         }
 
-        // If grouped elements are in range, all members of the group must be in range to be selected
+        // 如果组合元素在范围内，该组合的所有成员都必须在范围内才能被选中
         inRangeElementList = inRangeElementList.filter((inRangeElement) => {
           if (inRangeElement.groupId) {
             const inRangeElementIdList = inRangeElementList.map(
@@ -180,7 +180,7 @@ export function useMouseSelection(
       document.onmousemove = handleMouseMove;
       document.onmouseup = handleMouseUp;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally excludes mouseSelection state to avoid infinite re-creation
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 故意排除 mouseSelection 状态以避免无限重建
     [
       viewportRef,
       canvasScale,

@@ -1,11 +1,11 @@
 /**
- * Web Search Provider Constants
+ * 网络搜索提供者常量
  */
 
 import type { WebSearchProviderId, WebSearchProviderConfig } from './types';
 
 /**
- * Web Search Provider Registry
+ * 网络搜索提供者注册表
  */
 export const WEB_SEARCH_PROVIDERS: Record<WebSearchProviderId, WebSearchProviderConfig> = {
   tavily: {
@@ -17,7 +17,7 @@ export const WEB_SEARCH_PROVIDERS: Record<WebSearchProviderId, WebSearchProvider
 };
 
 /**
- * Get all available web search providers
+ * 获取所有可用的网络搜索提供者
  */
 export function getAllWebSearchProviders(): WebSearchProviderConfig[] {
   return Object.values(WEB_SEARCH_PROVIDERS);

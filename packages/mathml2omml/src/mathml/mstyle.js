@@ -1,4 +1,4 @@
 export function mstyle(element, targetParent, previousSibling, nextSibling, ancestors) {
-  // Ignore as default behavior
+  // 默认行为：忽略
   return targetParent
 }

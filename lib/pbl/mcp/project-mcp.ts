@@ -1,8 +1,8 @@
 /**
- * Project MCP - Manages project info (title + description) during PBL generation.
+ * Project MCP - 管理 PBL 生成过程中的项目信息（标题 + 描述）。
  *
- * Migrated from PBL-Nano. No HTML rendering, no list_tools().
- * Operates directly on a shared PBLProjectConfig.
+ * 从 PBL-Nano 迁移而来。无 HTML 渲染，无 list_tools()。
+ * 直接操作共享的 PBLProjectConfig。
  */
 
 import type { PBLProjectConfig, PBLToolResult } from '../types';

@@ -22,7 +22,7 @@ const sessionBadgeStyles = {
   lecture: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
 };
 
-// Labels are provided via i18n in the component
+// 标签通过组件中的 i18n 提供
 
 function getStatusIcon(status: SessionStatus) {
   switch (status) {
@@ -69,7 +69,7 @@ export function SessionList({
                 : 'border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-800/50',
             )}
           >
-            {/* Session Header */}
+            {/* 会话头部 */}
             <button
               onClick={() => onToggleExpand(session.id)}
               className="w-full flex items-center gap-1.5 px-3 py-2 text-left hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors"
@@ -110,7 +110,7 @@ export function SessionList({
               />
             </button>
 
-            {/* Messages */}
+            {/* 消息 */}
             <AnimatePresence initial={false}>
               {isExpanded && (
                 <motion.div

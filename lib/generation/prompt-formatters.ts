@@ -1,24 +1,24 @@
 /**
- * Prompt and context building utilities for the generation pipeline.
+ * 生成流水线的 Prompt 和上下文构建工具。
  */
 
 import type { PdfImage } from '@/lib/types/generation';
 import type { AgentInfo, SceneGenerationContext } from './pipeline-types';
 
-/** Build a course context string for injection into action prompts */
+/** 构建课程上下文字符串，用于注入到动作提示词中 */
 export function buildCourseContext(ctx?: SceneGenerationContext): string {
   if (!ctx) return '';
 
   const lines: string[] = [];
 
-  // Course outline with position marker
+  // 带位置标记的课程大纲
   lines.push('Course Outline:');
   ctx.allTitles.forEach((t, i) => {
     const marker = i === ctx.pageIndex - 1 ? ' ← current' : '';
     lines.push(`  ${i + 1}. ${t}${marker}`);
   });
 
-  // Position information
+  // 位置信息
   lines.push('');
   lines.push(
     'IMPORTANT: All pages belong to the SAME class session. Do NOT greet again after the first page. When referencing content from earlier pages, say "we just covered" or "as mentioned on page N" — NEVER say "last class" or "previous session" because there is no previous session.',
@@ -38,7 +38,7 @@ export function buildCourseContext(ctx?: SceneGenerationContext): string {
     );
   }
 
-  // Previous page speech for transition reference
+  // 上一页语音，用于过渡参考
   if (ctx.previousSpeeches.length > 0) {
     lines.push('');
     lines.push('Previous page speech (for transition reference):');
@@ -49,7 +49,7 @@ export function buildCourseContext(ctx?: SceneGenerationContext): string {
   return lines.join('\n');
 }
 
-/** Format agent list for injection into action prompts */
+/** 格式化智能体列表，用于注入到动作提示词中 */
 export function formatAgentsForPrompt(agents?: AgentInfo[]): string {
   if (!agents || agents.length === 0) return '';
 
@@ -61,7 +61,7 @@ export function formatAgentsForPrompt(agents?: AgentInfo[]): string {
   return lines.join('\n');
 }
 
-/** Extract the teacher agent's persona for injection into outline/content prompts */
+/** 提取教师智能体的个性描述，用于注入到大纲/内容提示词中 */
 export function formatTeacherPersonaForPrompt(agents?: AgentInfo[]): string {
   if (!agents || agents.length === 0) return '';
 
@@ -72,8 +72,8 @@ export function formatTeacherPersonaForPrompt(agents?: AgentInfo[]): string {
 }
 
 /**
- * Format a single PdfImage description for prompt inclusion.
- * Includes dimension/aspect-ratio info when available.
+ * 格式化单个 PdfImage 描述，用于包含在提示词中。
+ * 当可用时包含尺寸/宽高比信息。
  */
 export function formatImageDescription(img: PdfImage, language: string): string {
   let dimInfo = '';
@@ -88,8 +88,8 @@ export function formatImageDescription(img: PdfImage, language: string): string 
 }
 
 /**
- * Format a short image placeholder for vision mode.
- * Only ID + page + dimensions + aspect ratio (no description), since the model can see the actual image.
+ * 格式化简短的图片占位符，用于视觉模式。
+ * 仅包含 ID + 页码 + 尺寸 + 宽高比（无描述），因为模型可以看到实际图片。
  */
 export function formatImagePlaceholder(img: PdfImage, language: string): string {
   let dimInfo = '';
@@ -103,10 +103,9 @@ export function formatImagePlaceholder(img: PdfImage, language: string): string 
 }
 
 /**
- * Build a multimodal user content array for the AI SDK.
- * Interleaves text and images so the model can associate img_id with actual image.
- * Each image label includes dimensions when available so the model knows the size
- * before seeing the image (important for layout decisions).
+ * 构建 AI SDK 的多模态用户内容数组。
+ * 将文本和图片交错排列，以便模型能将 img_id 与实际图片关联。
+ * 每个图片标签包含可用时的尺寸信息，以便模型在看到图片前就知道大小（对布局决策很重要）。
  */
 export function buildVisionUserContent(
   userPrompt: string,
@@ -124,7 +123,7 @@ export function buildVisionUserContent(
         dimInfo = ` (${img.width}×${img.height}, 宽高比${ratio})`;
       }
       parts.push({ type: 'text', text: `\n**${img.id}**${dimInfo}:` });
-      // Strip data URI prefix — AI SDK only accepts http(s) URLs or raw base64
+      // 去除 data URI 前缀 — AI SDK 只接受 http(s) URL 或原始 base64
       const dataUriMatch = img.src.match(/^data:([^;]+);base64,(.+)$/);
       if (dataUriMatch) {
         parts.push({

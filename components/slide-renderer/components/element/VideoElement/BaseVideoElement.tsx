@@ -19,9 +19,9 @@ export interface BaseVideoElementProps {
 }
 
 /**
- * Base video element component for read-only/presentation display.
- * Controlled exclusively by the canvas store via the play_video action.
- * Videos never autoplay — they wait for an explicit play_video action.
+ * 基础视频元素组件（只读/演示显示）
+ * 完全由 canvas store 通过 play_video 动作控制
+ * 视频从不自动播放 — 它们等待显式的 play_video 动作
  */
 export function BaseVideoElement({ elementInfo }: BaseVideoElementProps) {
   const { t } = useI18n();
@@ -30,7 +30,7 @@ export function BaseVideoElement({ elementInfo }: BaseVideoElementProps) {
   const prevPlayingRef = useRef('');
   const [scope, animate] = useAnimate<HTMLDivElement>();
 
-  // Only subscribe to media store when inside a classroom (stageId provided via context).
+  // 仅在课堂内部订阅媒体 store（通过 context 提供 stageId）
   const stageId = useMediaStageId();
   const isPlaceholder = !!stageId && isMediaPlaceholder(elementInfo.src);
   const task = useMediaGenerationStore((s) => {
@@ -49,7 +49,7 @@ export function BaseVideoElement({ elementInfo }: BaseVideoElementProps) {
   const showError = isPlaceholder && task?.status === 'failed';
   const isReady = !isPlaceholder || task?.status === 'done';
 
-  // Ensure video is paused on mount — prevents browser autoplay from user gesture context
+  // 确保视频在挂载时暂停 — 防止浏览器从用户手势上下文自动播放
   useEffect(() => {
     const video = videoRef.current;
     if (video) {
@@ -66,7 +66,7 @@ export function BaseVideoElement({ elementInfo }: BaseVideoElementProps) {
     prevPlayingRef.current = playingVideoElementId;
 
     if (isMe && !wasMe) {
-      // "Tap" press animation — a deliberate, teacher-paced click feel
+      // "点击"按下动画 — 营造教师主导的刻意点击感
       animate(
         scope.current,
         { scale: [1, 1.035, 1] },

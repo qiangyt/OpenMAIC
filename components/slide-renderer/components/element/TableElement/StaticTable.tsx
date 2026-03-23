@@ -10,8 +10,8 @@ interface StaticTableProps {
 }
 
 /**
- * Static table rendering component, ported from PPTist StaticTable.vue.
- * Renders table data with theme colors, outline borders, and merged cells.
+ * 静态表格渲染组件，移植自 PPTist StaticTable.vue
+ * 渲染带有主题颜色、边框和合并单元格的表格数据
  */
 export function StaticTable({ elementInfo }: StaticTableProps) {
   const { width, data, colWidths, cellMinHeight, outline, theme } = elementInfo;
@@ -32,7 +32,7 @@ export function StaticTable({ elementInfo }: StaticTableProps) {
   }, [outline]);
 
   /**
-   * Get background color for a cell based on theme and position
+   * 根据主题和位置获取单元格背景色
    */
   const getCellBg = (
     rowIdx: number,
@@ -45,16 +45,16 @@ export function StaticTable({ elementInfo }: StaticTableProps) {
     const rowCount = data.length;
     const colCount = data[0]?.length ?? 0;
 
-    // Row header (first row) gets theme color
+    // 行标题（第一行）使用主题色
     if (theme.rowHeader && rowIdx === 0) return theme.color;
-    // Row footer (last row) gets theme color
+    // 行页脚（最后一行）使用主题色
     if (theme.rowFooter && rowIdx === rowCount - 1) return theme.color;
-    // Col header (first col) gets dark sub-theme
+    // 列标题（第一列）使用深色子主题
     if (theme.colHeader && colIdx === 0) return subThemeDark;
-    // Col footer (last col) gets dark sub-theme
+    // 列页脚（最后一列）使用深色子主题
     if (theme.colFooter && colIdx === colCount - 1) return subThemeDark;
 
-    // Alternating row colors (skip header row for counting)
+    // 交替行颜色（计数时跳过标题行）
     const effectiveRow = theme.rowHeader ? rowIdx - 1 : rowIdx;
     if (effectiveRow >= 0 && effectiveRow % 2 === 0) return subThemeLight;
 
@@ -62,7 +62,7 @@ export function StaticTable({ elementInfo }: StaticTableProps) {
   };
 
   /**
-   * Get text color for header/footer rows (white text on dark bg)
+   * 获取标题/页脚行的文字颜色（深色背景上使用白色文字）
    */
   const getHeaderTextColor = (rowIdx: number): string | undefined => {
     if (!theme) return undefined;
@@ -95,7 +95,7 @@ export function StaticTable({ elementInfo }: StaticTableProps) {
               const headerColor = getHeaderTextColor(rowIdx);
               const textStyle = getTextStyle(cell.style);
 
-              // Header text color should be overridden only if cell doesn't have its own color
+              // 只有当单元格没有自己的颜色时，才覆盖标题文字颜色
               if (headerColor && !cell.style?.color) {
                 textStyle.color = headerColor;
               }

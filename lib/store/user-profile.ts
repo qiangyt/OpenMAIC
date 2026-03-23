@@ -1,12 +1,12 @@
 /**
- * User Profile Store
- * Persists avatar, nickname & bio to localStorage
+ * 用户资料 Store
+ * 将头像、昵称和简介持久化到 localStorage
  */
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-/** Predefined avatar options */
+/** 预定义的头像选项 */
 export const AVATAR_OPTIONS = [
   '/avatars/user.png',
   '/avatars/teacher-2.png',
@@ -18,7 +18,7 @@ export const AVATAR_OPTIONS = [
 ] as const;
 
 export interface UserProfileState {
-  /** Local avatar path or data-URL (for custom uploads) */
+  /** 本地头像路径或 data-URL（用于自定义上传） */
   avatar: string;
   nickname: string;
   bio: string;

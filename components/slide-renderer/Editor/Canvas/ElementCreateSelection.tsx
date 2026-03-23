@@ -23,8 +23,8 @@ export function ElementCreateSelection({ onCreated }: ElementCreateSelectionProp
     setOffset({ x, y });
   }, []);
 
-  // Mouse drag to create element: determine position and size
-  // Get the start and end positions of the selection range
+  // 鼠标拖拽创建元素：确定位置和尺寸
+  // 获取选区范围的起始和结束位置
   const createSelection = (e: React.MouseEvent) => {
     let isMouseDown = true;
 
@@ -38,18 +38,18 @@ export function ElementCreateSelection({ onCreated }: ElementCreateSelectionProp
       let currentPageX = e.pageX;
       let currentPageY = e.pageY;
 
-      // When Ctrl or Shift is held:
-      // For non-line elements, lock aspect ratio; for line elements, lock to horizontal or vertical direction
+      // 当按住 Ctrl 或 Shift 时：
+      // 非线条元素锁定宽高比；线条元素锁定为水平或垂直方向
       if (ctrlOrShiftKeyActive) {
         const moveX = currentPageX - startPageX;
         const moveY = currentPageY - startPageY;
 
-        // Horizontal and vertical drag distances; use the larger one as the base for computing the other
+        // 水平和垂直拖拽距离；使用较大值作为基准来计算另一个
         const absX = Math.abs(moveX);
         const absY = Math.abs(moveY);
 
         if (creatingElement.type === 'shape') {
-          // Check if dragging in reverse direction: top-left to bottom-right is forward, everything else is reverse
+          // 检查是否反向拖拽：左上到右下为正向，其他为反向
           const isOpposite = (moveY > 0 && moveX < 0) || (moveY < 0 && moveX > 0);
 
           if (absX > absY) {
@@ -118,7 +118,7 @@ export function ElementCreateSelection({ onCreated }: ElementCreateSelectionProp
     document.addEventListener('mouseup', handleMouseUp);
   };
 
-  // Line drawing path data (only used when creating element type is line)
+  // 线条绘制路径数据（仅在创建元素类型为线条时使用）
   const lineData = useMemo(() => {
     if (!start || !end) return null;
     if (!creatingElement || creatingElement.type !== 'line') return null;
@@ -147,7 +147,7 @@ export function ElementCreateSelection({ onCreated }: ElementCreateSelectionProp
     };
   }, [start, end, creatingElement]);
 
-  // Calculate element position and size from the selection start and end positions
+  // 根据选区起始和结束位置计算元素位置和尺寸
   const position = useMemo(() => {
     if (!start || !end) return {};
 
@@ -187,7 +187,7 @@ export function ElementCreateSelection({ onCreated }: ElementCreateSelectionProp
           className={`selection absolute opacity-80 ${creatingElement?.type !== 'line' ? 'border border-primary' : ''}`}
           style={position}
         >
-          {/* Line drawing area */}
+          {/* 线条绘制区域 */}
           {creatingElement?.type === 'line' && lineData && (
             <svg className="overflow-visible" width={lineData.svgWidth} height={lineData.svgHeight}>
               <path d={lineData.path} stroke="#d14424" fill="none" strokeWidth="2" />

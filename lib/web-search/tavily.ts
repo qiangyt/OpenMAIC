@@ -1,8 +1,8 @@
 /**
- * Tavily Web Search Integration
+ * Tavily 网络搜索集成
  *
- * Uses raw REST API via proxyFetch for reliable proxy support.
- * Tavily search endpoint: POST https://api.tavily.com/search
+ * 通过 proxyFetch 使用原生 REST API 以支持可靠的代理。
+ * Tavily 搜索端点：POST https://api.tavily.com/search
  */
 
 import { proxyFetch } from '@/lib/server/proxy-fetch';
@@ -11,7 +11,7 @@ import type { WebSearchResult, WebSearchSource } from '@/lib/types/web-search';
 const TAVILY_API_URL = 'https://api.tavily.com/search';
 
 /**
- * Search the web using Tavily REST API and return structured results.
+ * 使用 Tavily REST API 进行网络搜索并返回结构化结果。
  */
 export async function searchWithTavily(params: {
   query: string;
@@ -67,7 +67,7 @@ export async function searchWithTavily(params: {
 }
 
 /**
- * Format search results into a markdown context block for LLM prompts.
+ * 将搜索结果格式化为 LLM 提示词的 markdown 上下文块。
  */
 export function formatSearchResultsAsContext(result: WebSearchResult): string {
   if (!result.answer && result.sources.length === 0) {

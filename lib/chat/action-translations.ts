@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { createElement } from 'react';
 
 /**
- * Map SSE status strings to i18n keys under `actions.status.*`
+ * 将 SSE 状态字符串映射到 `actions.status.*` 下的 i18n 键
  */
 const statusKeyMap: Record<string, string> = {
   'input-streaming': 'inputStreaming',
@@ -18,17 +18,17 @@ const statusKeyMap: Record<string, string> = {
 };
 
 /**
- * Resolve an action name to its i18n display name.
- * Falls back to the raw actionName if no translation exists.
+ * 将动作名称解析为其 i18n 显示名称。
+ * 如果没有翻译则回退到原始 actionName。
  */
 export function getActionDisplayName(t: (key: string) => string, actionName: string): string {
   const translated = t(`actions.names.${actionName}`);
-  // t() returns the key itself when translation is missing
+  // t() 在缺少翻译时返回键本身
   return translated === `actions.names.${actionName}` ? actionName : translated;
 }
 
 /**
- * Get a localized status badge for action state.
+ * 获取动作状态的本地化状态徽章。
  */
 export function getStatusBadge(t: (key: string) => string, state: string): ReactNode {
   const iconMap: Record<string, ReactNode> = {
@@ -67,7 +67,7 @@ export function getStatusBadge(t: (key: string) => string, state: string): React
 }
 
 /**
- * Extract text parts from a message
+ * 从消息中提取文本部分
  */
 export function getMessageTextParts(message: {
   parts?: Array<{ type: string; text?: string; [key: string]: unknown }>;
@@ -79,7 +79,7 @@ export function getMessageTextParts(message: {
 }
 
 /**
- * Extract action parts from a message
+ * 从消息中提取动作部分
  */
 export function getMessageActionParts(message: {
   parts?: Array<{ type: string; [key: string]: unknown }>;

@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import type { TableCell, TableCellStyle } from '@/lib/types/slides';
 
 /**
- * Convert TableCellStyle to CSS properties
+ * 将 TableCellStyle 转换为 CSS 属性
  */
 export function getTextStyle(style?: TableCellStyle): CSSProperties {
   if (!style) return {};
@@ -25,15 +25,15 @@ export function getTextStyle(style?: TableCellStyle): CSSProperties {
 }
 
 /**
- * Format text: convert \n to <br/> and spaces to &nbsp;
+ * 格式化文本：将 \n 转换为 <br/>，将空格转换为 &nbsp;
  */
 export function formatText(text: string): string {
   return text.replace(/\n/g, '<br/>').replace(/ /g, '&nbsp;');
 }
 
 /**
- * Compute hidden cell positions based on colspan/rowspan merges.
- * Returns a Set of "row_col" keys for cells that should be hidden.
+ * 根据 colspan/rowspan 合并计算隐藏单元格位置。
+ * 返回应隐藏单元格的 "row_col" 键集合。
  */
 export function getHiddenCells(data: TableCell[][]): Set<string> {
   const hidden = new Set<string>();
@@ -41,7 +41,7 @@ export function getHiddenCells(data: TableCell[][]): Set<string> {
   for (let rowIdx = 0; rowIdx < data.length; rowIdx++) {
     let realColIdx = 0;
     for (let colIdx = 0; colIdx < data[rowIdx].length; colIdx++) {
-      // Skip positions already occupied by a previous merge
+      // 跳过已被之前合并占据的位置
       while (hidden.has(`${rowIdx}_${realColIdx}`)) {
         realColIdx++;
       }

@@ -6,163 +6,163 @@ import type { TextFormatPainter, ShapeFormatPainter, CreatingElement } from '@/l
 import type { PercentageGeometry } from '@/lib/types/action';
 
 /**
- * Spotlight options
+ * 聚光灯选项
  */
 export interface SpotlightOptions {
-  radius?: number; // Spotlight radius (pixels)
-  dimness?: number; // Background dimming level (0-1)
-  transition?: number; // Transition animation duration (milliseconds)
+  radius?: number; // 聚光灯半径（像素）
+  dimness?: number; // 背景变暗级别（0-1）
+  transition?: number; // 过渡动画持续时间（毫秒）
 }
 
 /**
- * Highlight overlay options
+ * 高亮覆盖层选项
  */
 export interface HighlightOverlayOptions {
-  color?: string; // Highlight color
-  opacity?: number; // Highlight opacity (0-1)
-  borderWidth?: number; // Border width
-  animated?: boolean; // Whether to animate
+  color?: string; // 高亮颜色
+  opacity?: number; // 高亮不透明度（0-1）
+  borderWidth?: number; // 边框宽度
+  animated?: boolean; // 是否动画
 }
 
 /**
- * Laser pointer options
+ * 激光笔选项
  */
 export interface LaserOptions {
-  color?: string; // Laser pointer color, default red
-  duration?: number; // Duration (milliseconds)
+  color?: string; // 激光笔颜色，默认红色
+  duration?: number; // 持续时间（毫秒）
 }
 
 /**
- * Canvas Store - Manages all UI state of the Canvas editor
+ * 画布 Store - 管理画布编辑器的所有 UI 状态
  *
- * Responsibilities:
- * - Element selection state (selected, handling, editing)
- * - Canvas viewport state (zoom, drag, ruler, grid)
- * - Toolbar and panel state
- * - Element being created
- * - Rich text editing state
- * - Format painter state
+ * 职责：
+ * - 元素选择状态（选中、操作、编辑）
+ * - 画布视口状态（缩放、拖拽、标尺、网格）
+ * - 工具栏和面板状态
+ * - 正在创建的元素
+ * - 富文本编辑状态
+ * - 格式刷状态
  *
- * Note: Does not manage slide data (elements, background, etc.), which is managed by Scene Context
+ * 注意：不管理幻灯片数据（元素、背景等），这些由场景上下文管理
  */
 
-// ==================== Store Interface ====================
+// ==================== Store 接口 ====================
 
 interface CanvasState {
-  // ===== Element selection state =====
-  activeElementIdList: string[]; // Currently selected element IDs
-  handleElementId: string; // Element being operated (drag, resize, etc.)
-  activeGroupElementId: string; // Selected child element within a group
-  editingElementId: string; // Element being edited (e.g., text editing)
-  hiddenElementIdList: string[]; // Hidden element IDs
+  // ===== 元素选择状态 =====
+  activeElementIdList: string[]; // 当前选中的元素 ID
+  handleElementId: string; // 正在操作的元素（拖拽、缩放等）
+  activeGroupElementId: string; // 组内选中的子元素
+  editingElementId: string; // 正在编辑的元素（如文本编辑）
+  hiddenElementIdList: string[]; // 隐藏的元素 ID
 
-  // ===== Teaching feature state =====
-  spotlightElementId: string; // Element focused by spotlight
-  spotlightOptions: SpotlightOptions | null; // Spotlight configuration
-  spotlightMode: 'pixel' | 'percentage'; // Spotlight mode: pixel or percentage
-  spotlightPercentageGeometry: PercentageGeometry | null; // Percentage mode geometry info
-  highlightedElementIds: string[]; // Highlighted element IDs
-  highlightOptions: HighlightOverlayOptions | null; // Highlight configuration
-  laserElementId: string; // Element focused by laser pointer
-  laserOptions: LaserOptions | null; // Laser pointer configuration
-  zoomTarget: { elementId: string; scale: number } | null; // Zoom target
+  // ===== 教学功能状态 =====
+  spotlightElementId: string; // 聚光灯聚焦的元素
+  spotlightOptions: SpotlightOptions | null; // 聚光灯配置
+  spotlightMode: 'pixel' | 'percentage'; // 聚光灯模式：像素或百分比
+  spotlightPercentageGeometry: PercentageGeometry | null; // 百分比模式的几何信息
+  highlightedElementIds: string[]; // 高亮的元素 ID
+  highlightOptions: HighlightOverlayOptions | null; // 高亮配置
+  laserElementId: string; // 激光笔指向的元素
+  laserOptions: LaserOptions | null; // 激光笔配置
+  zoomTarget: { elementId: string; scale: number } | null; // 缩放目标
 
-  // ===== Canvas viewport state =====
-  canvasScale: number; // Canvas actual zoom scale
-  canvasPercentage: number; // Canvas percentage (used to calculate canvasScale)
-  viewportSize: number; // Viewport width base (default 1000px)
-  viewportRatio: number; // Viewport aspect ratio (default 0.5625, i.e. 16:9)
-  canvasDragged: boolean; // Whether canvas is being dragged
+  // ===== 画布视口状态 =====
+  canvasScale: number; // 画布实际缩放比例
+  canvasPercentage: number; // 画布百分比（用于计算 canvasScale）
+  viewportSize: number; // 视口宽度基准（默认 1000px）
+  viewportRatio: number; // 视口宽高比（默认 0.5625，即 16:9）
+  canvasDragged: boolean; // 画布是否正在被拖拽
 
-  // ===== Display aids =====
-  showRuler: boolean; // Show ruler
-  gridLineSize: number; // Grid line size (0 means hidden)
+  // ===== 显示辅助 =====
+  showRuler: boolean; // 显示标尺
+  gridLineSize: number; // 网格线大小（0 表示隐藏）
 
-  // ===== Toolbar and panels =====
-  toolbarState: 'design' | 'ai' | 'elAnimation'; // Right toolbar state
-  showSelectPanel: boolean; // Selection panel
-  showSearchPanel: boolean; // Find and replace panel
+  // ===== 工具栏和面板 =====
+  toolbarState: 'design' | 'ai' | 'elAnimation'; // 右侧工具栏状态
+  showSelectPanel: boolean; // 选择面板
+  showSearchPanel: boolean; // 查找替换面板
 
-  // ===== Element creation =====
-  creatingElement: CreatingElement | null; // Element being created (needs draw-to-insert)
-  creatingCustomShape: boolean; // Drawing custom shape (arbitrary polygon)
+  // ===== 元素创建 =====
+  creatingElement: CreatingElement | null; // 正在创建的元素（需要绘制后插入）
+  creatingCustomShape: boolean; // 绘制自定义形状（任意多边形）
 
-  // ===== Editing state =====
-  isScaling: boolean; // Element scaling in progress
-  clipingImageElementId: string; // Image being cropped
-  richTextAttrs: TextAttrs; // Rich text editing state
+  // ===== 编辑状态 =====
+  isScaling: boolean; // 元素缩放进行中
+  clipingImageElementId: string; // 正在裁剪的图片
+  richTextAttrs: TextAttrs; // 富文本编辑状态
 
-  // ===== Format painter =====
-  textFormatPainter: TextFormatPainter | null; // Text format painter
-  shapeFormatPainter: ShapeFormatPainter | null; // Shape format painter
+  // ===== 格式刷 =====
+  textFormatPainter: TextFormatPainter | null; // 文本格式刷
+  shapeFormatPainter: ShapeFormatPainter | null; // 形状格式刷
 
-  // ===== Video playback =====
-  playingVideoElementId: string; // Video element currently playing
+  // ===== 视频播放 =====
+  playingVideoElementId: string; // 当前正在播放的视频元素
 
-  // ===== Whiteboard =====
-  whiteboardOpen: boolean; // Whether whiteboard is open
-  whiteboardClearing: boolean; // Whiteboard clear animation in progress
+  // ===== 白板 =====
+  whiteboardOpen: boolean; // 白板是否打开
+  whiteboardClearing: boolean; // 白板清除动画进行中
 
-  // ===== Other =====
-  thumbnailsFocus: boolean; // Whether left thumbnail area is focused
-  editorAreaFocus: boolean; // Whether editor area is focused
-  disableHotkeys: boolean; // Whether hotkeys are disabled
-  selectedTableCells: string[]; // Selected table cells
+  // ===== 其他 =====
+  thumbnailsFocus: boolean; // 左侧缩略图区域是否聚焦
+  editorAreaFocus: boolean; // 编辑区域是否聚焦
+  disableHotkeys: boolean; // 是否禁用快捷键
+  selectedTableCells: string[]; // 选中的表格单元格
 
-  // ===== Actions =====
+  // ===== 操作 =====
 
-  // ----- Element selection -----
+  // ----- 元素选择 -----
   setActiveElementIdList: (ids: string[]) => void;
   setHandleElementId: (id: string) => void;
   setActiveGroupElementId: (id: string) => void;
   setEditingElementId: (id: string) => void;
   setHiddenElementIdList: (ids: string[]) => void;
-  clearSelection: () => void; // Clear all selections
+  clearSelection: () => void; // 清除所有选择
 
-  // ----- Canvas viewport -----
+  // ----- 画布视口 -----
   setCanvasScale: (scale: number) => void;
   setCanvasPercentage: (percentage: number) => void;
   setViewportSize: (size: number) => void;
   setViewportRatio: (ratio: number) => void;
   setCanvasDragged: (dragged: boolean) => void;
 
-  // ----- Display aids -----
+  // ----- 显示辅助 -----
   setRulerState: (show: boolean) => void;
   setGridLineSize: (size: number) => void;
 
-  // ----- Toolbar and panels -----
+  // ----- 工具栏和面板 -----
   setToolbarState: (state: 'design' | 'ai') => void;
   setSelectPanelState: (show: boolean) => void;
   setSearchPanelState: (show: boolean) => void;
 
-  // ----- Element creation -----
+  // ----- 元素创建 -----
   setCreatingElement: (element: CreatingElement | null) => void;
   setCreatingCustomShapeState: (creating: boolean) => void;
 
-  // ----- Editing state -----
+  // ----- 编辑状态 -----
   setScalingState: (isScaling: boolean) => void;
   setClipingImageElementId: (id: string) => void;
   setRichtextAttrs: (attrs: TextAttrs) => void;
 
-  // ----- Format painter -----
+  // ----- 格式刷 -----
   setTextFormatPainter: (painter: TextFormatPainter | null) => void;
   setShapeFormatPainter: (painter: ShapeFormatPainter | null) => void;
 
-  // ----- Video playback -----
+  // ----- 视频播放 -----
   playVideo: (elementId: string) => void;
   pauseVideo: () => void;
 
-  // ----- Whiteboard -----
+  // ----- 白板 -----
   setWhiteboardOpen: (open: boolean) => void;
   setWhiteboardClearing: (clearing: boolean) => void;
 
-  // ----- Other -----
+  // ----- 其他 -----
   setThumbnailsFocus: (focus: boolean) => void;
   setEditorAreaFocus: (focus: boolean) => void;
   setDisableHotkeysState: (disable: boolean) => void;
   setSelectedTableCells: (cells: string[]) => void;
 
-  // ----- Teaching features -----
+  // ----- 教学功能 -----
   setSpotlight: (elementId: string, options?: SpotlightOptions) => void;
   clearSpotlight: () => void;
   setSpotlightPercentage: (
@@ -178,11 +178,11 @@ interface CanvasState {
   clearZoom: () => void;
   clearAllEffects: () => void;
 
-  // ----- Batch operations -----
-  resetCanvasState: () => void; // Reset Canvas state (used when switching scenes)
+  // ----- 批量操作 -----
+  resetCanvasState: () => void; // 重置画布状态（用于切换场景时）
 }
 
-// ==================== Initial State ====================
+// ==================== 初始状态 ====================
 
 const initialState = {
   // Element selection
@@ -246,22 +246,22 @@ const initialState = {
   zoomTarget: null,
 };
 
-// ==================== Store Implementation ====================
+// ==================== Store 实现 ====================
 
 const useCanvasStoreBase = create<CanvasState>((set, get) => ({
   ...initialState,
 
-  // ===== Element Selection Actions =====
+  // ===== 元素选择操作 =====
 
   setActiveElementIdList: (ids) => {
     set({ activeElementIdList: ids });
-    // Auto-set handleElementId: set to that element for single select, empty for multi-select or none
+    // 自动设置 handleElementId：单选时设为该元素，多选或无选择时为空
     if (ids.length === 1) {
       set({ handleElementId: ids[0] });
     } else if (ids.length === 0) {
       set({ handleElementId: '' });
     }
-    // Auto-switch to design panel when elements are selected
+    // 选中元素时自动切换到设计面板
     if (ids.length > 0) {
       set({ toolbarState: 'design' });
     }
@@ -284,7 +284,7 @@ const useCanvasStoreBase = create<CanvasState>((set, get) => ({
     });
   },
 
-  // ===== Canvas Viewport Actions =====
+  // ===== 画布视口操作 =====
 
   setCanvasScale: (scale) => set({ canvasScale: scale }),
 
@@ -296,13 +296,13 @@ const useCanvasStoreBase = create<CanvasState>((set, get) => ({
 
   setCanvasDragged: (dragged) => set({ canvasDragged: dragged }),
 
-  // ===== Display Aids Actions =====
+  // ===== 显示辅助操作 =====
 
   setRulerState: (show) => set({ showRuler: show }),
 
   setGridLineSize: (size) => set({ gridLineSize: size }),
 
-  // ===== Toolbar and Panel Actions =====
+  // ===== 工具栏和面板操作 =====
 
   setToolbarState: (toolbarState) => set({ toolbarState }),
 
@@ -310,13 +310,13 @@ const useCanvasStoreBase = create<CanvasState>((set, get) => ({
 
   setSearchPanelState: (show) => set({ showSearchPanel: show }),
 
-  // ===== Element Creation Actions =====
+  // ===== 元素创建操作 =====
 
   setCreatingElement: (element) => set({ creatingElement: element }),
 
   setCreatingCustomShapeState: (creating) => set({ creatingCustomShape: creating }),
 
-  // ===== Editing State Actions =====
+  // ===== 编辑状态操作 =====
 
   setScalingState: (isScaling) => set({ isScaling }),
 
@@ -324,24 +324,24 @@ const useCanvasStoreBase = create<CanvasState>((set, get) => ({
 
   setRichtextAttrs: (attrs) => set({ richTextAttrs: attrs }),
 
-  // ===== Format Painter Actions =====
+  // ===== 格式刷操作 =====
 
   setTextFormatPainter: (painter) => set({ textFormatPainter: painter }),
 
   setShapeFormatPainter: (painter) => set({ shapeFormatPainter: painter }),
 
-  // ===== Video Playback Actions =====
+  // ===== 视频播放操作 =====
 
   playVideo: (elementId) => set({ playingVideoElementId: elementId }),
 
   pauseVideo: () => set({ playingVideoElementId: '' }),
 
-  // ===== Whiteboard Actions =====
+  // ===== 白板操作 =====
 
   setWhiteboardOpen: (open) => set({ whiteboardOpen: open }),
   setWhiteboardClearing: (clearing) => set({ whiteboardClearing: clearing }),
 
-  // ===== Other Actions =====
+  // ===== 其他操作 =====
 
   setThumbnailsFocus: (focus) => set({ thumbnailsFocus: focus }),
 
@@ -351,7 +351,7 @@ const useCanvasStoreBase = create<CanvasState>((set, get) => ({
 
   setSelectedTableCells: (cells) => set({ selectedTableCells: cells }),
 
-  // ===== Teaching Feature Actions =====
+  // ===== 教学功能操作 =====
 
   setSpotlight: (elementId, options = {}) => {
     set({
@@ -450,23 +450,23 @@ const useCanvasStoreBase = create<CanvasState>((set, get) => ({
       laserElementId: '',
       laserOptions: null,
       zoomTarget: null,
-      // Note: playingVideoElementId intentionally NOT cleared here.
-      // Video playback has its own lifecycle (playVideo/pauseVideo/onEnded)
-      // and must not be interrupted by visual effect auto-clear timers.
+      // 注意：playingVideoElementId 故意不在此时清除。
+      // 视频播放有自己的生命周期（playVideo/pauseVideo/onEnded）
+      // 不能被视觉效果自动清除计时器中断。
     });
   },
 
-  // ===== Batch Operations =====
+  // ===== 批量操作 =====
 
   resetCanvasState: () => {
     set({
       ...initialState,
-      // Preserve viewport settings
+      // 保留视口设置
       viewportSize: get().viewportSize,
       viewportRatio: get().viewportRatio,
     });
   },
 }));
 
-// Enhance store with selectors, supporting store.use.xxx() syntax
+// 为 store 增加选择器，支持 store.use.xxx() 语法
 export const useCanvasStore = createSelectors(useCanvasStoreBase);

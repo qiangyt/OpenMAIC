@@ -1,12 +1,12 @@
 /**
- * Type definitions for the generation pipeline.
+ * 生成流水线的类型定义。
  */
 
 import type { GenerationProgress } from '@/lib/types/generation';
 
-// ==================== Agent Info ====================
+// ==================== 智能体信息 ====================
 
-/** Lightweight agent info passed to the generation pipeline */
+/** 传递给生成流水线的轻量级智能体信息 */
 export interface AgentInfo {
   id: string;
   name: string;
@@ -14,21 +14,21 @@ export interface AgentInfo {
   persona?: string;
 }
 
-// ==================== Cross-Page Context ====================
+// ==================== 跨页面上下文 ====================
 
-/** Cross-page context for maintaining speech coherence across scenes */
+/** 跨页面上下文，用于在场景间保持语音连贯性 */
 export interface SceneGenerationContext {
-  pageIndex: number; // Current page (1-based)
-  totalPages: number; // Total number of pages
-  allTitles: string[]; // All page titles in order
-  previousSpeeches: string[]; // Speech texts from the previous page only
+  pageIndex: number; // 当前页码（从1开始）
+  totalPages: number; // 总页数
+  allTitles: string[]; // 按顺序排列的所有页面标题
+  previousSpeeches: string[]; // 上一页的语音文本
 }
 
-// ==================== Generated Slide Data Interface ====================
+// ==================== 生成的幻灯片数据接口 ====================
 
 /**
- * AI-generated slide data structure
- * Used to parse AI responses
+ * AI 生成的幻灯片数据结构
+ * 用于解析 AI 响应
  */
 export interface GeneratedSlideData {
   elements: Array<{
@@ -51,7 +51,7 @@ export interface GeneratedSlideData {
   remark?: string;
 }
 
-// ==================== Types ====================
+// ==================== 类型 ====================
 
 export interface GenerationResult<T> {
   success: boolean;

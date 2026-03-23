@@ -1,5 +1,5 @@
 export const MIME_MAP: Record<string, string> = {
-  // Audio types
+  // 音频类型
   'audio/aac': 'aac',
   'audio/mpeg': 'mp3',
   'audio/ogg': 'oga',
@@ -11,7 +11,7 @@ export const MIME_MAP: Record<string, string> = {
   'audio/x-ms-wma': 'wma',
   'audio/midi': 'mid',
 
-  // Video types
+  // 视频类型
   'video/mp4': 'mp4',
   'video/mpeg': 'mpeg',
   'video/ogg': 'ogv',

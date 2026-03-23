@@ -19,7 +19,7 @@ import { useSettingsStore } from '@/lib/store/settings';
 import { getTTSVoices } from '@/lib/audio/constants';
 import { useTTSPreview } from '@/lib/audio/use-tts-preview';
 
-/** Extract the English name from voice name format "ChineseName (English)" */
+/** 从语音名称格式"中文名 (English)"中提取英文名 */
 function getVoiceDisplayName(name: string, lang: string): string {
   if (lang === 'en-US') {
     const match = name.match(/\(([^)]+)\)/);
@@ -120,7 +120,7 @@ export function TtsConfigPopover() {
         <TooltipContent>{t('toolbar.ttsHint')}</TooltipContent>
       </Tooltip>
       <PopoverContent align="start" className="w-[280px] p-0">
-        {/* Header with toggle */}
+        {/* 带开关的头部 */}
         <div className="flex items-center gap-2.5 px-3.5 py-3 border-b border-border/40">
           <Volume2
             className={cn(
@@ -140,10 +140,10 @@ export function TtsConfigPopover() {
           />
         </div>
 
-        {/* Config body */}
+        {/* 配置主体 */}
         {ttsEnabled && (
           <div className="px-3.5 py-3 space-y-3">
-            {/* Voice + Preview row */}
+            {/* 语音 + 预览行 */}
             <div className="flex items-center gap-2">
               <Select value={ttsVoice} onValueChange={setTTSVoice}>
                 <SelectTrigger className="h-7 text-xs flex-1 min-w-0">

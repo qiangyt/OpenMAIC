@@ -18,7 +18,7 @@ export interface ImageElementProps {
 }
 
 /**
- * Image element component with interaction support
+ * 图片元素组件（支持交互）
  */
 export function ImageElement({ elementInfo, selectElement }: ImageElementProps) {
   const clipingImageElementId = useCanvasStore.use.clipingImageElementId();

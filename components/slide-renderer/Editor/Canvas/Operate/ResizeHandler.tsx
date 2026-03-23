@@ -29,7 +29,7 @@ export function ResizeHandler({
     return prefix + '0';
   }, [rotate]);
 
-  // Map rotation and handler type to cursor style
+  // 将旋转和手柄类型映射到光标样式
   const cursorClass = useMemo(() => {
     const key = `${type}.${rotateClassName}`;
     const cursorMap: Record<string, string> = {

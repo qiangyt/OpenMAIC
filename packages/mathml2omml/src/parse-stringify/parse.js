@@ -7,7 +7,7 @@ const whitespaceRE = /^\s*$/
 
 const textContainerNames = ['mtext', 'mi', 'mn', 'mo', 'ms']
 
-// re-used obj for quick lookups of components
+// 用于快速查找组件的复用对象
 const empty = Object.create(null)
 
 export function parse(html, options = {}) {
@@ -26,7 +26,7 @@ export function parse(html, options = {}) {
     if (isComment) {
       const comment = parseTag(tag)
 
-      // if we're at root, push new base node
+      // 如果在根节点，推送新的基础节点
       if (level < 0) {
         result.push(comment)
         return result
@@ -57,7 +57,7 @@ export function parse(html, options = {}) {
         })
       }
 
-      // if we're at root, push new base node
+      // 如果在根节点，推送新的基础节点
       if (level === 0) {
         result.push(current)
       }
@@ -74,7 +74,7 @@ export function parse(html, options = {}) {
     if (!isOpen || current.voidElement) {
       if (level > -1 && (current.voidElement || current.name === tag.slice(2, -1))) {
         level--
-        // move current up a level to match the end tag
+        // 将 current 上移一级以匹配结束标签
         current = level === -1 ? result : arr[level]
       }
       if (
@@ -83,22 +83,20 @@ export function parse(html, options = {}) {
         nextChar !== '<' &&
         nextChar
       ) {
-        // trailing text node
+        // 尾部文本节点
         parent = arr[level].children
 
-        // calculate correct end of the content slice in case there's
-        // no tag after the text node.
+        // 计算内容切片的正确结束位置，以防文本节点后没有标签。
         const end = html.indexOf('<', start)
         let data = html.slice(start, end === -1 ? undefined : end)
-        // if a node is nothing but whitespace, collapse it as the spec states:
+        // 如果节点只有空白字符，按规范将其折叠：
         // https://www.w3.org/TR/html4/struct/text.html#h-9.1
         if (whitespaceRE.test(data)) {
           data = ' '
         }
-        // don't add whitespace-only text nodes if they would be trailing text nodes
-        // or if they would be leading whitespace-only text nodes:
-        //  * end > -1 indicates this is not a trailing text node
-        //  * leading node is when level is -1 and parent has length 0
+        // 如果空白文本节点是尾部文本节点或前导空白文本节点，则不要添加：
+        //  * end > -1 表示这不是尾部文本节点
+        //  * level 为 -1 且 parent 长度为 0 时为前导节点
         if ((end > -1 && level + parent.length >= 0) || data !== ' ') {
           parent.push({
             type: 'text',

@@ -2,7 +2,7 @@ import { walker } from '../walker.js'
 
 export function mfrac(element, targetParent, previousSibling, nextSibling, ancestors) {
   if (element.children.length !== 2) {
-    // treat as mrow
+    // 视为 mrow 处理
     return targetParent
   }
 
@@ -50,5 +50,5 @@ export function mfrac(element, targetParent, previousSibling, nextSibling, ances
       denumeratorTarget
     ]
   })
-  // Don't iterate over children in the usual way.
+  // 不要以常规方式遍历子元素。
 }

@@ -32,7 +32,7 @@ export function QuizRenderer({ content, mode, sceneId: _sceneId }: QuizRendererP
               {question.type === 'single' && question.options && (
                 <div className="space-y-2">
                   {question.options.map((option, optIndex) => {
-                    // Normalize: options may be QuizOption objects or plain strings from AI
+                    // 规范化：选项可能是 QuizOption 对象或 AI 返回的纯字符串
                     const optionValue = typeof option === 'string' ? option : option.value;
                     const optionLabel = typeof option === 'string' ? option : option.label;
                     const letterPrefix = String.fromCharCode(65 + optIndex); // A, B, C, D...

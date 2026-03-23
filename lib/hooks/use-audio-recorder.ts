@@ -3,7 +3,7 @@ import { createLogger } from '@/lib/logger';
 
 const log = createLogger('AudioRecorder');
 
-// TypeScript declarations for Web Speech API
+// Web Speech API 的 TypeScript 声明
 declare global {
   interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Web Speech API not typed in lib.dom
@@ -31,7 +31,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Web Speech API not typed
   const speechRecognitionRef = useRef<any>(null);
 
-  // Send audio to server for transcription
+  // 发送音频到服务器进行转录
   const transcribeAudio = useCallback(
     async (audioBlob: Blob) => {
       setIsProcessing(true);
@@ -40,8 +40,8 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
         const formData = new FormData();
         formData.append('audio', audioBlob, 'recording.webm');
 
-        // Get current ASR configuration from settings store
-        // Note: This requires importing useSettingsStore in browser context
+        // 从设置存储获取当前 ASR 配置
+        // 注意：这需要在浏览器上下文中导入 useSettingsStore
         if (typeof window !== 'undefined') {
           const { useSettingsStore } = await import('@/lib/store/settings');
           const { asrProviderId, asrLanguage, asrProvidersConfig } = useSettingsStore.getState();
@@ -49,7 +49,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
           formData.append('providerId', asrProviderId);
           formData.append('language', asrLanguage);
 
-          // Append API key and base URL if configured
+          // 如果已配置则添加 API 密钥和基础 URL
           const providerConfig = asrProvidersConfig?.[asrProviderId];
           if (providerConfig?.apiKey?.trim()) {
             formData.append('apiKey', providerConfig.apiKey);
@@ -82,17 +82,17 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
     [onTranscription, onError],
   );
 
-  // Start recording
+  // 开始录音
   const startRecording = useCallback(async () => {
     try {
-      // Get current ASR configuration
+      // 获取当前 ASR 配置
       if (typeof window !== 'undefined') {
         const { useSettingsStore } = await import('@/lib/store/settings');
         const { asrProviderId, asrLanguage } = useSettingsStore.getState();
 
-        // Use browser native ASR if configured
+        // 如果配置了浏览器原生 ASR 则使用
         if (asrProviderId === 'browser-native') {
-          // Check if Speech Recognition is supported
+          // 检查是否支持语音识别
           if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
             onError?.('您的浏览器不支持语音识别功能');
             return;
@@ -109,7 +109,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
             setIsRecording(true);
             setRecordingTime(0);
 
-            // Start timer
+            // 启动计时器
             timerRef.current = setInterval(() => {
               setRecordingTime((prev) => prev + 1);
             }, 1000);
@@ -169,11 +169,11 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
         }
       }
 
-      // Use MediaRecorder for server-side ASR
-      // Request microphone permission
+      // 使用 MediaRecorder 进行服务器端 ASR
+      // 请求麦克风权限
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      // Create MediaRecorder
+      // 创建 MediaRecorder
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'audio/webm',
       });
@@ -188,24 +188,24 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
       };
 
       mediaRecorder.onstop = async () => {
-        // Stop all audio tracks
+        // 停止所有音频轨道
         stream.getTracks().forEach((track) => track.stop());
 
-        // Merge audio chunks
+        // 合并音频块
         const audioBlob = new Blob(audioChunksRef.current, {
           type: 'audio/webm',
         });
 
-        // Send to server for transcription
+        // 发送到服务器进行转录
         await transcribeAudio(audioBlob);
       };
 
-      // Start recording
+      // 开始录音
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingTime(0);
 
-      // Start timer
+      // 启动计时器
       timerRef.current = setInterval(() => {
         setRecordingTime((prev) => prev + 1);
       }, 1000);
@@ -215,9 +215,9 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
     }
   }, [onTranscription, onError, transcribeAudio]);
 
-  // Stop recording
+  // 停止录音
   const stopRecording = useCallback(() => {
-    // Stop Speech Recognition if active
+    // 如果活动则停止语音识别
     if (speechRecognitionRef.current) {
       speechRecognitionRef.current.stop();
       speechRecognitionRef.current = null;
@@ -229,7 +229,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
       return;
     }
 
-    // Stop MediaRecorder if active
+    // 如果活动则停止 MediaRecorder
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
@@ -241,11 +241,11 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
     }
   }, [isRecording]);
 
-  // Cancel recording
+  // 取消录音
   const cancelRecording = useCallback(() => {
-    // Cancel Speech Recognition if active
+    // 如果活动则取消语音识别
     if (speechRecognitionRef.current) {
-      speechRecognitionRef.current.onresult = null; // Prevent transcription callback
+      speechRecognitionRef.current.onresult = null; // 阻止转录回调
       speechRecognitionRef.current.stop();
       speechRecognitionRef.current = null;
       setIsRecording(false);
@@ -257,14 +257,14 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
       return;
     }
 
-    // Cancel MediaRecorder if active
+    // 如果活动则取消 MediaRecorder
     if (mediaRecorderRef.current && isRecording) {
-      // Stop recording without transcription
+      // 停止录音但不转录
       mediaRecorderRef.current.ondataavailable = null;
       mediaRecorderRef.current.onstop = null;
       mediaRecorderRef.current.stop();
 
-      // Stop all audio tracks
+      // 停止所有音频轨道
       if (mediaRecorderRef.current.stream) {
         mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop());
       }

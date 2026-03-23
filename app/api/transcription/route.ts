@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Audio file is required');
     }
 
-    // providerId is required from the client — no server-side store to fall back to
+    // providerId 必须由客户端提供 — 没有服务器端存储可以回退
     const effectiveProviderId = providerId || ('openai-whisper' as ASRProviderId);
 
     const clientBaseUrl = baseUrl || undefined;
@@ -44,11 +44,11 @@ export async function POST(req: NextRequest) {
         : resolveASRBaseUrl(effectiveProviderId, baseUrl || undefined),
     };
 
-    // Convert audio file to buffer
+    // 将音频文件转换为 buffer
     const arrayBuffer = await audioFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Transcribe using the provider system
+    // 使用提供商系统进行转录
     const result = await transcribeAudio(config, buffer);
 
     return apiSuccess({ text: result.text });

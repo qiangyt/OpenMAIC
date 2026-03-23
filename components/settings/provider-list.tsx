@@ -27,11 +27,11 @@ export function ProviderList({
 }: ProviderListProps) {
   const { t } = useI18n();
 
-  // Helper function to get translated provider name
+  // 获取翻译后服务商名称的辅助函数
   const getProviderDisplayName = (provider: ProviderConfig) => {
     const translationKey = `settings.providerNames.${provider.id}`;
     const translated = t(translationKey);
-    // If translation exists (not equal to key), use it; otherwise fallback to provider.name
+    // 如果翻译存在（不等于 key），使用它；否则回退到 provider.name
     return translated !== translationKey ? translated : provider.name;
   };
 
@@ -73,7 +73,7 @@ export function ProviderList({
         ))}
       </div>
 
-      {/* Add Provider Button */}
+      {/* 添加服务商按钮 */}
       <div className="p-3 border-t">
         <Button variant="outline" size="sm" className="w-full gap-1.5" onClick={onAddProvider}>
           <Plus className="h-3.5 w-3.5" />

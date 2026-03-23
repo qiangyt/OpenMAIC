@@ -8,8 +8,8 @@ export interface BaseLatexElementProps {
 }
 
 /**
- * Base latex element for read-only/playback mode.
- * Renders KaTeX HTML if available, falls back to legacy SVG path.
+ * 基础 LaTeX 元素（只读/播放模式）
+ * 如果可用则渲染 KaTeX HTML，否则回退到旧的 SVG 路径
  */
 export function BaseLatexElement({ elementInfo }: BaseLatexElementProps) {
   return (

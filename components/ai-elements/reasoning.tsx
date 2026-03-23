@@ -61,11 +61,11 @@ export const Reasoning = memo(
     const [hasAutoClosed, setHasAutoClosed] = useState(false);
     const [startTime, setStartTime] = useState<number | null>(null);
 
-    // Track duration when streaming starts and ends
+    // 在流开始和结束时跟踪持续时间
     useEffect(() => {
       if (isStreaming) {
         if (startTime === null) {
-          // eslint-disable-next-line react-hooks/set-state-in-effect -- Tracking streaming duration requires effect
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- 跟踪流持续时间需要使用 effect
           setStartTime(Date.now());
         }
       } else if (startTime !== null) {
@@ -74,10 +74,10 @@ export const Reasoning = memo(
       }
     }, [isStreaming, startTime, setDuration]);
 
-    // Auto-open when streaming starts, auto-close when streaming ends (once only)
+    // 流开始时自动打开，流结束时自动关闭（仅一次）
     useEffect(() => {
       if (defaultOpen && !isStreaming && isOpen && !hasAutoClosed) {
-        // Add a small delay before closing to allow user to see the content
+        // 关闭前添加小延迟以让用户看到内容
         const timer = setTimeout(() => {
           setIsOpen(false);
           setHasAutoClosed(true);

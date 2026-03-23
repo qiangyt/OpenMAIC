@@ -24,7 +24,7 @@ const log = createLogger('GeneralSettings');
 export function GeneralSettings() {
   const { t } = useI18n();
 
-  // Clear cache state
+  // 清除缓存状态
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [confirmInput, setConfirmInput] = useState('');
   const [clearing, setClearing] = useState(false);
@@ -36,16 +36,16 @@ export function GeneralSettings() {
     if (!isConfirmValid) return;
     setClearing(true);
     try {
-      // 1. Clear IndexedDB
+      // 1. 清除 IndexedDB
       await clearDatabase();
-      // 2. Clear localStorage
+      // 2. 清除 localStorage
       localStorage.clear();
-      // 3. Clear sessionStorage
+      // 3. 清除 sessionStorage
       sessionStorage.clear();
 
       toast.success(t('settings.clearCacheSuccess'));
 
-      // Reload page after a short delay
+      // 短暂延迟后重新加载页面
       setTimeout(() => {
         window.location.reload();
       }, 1000);
@@ -63,9 +63,9 @@ export function GeneralSettings() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Danger Zone - Clear Cache */}
+      {/* 危险区域 - 清除缓存 */}
       <div className="relative rounded-xl border border-destructive/30 bg-destructive/[0.03] dark:bg-destructive/[0.06] overflow-hidden">
-        {/* Subtle diagonal stripe pattern for danger emphasis */}
+        {/* 危险强调的微妙斜线图案 */}
         <div
           className="absolute inset-0 opacity-[0.015] dark:opacity-[0.03] pointer-events-none"
           style={{
@@ -80,7 +80,7 @@ export function GeneralSettings() {
         />
 
         <div className="relative p-4 space-y-4">
-          {/* Header */}
+          {/* 头部 */}
           <div className="flex items-center gap-2.5">
             <div className="p-1.5 rounded-md bg-destructive/10 text-destructive">
               <AlertTriangle className="w-4 h-4" />
@@ -88,7 +88,7 @@ export function GeneralSettings() {
             <h3 className="text-sm font-semibold text-destructive">{t('settings.dangerZone')}</h3>
           </div>
 
-          {/* Content */}
+          {/* 内容 */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium">{t('settings.clearCache')}</p>
@@ -112,7 +112,7 @@ export function GeneralSettings() {
         </div>
       </div>
 
-      {/* Clear Cache Confirmation Dialog */}
+      {/* 清除缓存确认对话框 */}
       <AlertDialog
         open={showClearDialog}
         onOpenChange={(open) => {

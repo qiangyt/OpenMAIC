@@ -62,10 +62,10 @@ function GenerationPreviewContent() {
   >([]);
   const agentRevealResolveRef = useRef<(() => void) | null>(null);
 
-  // Compute active steps based on session state
+  // 根据会话状态计算活动步骤
   const activeSteps = getActiveSteps(session);
 
-  // Load session from sessionStorage
+  // 从 sessionStorage 加载会话
   useEffect(() => {
     cleanupOldImages(24).catch((e) => log.error(e));
 
@@ -75,20 +75,20 @@ function GenerationPreviewContent() {
         const parsed = JSON.parse(saved) as GenerationSessionState;
         setSession(parsed);
       } catch (e) {
-        log.error('Failed to parse generation session:', e);
+        log.error('解析生成会话失败：', e);
       }
     }
     setSessionLoaded(true);
   }, []);
 
-  // Abort all in-flight requests on unmount
+  // 组件卸载时中止所有进行中的请求
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
     };
   }, []);
 
-  // Get API credentials from localStorage
+  // 从 localStorage 获取 API 凭据
   const getApiHeaders = () => {
     const modelConfig = getCurrentModelConfig();
     const settings = useSettingsStore.getState();
@@ -101,23 +101,23 @@ function GenerationPreviewContent() {
       'x-base-url': modelConfig.baseUrl,
       'x-provider-type': modelConfig.providerType || '',
       'x-requires-api-key': modelConfig.requiresApiKey ? 'true' : 'false',
-      // Image generation provider
+      // 图像生成提供者
       'x-image-provider': settings.imageProviderId || '',
       'x-image-model': settings.imageModelId || '',
       'x-image-api-key': imageProviderConfig?.apiKey || '',
       'x-image-base-url': imageProviderConfig?.baseUrl || '',
-      // Video generation provider
+      // 视频生成提供者
       'x-video-provider': settings.videoProviderId || '',
       'x-video-model': settings.videoModelId || '',
       'x-video-api-key': videoProviderConfig?.apiKey || '',
       'x-video-base-url': videoProviderConfig?.baseUrl || '',
-      // Media generation toggles
+      // 媒体生成开关
       'x-image-generation-enabled': String(settings.imageGenerationEnabled ?? false),
       'x-video-generation-enabled': String(settings.videoGenerationEnabled ?? false),
     };
   };
 
-  // Auto-start generation when session is loaded
+  // 会话加载后自动开始生成
   useEffect(() => {
     if (session && !hasStartedRef.current) {
       hasStartedRef.current = true;
@@ -126,52 +126,52 @@ function GenerationPreviewContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
-  // Main generation flow
+  // 主生成流程
   const startGeneration = async () => {
     if (!session) return;
 
-    // Create AbortController for this generation run
+    // 为此次生成创建 AbortController
     abortControllerRef.current?.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
     const signal = controller.signal;
 
-    // Use a local mutable copy so we can update it after PDF parsing
+    // 使用本地可变副本，以便在 PDF 解析后更新
     let currentSession = session;
 
     setError(null);
     setCurrentStepIndex(0);
 
     try {
-      // Compute active steps for this session (recomputed after session mutations)
+      // 计算此会话的活动步骤（会话变更后重新计算）
       let activeSteps = getActiveSteps(currentSession);
 
-      // Determine if we need the PDF analysis step
+      // 确定是否需要 PDF 解析步骤
       const hasPdfToAnalyze = !!currentSession.pdfStorageKey && !currentSession.pdfText;
-      // If no PDF to analyze, skip to the next available step
+      // 如果没有需要解析的 PDF，跳到下一个可用步骤
       if (!hasPdfToAnalyze) {
         const firstNonPdfIdx = activeSteps.findIndex((s) => s.id !== 'pdf-analysis');
         setCurrentStepIndex(Math.max(0, firstNonPdfIdx));
       }
 
-      // Step 0: Parse PDF if needed
+      // 步骤 0：如需要则解析 PDF
       if (hasPdfToAnalyze) {
-        log.debug('=== Generation Preview: Parsing PDF ===');
+        log.debug('=== 生成预览：正在解析 PDF ===');
         const pdfBlob = await loadPdfBlob(currentSession.pdfStorageKey!);
         if (!pdfBlob) {
           throw new Error(t('generation.pdfLoadFailed'));
         }
 
-        // Ensure pdfBlob is a valid Blob with content
+        // 确保 pdfBlob 是有效的 Blob 且有内容
         if (!(pdfBlob instanceof Blob) || pdfBlob.size === 0) {
-          log.error('Invalid PDF blob:', {
+          log.error('无效的 PDF blob：', {
             type: typeof pdfBlob,
             size: pdfBlob instanceof Blob ? pdfBlob.size : 'N/A',
           });
           throw new Error(t('generation.pdfLoadFailed'));
         }
 
-        // Wrap as a File to guarantee multipart/form-data with correct content-type
+        // 包装为 File 以确保 multipart/form-data 具有正确的 content-type
         const pdfFile = new File([pdfBlob], currentSession.pdfFileName || 'document.pdf', {
           type: 'application/pdf',
         });
@@ -207,13 +207,13 @@ function GenerationPreviewContent() {
 
         let pdfText = parseResult.data.text as string;
 
-        // Truncate if needed
+        // 如需要则截断
         if (pdfText.length > MAX_PDF_CONTENT_CHARS) {
           pdfText = pdfText.substring(0, MAX_PDF_CONTENT_CHARS);
         }
 
-        // Create image metadata and store images
-        // Prefer metadata.pdfImages (both parsers now return this)
+        // 创建图像元数据并存储图像
+        // 优先使用 metadata.pdfImages（两个解析器现在都返回此字段）
         const rawPdfImages = parseResult.data.metadata?.pdfImages;
         const images = rawPdfImages
           ? rawPdfImages.map(
@@ -263,18 +263,18 @@ function GenerationPreviewContent() {
           }),
         );
 
-        // Update session with parsed PDF data
+        // 用解析后的 PDF 数据更新会话
         const updatedSession = {
           ...currentSession,
           pdfText,
           pdfImages,
           imageStorageIds,
-          pdfStorageKey: undefined, // Clear so we don't re-parse
+          pdfStorageKey: undefined, // 清除以避免重复解析
         };
         setSession(updatedSession);
         sessionStorage.setItem('generationSession', JSON.stringify(updatedSession));
 
-        // Truncation warnings
+        // 截断警告
         const warnings: string[] = [];
         if ((parseResult.data.text as string).length > MAX_PDF_CONTENT_CHARS) {
           warnings.push(
@@ -292,12 +292,12 @@ function GenerationPreviewContent() {
           setTruncationWarnings(warnings);
         }
 
-        // Reassign local reference for subsequent steps
+        // 为后续步骤重新赋值本地引用
         currentSession = updatedSession;
         activeSteps = getActiveSteps(currentSession);
       }
 
-      // Step: Web Search (if enabled)
+      // 步骤：网络搜索（如已启用）
       const webSearchStepIdx = activeSteps.findIndex((s) => s.id === 'web-search');
       if (currentSession.requirements.webSearch && webSearchStepIdx >= 0) {
         setCurrentStepIndex(webSearchStepIdx);
@@ -339,20 +339,20 @@ function GenerationPreviewContent() {
         activeSteps = getActiveSteps(currentSession);
       }
 
-      // Load imageMapping early (needed for both outline and scene generation)
+      // 尽早加载 imageMapping（大纲和场景生成都需要）
       let imageMapping: ImageMapping = {};
       if (currentSession.imageStorageIds && currentSession.imageStorageIds.length > 0) {
-        log.debug('Loading images from IndexedDB');
+        log.debug('正在从 IndexedDB 加载图像');
         imageMapping = await loadImageMapping(currentSession.imageStorageIds);
       } else if (
         currentSession.imageMapping &&
         Object.keys(currentSession.imageMapping).length > 0
       ) {
-        log.debug('Using imageMapping from session (old format)');
+        log.debug('使用会话中的 imageMapping（旧格式）');
         imageMapping = currentSession.imageMapping;
       }
 
-      // ── Agent generation (before outlines so persona can influence structure) ──
+      // ── 智能体生成（在大纲之前，以便角色特征能影响结构） ──
       const settings = useSettingsStore.getState();
       let agents: Array<{
         id: string;
@@ -361,7 +361,7 @@ function GenerationPreviewContent() {
         persona?: string;
       }> = [];
 
-      // Create stage client-side (needed for agent generation stageId)
+      // 在客户端创建舞台（智能体生成需要 stageId）
       const stageId = nanoid(10);
       const stage: Stage = {
         id: stageId,
@@ -393,7 +393,7 @@ function GenerationPreviewContent() {
             '/avatars/thinker-2.png',
           ];
 
-          // No outlines yet — agent generation uses only stage name + description
+          // 尚无大纲 — 智能体生成仅使用舞台名称 + 描述
           const agentResp = await fetch('/api/generate/agent-profiles', {
             method: 'POST',
             headers: getApiHeaders(),
@@ -409,12 +409,12 @@ function GenerationPreviewContent() {
           const agentData = await agentResp.json();
           if (!agentData.success) throw new Error(agentData.error || 'Agent generation failed');
 
-          // Save to IndexedDB and registry
+          // 保存到 IndexedDB 和注册表
           const { saveGeneratedAgents } = await import('@/lib/orchestration/registry/store');
           const savedIds = await saveGeneratedAgents(stage.id, agentData.agents);
           settings.setSelectedAgentIds(savedIds);
 
-          // Show card-reveal modal, continue generation once all cards are revealed
+          // 显示卡片揭示模态框，所有卡片揭示后继续生成
           setGeneratedAgents(agentData.agents);
           setShowAgentReveal(true);
           await new Promise<void>((resolve) => {
@@ -431,7 +431,7 @@ function GenerationPreviewContent() {
               persona: a!.persona,
             }));
         } catch (err: unknown) {
-          log.warn('[Generation] Agent generation failed, falling back to presets:', err);
+          log.warn('[Generation] 智能体生成失败，回退到预设：', err);
           const registry = useAgentRegistry.getState();
           agents = settings.selectedAgentIds
             .map((id) => registry.getAgent(id))
@@ -444,7 +444,7 @@ function GenerationPreviewContent() {
             }));
         }
       } else {
-        // Preset mode — use selected agents (include persona)
+        // 预设模式 — 使用选中的智能体（包含角色特征）
         const registry = useAgentRegistry.getState();
         agents = settings.selectedAgentIds
           .map((id) => registry.getAgent(id))
@@ -457,13 +457,13 @@ function GenerationPreviewContent() {
           }));
       }
 
-      // ── Generate outlines (with agent personas for teacher context) ──
+      // ── 生成大纲（包含智能体角色特征作为教师上下文） ──
       let outlines = currentSession.sceneOutlines;
 
       const outlineStepIdx = activeSteps.findIndex((s) => s.id === 'outline');
       setCurrentStepIndex(outlineStepIdx >= 0 ? outlineStepIdx : 0);
       if (!outlines || outlines.length === 0) {
-        log.debug('=== Generating outlines (SSE) ===');
+        log.debug('=== 正在生成大纲 (SSE) ===');
         setStreamingOutlines([]);
 
         outlines = await new Promise<SceneOutline[]>((resolve, reject) => {
@@ -524,7 +524,7 @@ function GenerationPreviewContent() {
                           return;
                         }
                       } catch (e) {
-                        log.error('Failed to parse outline SSE:', line, e);
+                        log.error('解析大纲 SSE 失败：', line, e);
                       }
                     }
                   }
@@ -548,33 +548,33 @@ function GenerationPreviewContent() {
         setSession(updatedSession);
         sessionStorage.setItem('generationSession', JSON.stringify(updatedSession));
 
-        // Outline generation succeeded — clear homepage draft cache
+        // 大纲生成成功 — 清除首页草稿缓存
         try {
           localStorage.removeItem('requirementDraft');
         } catch {
-          /* ignore */
+          /* 忽略 */
         }
 
-        // Brief pause to let user see the final outline state
+        // 短暂停顿让用户看到最终大纲状态
         await new Promise((resolve) => setTimeout(resolve, 800));
       }
 
-      // Move to scene generation step
+      // 进入场景生成步骤
       setStatusMessage('');
       if (!outlines || outlines.length === 0) {
         throw new Error(t('generation.outlineEmptyResponse'));
       }
 
-      // Store stage and outlines
+      // 存储舞台和大纲
       const store = useStageStore.getState();
       store.setStage(stage);
       store.setOutlines(outlines);
 
-      // Advance to slide-content step
+      // 前进到幻灯片内容步骤
       const contentStepIdx = activeSteps.findIndex((s) => s.id === 'slide-content');
       if (contentStepIdx >= 0) setCurrentStepIndex(contentStepIdx);
 
-      // Build stageInfo and userProfile for API call
+      // 为 API 调用构建 stageInfo 和 userProfile
       const stageInfo = {
         name: stage.name,
         description: stage.description,
@@ -587,12 +587,12 @@ function GenerationPreviewContent() {
           ? `Student: ${currentSession.requirements.userNickname || 'Unknown'}${currentSession.requirements.userBio ? ` — ${currentSession.requirements.userBio}` : ''}`
           : undefined;
 
-      // Generate ONLY the first scene
+      // 仅生成第一个场景
       store.setGeneratingOutlines(outlines);
 
       const firstOutline = outlines[0];
 
-      // Step 2: Generate content (currentStepIndex is already 2)
+      // 步骤 2：生成内容（currentStepIndex 已经是 2）
       const contentResp = await fetch('/api/generate/scene-content', {
         method: 'POST',
         headers: getApiHeaders(),
@@ -618,7 +618,7 @@ function GenerationPreviewContent() {
         throw new Error(contentData.error || t('generation.sceneGenerateFailed'));
       }
 
-      // Generate actions (activate actions step indicator)
+      // 生成动作（激活动作步骤指示器）
       const actionsStepIdx = activeSteps.findIndex((s) => s.id === 'actions');
       setCurrentStepIndex(actionsStepIdx >= 0 ? actionsStepIdx : currentStepIndex + 1);
 
@@ -647,7 +647,7 @@ function GenerationPreviewContent() {
         throw new Error(data.error || t('generation.sceneGenerateFailed'));
       }
 
-      // Generate TTS for first scene (part of actions step — blocking)
+      // 为第一个场景生成 TTS（动作步骤的一部分 — 阻塞式）
       if (settings.ttsEnabled && settings.ttsProviderId !== 'browser-native-tts') {
         const ttsProviderConfig = settings.ttsProvidersConfig?.[settings.ttsProviderId];
         const speechActions = (data.scene.actions || []).filter(
@@ -693,7 +693,7 @@ function GenerationPreviewContent() {
               createdAt: Date.now(),
             });
           } catch (err) {
-            log.warn(`[TTS] Failed for ${audioId}:`, err);
+            log.warn(`[TTS] ${audioId} 生成失败：`, err);
             ttsFailCount++;
           }
         }
@@ -703,15 +703,15 @@ function GenerationPreviewContent() {
         }
       }
 
-      // Add scene to store and navigate
+      // 将场景添加到存储并导航
       store.addScene(data.scene);
       store.setCurrentSceneId(data.scene.id);
 
-      // Set remaining outlines as skeleton placeholders
+      // 将剩余大纲设置为骨架占位符
       const remaining = outlines.filter((o) => o.order !== data.scene.order);
       store.setGeneratingOutlines(remaining);
 
-      // Store generation params for classroom to continue generation
+      // 存储生成参数供课堂页面继续生成
       sessionStorage.setItem(
         'generationParams',
         JSON.stringify({
@@ -725,9 +725,9 @@ function GenerationPreviewContent() {
       await store.saveToStorage();
       router.push(`/classroom/${stage.id}`);
     } catch (err) {
-      // AbortError is expected when navigating away — don't show as error
+      // 导航离开时预期的 AbortError — 不显示为错误
       if (err instanceof DOMException && err.name === 'AbortError') {
-        log.info('[GenerationPreview] Generation aborted');
+        log.info('[GenerationPreview] 生成已中止');
         return;
       }
       setError(err instanceof Error ? err.message : String(err));
@@ -748,7 +748,7 @@ function GenerationPreviewContent() {
     router.push('/');
   };
 
-  // Still loading session from sessionStorage
+  // 正在从 sessionStorage 加载会话
   if (!sessionLoaded) {
     return (
       <div className="min-h-[100dvh] w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
@@ -759,7 +759,7 @@ function GenerationPreviewContent() {
     );
   }
 
-  // No session found
+  // 未找到会话
   if (!session) {
     return (
       <div className="min-h-[100dvh] w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
@@ -785,7 +785,7 @@ function GenerationPreviewContent() {
 
   return (
     <div className="min-h-[100dvh] w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center justify-center p-4 relative overflow-hidden text-center">
-      {/* Background Decor */}
+      {/* 背景装饰 */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div
           className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"
@@ -797,7 +797,7 @@ function GenerationPreviewContent() {
         />
       </div>
 
-      {/* Back button */}
+      {/* 返回按钮 */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -817,7 +817,7 @@ function GenerationPreviewContent() {
           className="w-full"
         >
           <Card className="relative overflow-hidden border-muted/40 shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl min-h-[400px] flex flex-col items-center justify-center p-8 md:p-12">
-            {/* Progress Dots */}
+            {/* 进度点 */}
             <div className="absolute top-6 left-0 right-0 flex justify-center gap-2">
               {activeSteps.map((step, idx) => (
                 <div
@@ -834,9 +834,9 @@ function GenerationPreviewContent() {
               ))}
             </div>
 
-            {/* Central Content */}
+            {/* 中心内容 */}
             <div className="flex-1 flex flex-col items-center justify-center w-full space-y-8 mt-4">
-              {/* Icon / Visualizer Container */}
+              {/* 图标 / 可视化容器 */}
               <div className="relative size-48 flex items-center justify-center">
                 <AnimatePresence mode="popLayout">
                   {error ? (
@@ -876,7 +876,7 @@ function GenerationPreviewContent() {
                 </AnimatePresence>
               </div>
 
-              {/* Text Content */}
+              {/* 文本内容 */}
               <div className="space-y-3 max-w-sm mx-auto">
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -903,7 +903,7 @@ function GenerationPreviewContent() {
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Truncation warning indicator */}
+                {/* 截断警告指示器 */}
                 <AnimatePresence>
                   {truncationWarnings.length > 0 && !error && !isComplete && (
                     <motion.div
@@ -964,7 +964,7 @@ function GenerationPreviewContent() {
           </Card>
         </motion.div>
 
-        {/* Footer Action */}
+        {/* 底部操作 */}
         <div className="h-16 flex items-center justify-center w-full">
           <AnimatePresence>
             {error ? (
@@ -1000,7 +1000,7 @@ function GenerationPreviewContent() {
         </div>
       </div>
 
-      {/* Agent Reveal Modal */}
+      {/* 智能体揭示模态框 */}
       <AgentRevealModal
         agents={generatedAgents}
         open={showAgentReveal}

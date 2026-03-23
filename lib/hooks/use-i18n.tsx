@@ -17,7 +17,7 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined);
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(defaultLocale);
 
-  // Hydrate from localStorage after mount (avoids SSR mismatch)
+  // 挂载后从 localStorage 恢复（避免 SSR 不匹配）
   /* eslint-disable react-hooks/set-state-in-effect -- Hydration from localStorage must happen in effect */
   useEffect(() => {
     try {
@@ -30,7 +30,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(LOCALE_STORAGE_KEY, detected);
       setLocaleState(detected);
     } catch {
-      // localStorage unavailable, keep default
+      // localStorage 不可用，保持默认值
     }
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */

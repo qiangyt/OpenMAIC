@@ -17,7 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import type { SceneOutline } from '@/lib/types/generation';
 
-// Step-specific visualizers
+// 各步骤的可视化组件
 export function StepVisualizer({
   stepId,
   outlines,
@@ -45,7 +45,7 @@ export function StepVisualizer({
   }
 }
 
-// PDF: Document with scanning laser line
+// PDF：带有扫描激光线的文档
 function PdfScanVisualizer() {
   return (
     <div className="size-32 relative flex items-center justify-center">
@@ -66,7 +66,7 @@ function PdfScanVisualizer() {
             />
           ))}
         </div>
-        {/* Scanning laser */}
+        {/* 扫描激光线 */}
         <motion.div
           className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_12px_rgba(34,211,238,0.6)]"
           animate={{ top: ['5%', '90%', '5%'] }}
@@ -84,11 +84,11 @@ function PdfScanVisualizer() {
   );
 }
 
-// Web Search: Miniature search engine results page with animated query + result rows
+// 网络搜索：迷你搜索引擎结果页，带有动画查询和结果行
 function WebSearchVisualizer({ sources }: { sources: Array<{ title: string; url: string }> }) {
   const [activeResult, setActiveResult] = useState(0);
 
-  // Cycle through result highlight when we have sources
+  // 当有搜索来源时，循环高亮显示结果
   useEffect(() => {
     if (sources.length === 0) return;
     const timer = setInterval(() => {
@@ -97,7 +97,7 @@ function WebSearchVisualizer({ sources }: { sources: Array<{ title: string; url:
     return () => clearInterval(timer);
   }, [sources.length]);
 
-  // Placeholder results for skeleton state
+  // 骨架屏状态的占位结果
   const skeletonResults = [
     { titleW: 70, urlW: 45, snippetW: [90, 60] },
     { titleW: 55, urlW: 50, snippetW: [80, 75] },
@@ -109,16 +109,16 @@ function WebSearchVisualizer({ sources }: { sources: Array<{ title: string; url:
 
   return (
     <div className="size-56 relative flex items-center justify-center">
-      {/* Background glow */}
+      {/* 背景光晕 */}
       <motion.div
         className="absolute inset-0 blur-3xl rounded-full bg-teal-500/8"
         animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
         transition={{ duration: 3.5, repeat: Infinity }}
       />
 
-      {/* Search results card */}
+      {/* 搜索结果卡片 */}
       <div className="w-44 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl overflow-hidden relative">
-        {/* Search bar header */}
+        {/* 搜索栏头部 */}
         <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2">
           <Search className="size-3 text-teal-500 shrink-0" />
           <div className="flex-1 h-4 bg-slate-50 dark:bg-slate-700/50 rounded-full overflow-hidden flex items-center px-2">
@@ -131,9 +131,9 @@ function WebSearchVisualizer({ sources }: { sources: Array<{ title: string; url:
           </div>
         </div>
 
-        {/* Results list */}
+        {/* 结果列表 */}
         <div className="p-2 space-y-0.5 relative">
-          {/* Sliding highlight */}
+          {/* 滑动高亮 */}
           {sources.length > 0 && (
             <motion.div
               className="absolute left-2 right-2 rounded-lg bg-teal-500/[0.06] dark:bg-teal-400/[0.08]"
@@ -144,7 +144,7 @@ function WebSearchVisualizer({ sources }: { sources: Array<{ title: string; url:
           )}
 
           {sources.length === 0
-            ? // Skeleton: pulsing result placeholders
+            ? // 骨架屏：脉冲动画的占位结果
               skeletonResults.map((item, i) => (
                 <motion.div
                   key={i}
@@ -175,7 +175,7 @@ function WebSearchVisualizer({ sources }: { sources: Array<{ title: string; url:
                   </div>
                 </motion.div>
               ))
-            : // Live results
+            : // 实时结果
               sources.slice(0, 4).map((source, i) => {
                 const isActive = i === activeResult;
                 return (
@@ -208,7 +208,7 @@ function WebSearchVisualizer({ sources }: { sources: Array<{ title: string; url:
               })}
         </div>
 
-        {/* Scanning beam */}
+        {/* 扫描光束 */}
         <motion.div
           className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 dark:via-white/5 to-transparent -skew-x-12 pointer-events-none"
           initial={{ left: '-150%' }}
@@ -222,7 +222,7 @@ function WebSearchVisualizer({ sources }: { sources: Array<{ title: string; url:
         />
       </div>
 
-      {/* Source count badge */}
+      {/* 来源数量徽章 */}
       {sources.length > 0 && (
         <motion.div
           initial={{ scale: 0 }}
@@ -238,9 +238,9 @@ function WebSearchVisualizer({ sources }: { sources: Array<{ title: string; url:
   );
 }
 
-// Outline: Streams real outline data as it arrives from SSE
+// 大纲：实时流式显示从 SSE 接收的大纲数据
 function StreamingOutlineVisualizer({ outlines }: { outlines: SceneOutline[] }) {
-  // Build display lines from outlines
+  // 从大纲构建显示行
   const allLines: string[] = [];
   outlines.forEach((outline, i) => {
     allLines.push(`${i + 1}. ${outline.title}`);
@@ -256,7 +256,7 @@ function StreamingOutlineVisualizer({ outlines }: { outlines: SceneOutline[] }) 
       <div className="w-1/3 h-2 bg-slate-100 dark:bg-slate-700 rounded mb-3" />
       <div className="space-y-1.5 font-mono text-[8px] text-muted-foreground leading-tight">
         {allLines.length === 0 ? (
-          // Waiting for first outline — show placeholder skeleton
+          // 等待第一个大纲 — 显示骨架屏占位
           <div className="space-y-2">
             {[60, 80, 50, 70].map((w, i) => (
               <motion.div
@@ -295,7 +295,7 @@ function StreamingOutlineVisualizer({ outlines }: { outlines: SceneOutline[] }) 
   );
 }
 
-// Content: Cycles through distinct representations of Slides, Quiz, PBL, Interactive
+// 内容：循环展示幻灯片、测验、PBL、互动等不同类型的可视化
 function AgentGenerationVisualizer() {
   return (
     <div className="w-60 h-40 mx-auto flex items-center justify-center">
@@ -325,10 +325,10 @@ function AgentGenerationVisualizer() {
 function ContentVisualizer() {
   const [index, setIndex] = useState(0);
 
-  // 0: Slide (Blue)
-  // 1: Quiz (Purple)
-  // 2: PBL (Amber)
-  // 3: Interactive (Emerald)
+  // 0: 幻灯片 (蓝色)
+  // 1: 测验 (紫色)
+  // 2: PBL (琥珀色)
+  // 3: 互动 (翠绿色)
   const totalTypes = 4;
 
   useEffect(() => {
@@ -383,7 +383,7 @@ function ContentVisualizer() {
 
   return (
     <div className="size-56 relative flex items-center justify-center perspective-[800px]">
-      {/* Background glow based on current theme */}
+      {/* 基于当前主题的背景光晕 */}
       <motion.div
         key={`glow-${index}`}
         className={cn(
@@ -397,7 +397,7 @@ function ContentVisualizer() {
         transition={{ duration: 4, repeat: Infinity }}
       />
 
-      {/* Subtle orbiting rings (pushed back, slower) */}
+      {/* 细微的轨道环（后置，较慢） */}
       {[0, 1].map((i) => (
         <motion.div
           key={i}
@@ -423,7 +423,7 @@ function ContentVisualizer() {
         />
       ))}
 
-      {/* Main Content Container */}
+      {/* 主内容容器 */}
       <div className="w-40 h-28 relative">
         <AnimatePresence mode="popLayout">
           <motion.div
@@ -441,7 +441,7 @@ function ContentVisualizer() {
               theme.color === 'emerald' && 'border-emerald-200 dark:border-emerald-900/30',
             )}
           >
-            {/* Consistent Badge - Now outside content logic */}
+            {/* 统一徽章 - 现在在内容逻辑之外 */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -454,7 +454,7 @@ function ContentVisualizer() {
               {theme.label}
             </motion.div>
 
-            {/* --- SLIDE TYPE --- */}
+            {/* --- 幻灯片类型 --- */}
             {index === 0 && (
               <div className="flex flex-col h-full pt-1">
                 <motion.div
@@ -487,7 +487,7 @@ function ContentVisualizer() {
               </div>
             )}
 
-            {/* --- QUIZ TYPE --- */}
+            {/* --- 测验类型 --- */}
             {index === 1 && (
               <div className="flex flex-col h-full justify-center space-y-2 pt-2">
                 <motion.div
@@ -531,7 +531,7 @@ function ContentVisualizer() {
               </div>
             )}
 
-            {/* --- PBL TYPE --- */}
+            {/* --- PBL 类型 --- */}
             {index === 2 && (
               <div className="flex flex-col h-full pt-1">
                 <div className="flex items-center gap-2 mb-2">
@@ -564,10 +564,10 @@ function ContentVisualizer() {
               </div>
             )}
 
-            {/* --- INTERACTIVE TYPE --- */}
+            {/* --- 互动类型 --- */}
             {index === 3 && (
               <div className="flex flex-col h-full relative pt-1">
-                {/* Browser Chrome - Padded right to avoid badge */}
+                {/* 浏览器边框 - 右侧留空避免与徽章重叠 */}
                 <div className="flex items-center gap-1 mb-2 border-b border-slate-100 dark:border-slate-700 pb-1 pr-10">
                   <div className="flex gap-0.5">
                     <div className="size-1.5 rounded-full bg-red-400" />
@@ -605,7 +605,7 @@ function ContentVisualizer() {
               </div>
             )}
 
-            {/* Scanning beam (shared) */}
+            {/* 扫描光束（共享） */}
             <motion.div
               className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 dark:via-white/10 to-transparent -skew-x-12 pointer-events-none"
               initial={{ left: '-150%' }}
@@ -624,7 +624,7 @@ function ContentVisualizer() {
   );
 }
 
-// Actions: Timeline of speech, spotlight, and interactions being orchestrated
+// 动作：语音、聚光灯和互动操作的时间线编排
 function ActionsVisualizer() {
   const [activeIdx, setActiveIdx] = useState(0);
 
@@ -666,7 +666,7 @@ function ActionsVisualizer() {
     },
   ];
 
-  // Row height (py-1.5 = 6px×2 padding + icon ~16px) + gap 6px ≈ 34px per row
+  // 行高 (py-1.5 = 6px×2 padding + icon ~16px) + gap 6px ≈ 每行 34px
   const ROW_H = 34;
 
   useEffect(() => {
@@ -679,16 +679,16 @@ function ActionsVisualizer() {
 
   return (
     <div className="size-56 relative flex items-center justify-center">
-      {/* Background pulse */}
+      {/* 背景脉冲 */}
       <motion.div
         className="absolute inset-0 blur-3xl rounded-full bg-violet-500/8"
         animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
         transition={{ duration: 3.5, repeat: Infinity }}
       />
 
-      {/* Timeline card */}
+      {/* 时间线卡片 */}
       <div className="w-44 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl overflow-hidden relative">
-        {/* Header */}
+        {/* 头部 */}
         <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2">
           <Clapperboard className="size-3 text-violet-500" />
           <motion.div
@@ -699,9 +699,9 @@ function ActionsVisualizer() {
           />
         </div>
 
-        {/* Action items */}
+        {/* 动作项 */}
         <div className="p-2 space-y-1.5 relative">
-          {/* Sliding highlight — absolute, animates via y transform, no layout impact */}
+          {/* 滑动高亮 — 绝对定位，通过 y 变换动画，不影响布局 */}
           <motion.div
             className="absolute left-2 right-2 rounded-lg bg-violet-500/[0.06] dark:bg-violet-400/[0.08]"
             style={{ height: ROW_H - 6 }}
@@ -745,7 +745,7 @@ function ActionsVisualizer() {
                     )}
                   />
                 </div>
-                {/* Pulsing dot — always rendered, opacity-controlled, no layout shift */}
+                {/* 脉冲点 — 始终渲染，通过透明度控制，无布局偏移 */}
                 <motion.div
                   className="size-1.5 rounded-full bg-violet-500"
                   animate={{ opacity: isActive ? [1, 0.3, 1] : 0 }}

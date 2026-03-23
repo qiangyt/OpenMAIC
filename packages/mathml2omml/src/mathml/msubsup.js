@@ -2,9 +2,9 @@ import { getNary, getNaryTarget } from '../ooml/index.js'
 import { walker } from '../walker.js'
 
 export function msubsup(element, targetParent, previousSibling, nextSibling, ancestors) {
-  // Sub + superscript
+  // 下标 + 上标
   if (element.children.length !== 3) {
-    // treat as mrow
+    // 视为 mrow 处理
     return targetParent
   }
 
@@ -19,9 +19,9 @@ export function msubsup(element, targetParent, previousSibling, nextSibling, anc
   //
   // m:nAry
   //
-  // Conditions:
-  // 1. base text must be nary operator
-  // 2. no accents
+  // 条件：
+  // 1. 基底文本必须是 nary 运算符
+  // 2. 没有重音符号
   const naryChar = getNary(base)
   if (
     naryChar &&
@@ -31,7 +31,7 @@ export function msubsup(element, targetParent, previousSibling, nextSibling, anc
     topTarget = getNaryTarget(naryChar, element, 'subSup')
     element.isNary = true
   } else {
-    // Check for empty base → prescript pattern (LaTeX {}^{sup}_{sub}X)
+    // 检查空基底 → 前标模式（LaTeX {}^{sup}_{sub}X）
     const isEmptyBase = base.name === 'mrow' && (!base.children || base.children.length === 0)
 
     if (isEmptyBase) {
@@ -57,7 +57,7 @@ export function msubsup(element, targetParent, previousSibling, nextSibling, anc
       }
       element.isPrescript = true
     } else {
-      // Regular m:sSubSup
+      // 常规 m:sSubSup
       const baseTarget = {
         name: 'm:e',
         type: 'tag',
@@ -113,5 +113,5 @@ export function msubsup(element, targetParent, previousSibling, nextSibling, anc
     topTarget.children.push({ type: 'tag', name: 'm:e', attribs: {}, children: [] })
   }
   targetParent.children.push(topTarget)
-  // Don't iterate over children in the usual way.
+  // 不要以常规方式遍历子元素。
 }

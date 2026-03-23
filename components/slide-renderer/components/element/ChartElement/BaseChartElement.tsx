@@ -10,7 +10,7 @@ export interface BaseChartElementProps {
 }
 
 /**
- * Base chart element for read-only/playback mode
+ * 基础图表元素（只读/播放模式）
  */
 export function BaseChartElement({ elementInfo, target }: BaseChartElementProps) {
   return (

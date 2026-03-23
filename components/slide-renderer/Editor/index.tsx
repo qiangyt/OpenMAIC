@@ -5,7 +5,7 @@ import type { StageMode } from '@/lib/types/stage';
 import { ScreenCanvas } from './ScreenCanvas';
 
 /**
- * Slide Editor - wraps Canvas with SceneProvider
+ * 幻灯片编辑器 - 使用 SceneProvider 包装 Canvas
  */
 export function SlideEditor({ mode }: { readonly mode: StageMode }) {
   return (

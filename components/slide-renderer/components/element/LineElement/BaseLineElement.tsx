@@ -11,12 +11,12 @@ export interface BaseLineElementProps {
   animate?: boolean;
 }
 
-/** Duration of the stroke-drawing animation in ms */
+/** 描边动画持续时间（毫秒） */
 const DRAW_ANIMATION_MS = 600;
 
 /**
- * Base line element for read-only/playback mode.
- * When animate=true, plays a stroke-drawing animation on mount.
+ * 基础线条元素（只读/播放模式）
+ * 当 animate=true 时，在挂载时播放描边动画
  */
 export function BaseLineElement({ elementInfo, animate }: BaseLineElementProps) {
   const { shadowStyle } = useElementShadow(elementInfo.shadow);
@@ -46,7 +46,7 @@ export function BaseLineElement({ elementInfo, animate }: BaseLineElementProps) 
     return getLineElementPath(elementInfo);
   }, [elementInfo]);
 
-  // Stroke-drawing animation on mount (whiteboard only)
+  // 挂载时的描边动画（仅白板）
   useEffect(() => {
     if (!animate) return;
     const pathEl = pathRef.current;
@@ -54,25 +54,25 @@ export function BaseLineElement({ elementInfo, animate }: BaseLineElementProps) 
 
     const length = pathEl.getTotalLength();
     if (length === 0) {
-      // Zero-length path — skip animation, reveal markers on next tick
+      // 零长度路径 — 跳过动画，在下一帧显示端点标记
       const t = setTimeout(() => setDrawComplete(true), 0);
       return () => clearTimeout(t);
     }
 
-    // Initial state: line fully hidden via dash offset
+    // 初始状态：通过虚线偏移完全隐藏线条
     pathEl.style.strokeDasharray = `${length}`;
     pathEl.style.strokeDashoffset = `${length}`;
     pathEl.style.transition = 'none';
 
-    // Force reflow so the browser registers the initial state
+    // 强制重排，让浏览器注册初始状态
     pathEl.getBoundingClientRect();
 
-    // Animate: draw the line from start to end
+    // 动画：从起点到终点绘制线条
     pathEl.style.transition = `stroke-dashoffset ${DRAW_ANIMATION_MS}ms ease-out`;
     pathEl.style.strokeDashoffset = '0';
 
-    // After animation, restore the original dash style (for dashed/dotted lines)
-    // and show endpoint markers
+    // 动画结束后，恢复原始虚线样式（用于虚线/点线）
+    // 并显示端点标记
     const timer = setTimeout(() => {
       pathEl.style.transition = 'none';
       pathEl.style.strokeDasharray = '';

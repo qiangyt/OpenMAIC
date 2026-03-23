@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { SlideBackground } from '@/lib/types/slides';
 
 /**
- * Convert slide background data to CSS styles
+ * 将幻灯片背景数据转换为 CSS 样式
  */
 export function useSlideBackgroundStyle(background: SlideBackground | undefined) {
   const backgroundStyle = useMemo<React.CSSProperties>(() => {
@@ -10,11 +10,11 @@ export function useSlideBackgroundStyle(background: SlideBackground | undefined)
 
     const { type, color, image, gradient } = background;
 
-    // Solid color background
+    // 纯色背景
     if (type === 'solid') return { backgroundColor: color };
 
-    // Image background mode
-    // Includes: background image, background size, whether to repeat
+    // 图片背景模式
+    // 包含：背景图片、背景大小、是否重复
     if (type === 'image' && image) {
       const { src, size } = image;
       if (!src) return { backgroundColor: '#fff' };
@@ -32,7 +32,7 @@ export function useSlideBackgroundStyle(background: SlideBackground | undefined)
       };
     }
 
-    // Gradient background
+    // 渐变背景
     if (type === 'gradient' && gradient) {
       const { type, colors, rotate } = gradient;
       const list = colors.map((item) => `${item.color} ${item.pos}%`);

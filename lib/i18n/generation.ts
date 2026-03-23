@@ -18,7 +18,7 @@ export const generationZhCN = {
     fileTooLarge: '文件过大，请选择小于50MB的PDF文件',
   },
   generation: {
-    // Progress steps (used dynamically via activeStep)
+    // 进度步骤（通过 activeStep 动态使用）
     analyzingPdf: '解析 PDF 文档',
     analyzingPdfDesc: '正在提取文档结构和内容...',
     generatingOutlines: '生成课程大纲',
@@ -45,17 +45,17 @@ export const generationZhCN = {
     aiWorking: 'AI智能体工作中...',
     textTruncated: '文档文本较长，已截取前 {n} 字符用于生成',
     imageTruncated: '文档含 {total} 张图片，超出上限 {max} 张，多余图片将仅以文字描述传递',
-    // Agent generation
+    // 智能体生成
     agentGeneration: '生成课堂角色',
     agentGenerationDesc: '正在根据课程内容生成角色...',
     agentRevealTitle: '你的课堂角色',
     viewAgents: '查看角色',
     continue: '继续',
-    // Outline errors
+    // 大纲错误
     outlineRetrying: '大纲生成异常，正在重试...',
     outlineEmptyResponse: '模型未返回有效的大纲内容，请检查模型配置后重试',
     outlineGenerateFailed: '大纲生成失败，请稍后重试',
-    // Web Search
+    // 网络搜索
     webSearching: '网络搜索',
     webSearchingDesc: '正在搜索网络获取最新资料',
     webSearchFailed: '网络搜索失败',
@@ -82,7 +82,7 @@ export const generationEnUS = {
     fileTooLarge: 'File too large. Please select a PDF file smaller than 50MB',
   },
   generation: {
-    // Progress steps (used dynamically via activeStep)
+    // 进度步骤（通过 activeStep 动态使用）
     analyzingPdf: 'Analyzing PDF Document',
     analyzingPdfDesc: 'Extracting document structure and content...',
     generatingOutlines: 'Drafting Course Outline',
@@ -110,18 +110,18 @@ export const generationEnUS = {
     textTruncated: 'Document text is long, using first {n} characters for generation',
     imageTruncated:
       '{total} images found, exceeding the {max} image limit. Extra images will use text descriptions only',
-    // Agent generation
+    // 智能体生成
     agentGeneration: 'Generating Classroom Roles',
     agentGenerationDesc: 'Generating roles based on course content...',
     agentRevealTitle: 'Your Classroom Roles',
     viewAgents: 'View Roles',
     continue: 'Continue',
-    // Outline errors
+    // 大纲错误
     outlineRetrying: 'Outline generation issue, retrying...',
     outlineEmptyResponse:
       'Model returned no valid outlines. Please check model configuration and try again',
     outlineGenerateFailed: 'Outline generation failed, please try again later',
-    // Web Search
+    // 网络搜索
     webSearching: 'Web Search',
     webSearchingDesc: 'Searching the web for up-to-date information',
     webSearchFailed: 'Web search failed',

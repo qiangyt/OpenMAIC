@@ -72,7 +72,7 @@ export function mtable(element, targetParent, previousSibling, nextSibling, ance
 }
 
 export function mtd(element, targetParent, previousSibling, nextSibling, ancestors) {
-  // table cell
+  // 表格单元格
   const targetElement = {
     name: 'm:e',
     type: 'tag',
@@ -84,7 +84,7 @@ export function mtd(element, targetParent, previousSibling, nextSibling, ancesto
 }
 
 export function mtr(element, targetParent, previousSibling, nextSibling, ancestors) {
-  // table row
+  // 表格行
   const targetElement = {
     name: 'm:mr',
     type: 'tag',

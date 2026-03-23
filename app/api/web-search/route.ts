@@ -1,8 +1,8 @@
 /**
- * Web Search API
+ * 网页搜索 API
  *
  * POST /api/web-search
- * Simple JSON request/response using Tavily search.
+ * 使用 Tavily 搜索的简单 JSON 请求/响应。
  */
 
 import { searchWithTavily, formatSearchResultsAsContext } from '@/lib/web-search/tavily';

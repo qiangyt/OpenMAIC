@@ -46,8 +46,8 @@ export async function POST(req: NextRequest) {
       return apiError('REDIRECT_NOT_ALLOWED', 403, 'Redirects are not allowed');
     }
 
-    // MinerU's FastAPI root returns 404 (no root route), but the server is reachable.
-    // Any HTTP response (including 404) means the server is up.
+    // MinerU 的 FastAPI 根路径返回 404（没有根路由），但服务器是可达的。
+    // 任何 HTTP 响应（包括 404）都意味着服务器已启动。
     return apiSuccess({
       message: 'Connection successful',
       status: response.status,

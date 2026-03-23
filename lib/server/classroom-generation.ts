@@ -178,7 +178,7 @@ export async function generateClassroom(
   const { model: languageModel, modelInfo, modelString } = resolveModel({});
   log.info(`Using server-configured model: ${modelString}`);
 
-  // Fail fast if the resolved provider has no API key configured
+  // 如果解析出的 provider 没有配置 API key，快速失败
   const { providerId } = parseModelString(modelString);
   const apiKey = resolveApiKey(providerId);
   if (!apiKey) {
@@ -210,7 +210,7 @@ export async function generateClassroom(
   };
   const pdfText = pdfContent?.text || undefined;
 
-  // Resolve agents based on agentMode
+  // 根据 agentMode 解析智能体
   let agents: AgentInfo[];
   const agentMode = input.agentMode || 'default';
   if (agentMode === 'generate') {
@@ -234,7 +234,7 @@ export async function generateClassroom(
     scenesGenerated: 0,
   });
 
-  // Web search (optional, graceful degradation)
+  // 网络搜索（可选，优雅降级）
   let researchContext: string | undefined;
   if (input.enableWebSearch) {
     const tavilyKey = resolveWebSearchApiKey();
@@ -362,7 +362,7 @@ export async function generateClassroom(
     throw new Error('No scenes were generated');
   }
 
-  // Phase: Media generation (after all scenes generated)
+  // 阶段：媒体生成（所有场景生成完成后）
   if (input.enableImageGeneration || input.enableVideoGeneration) {
     await options.onProgress?.({
       step: 'generating_media',
@@ -381,7 +381,7 @@ export async function generateClassroom(
     }
   }
 
-  // Phase: TTS generation
+  // 阶段：TTS 生成
   if (input.enableTTS) {
     await options.onProgress?.({
       step: 'generating_tts',

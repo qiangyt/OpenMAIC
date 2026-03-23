@@ -32,19 +32,19 @@ export function MultiSelectOperate({ elementList, scaleMultiElement }: MultiSele
     maxY: 0,
   });
 
-  // Calculate border lines and resize handlers based on the multi-select range on canvas
+  // 根据画布上的多选范围计算边框线 and 缩放手柄
   const width = useMemo(() => (range.maxX - range.minX) * canvasScale, [range, canvasScale]);
   const height = useMemo(() => (range.maxY - range.minY) * canvasScale, [range, canvasScale]);
   const { resizeHandlers, borderLines } = useCommonOperate(width, height);
 
-  // Calculate the overall range of multi-selected elements on canvas
+  // 计算画布上多选元素的整体范围
   useEffect(() => {
     const { minX, maxX, minY, maxY } = getElementListRange(localActiveElementList);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM measurement requires effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM 测量需要在 effect 中进行
     setRange({ minX, maxX, minY, maxY });
   }, [localActiveElementList]);
 
-  // Disable resize in multi-select: only non-rotated images and shapes can be resized
+  // 多选时禁用缩放：只有非旋转的图片和形状可以被缩放
   const disableResize = useMemo(() => {
     return localActiveElementList.some((item) => {
       if ((item.type === 'image' || item.type === 'shape') && !item.rotate) return false;
@@ -58,7 +58,7 @@ export function MultiSelectOperate({ elementList, scaleMultiElement }: MultiSele
       style={{
         left: range.minX * canvasScale + 'px',
         top: range.minY * canvasScale + 'px',
-        pointerEvents: 'auto', // Enable mouse events for multi-select controls
+        pointerEvents: 'auto', // 启用多选控件鼠标事件
       }}
     >
       {borderLines.map((line) => (

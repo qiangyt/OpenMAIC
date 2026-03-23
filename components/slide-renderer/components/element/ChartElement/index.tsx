@@ -12,8 +12,8 @@ export interface ChartElementProps {
 }
 
 /**
- * Chart element component
- * Renders interactive charts using ECharts
+ * 图表元素组件
+ * 使用 ECharts 渲染交互式图表
  */
 export function ChartElement({ elementInfo, selectElement }: ChartElementProps) {
   const handleSelectElement = (e: React.MouseEvent | React.TouchEvent) => {

@@ -22,7 +22,7 @@ export function Ruler({ viewportStyles, elementList }: RulerProps) {
   useEffect(() => {
     const els = elementList.filter((el) => activeElementIdList.includes(el.id));
     if (!els.length) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM measurement requires effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM 测量需要在 effect 中进行
       setElementListRange(null);
     } else {
       setElementListRange(getElementListRange(els));
@@ -37,7 +37,7 @@ export function Ruler({ viewportStyles, elementList }: RulerProps) {
 
   return (
     <div className="ruler text-xs">
-      {/* Ruler corner */}
+      {/* 标尺角落 */}
       <div
         className="corner absolute bg-white border border-gray-200 w-5 h-5"
         style={{
@@ -46,7 +46,7 @@ export function Ruler({ viewportStyles, elementList }: RulerProps) {
         }}
       />
 
-      {/* Horizontal ruler */}
+      {/* 水平标尺 */}
       <div
         className="h absolute bg-white border border-gray-200 h-5 flex justify-between items-center overflow-hidden"
         style={{
@@ -64,9 +64,9 @@ export function Ruler({ viewportStyles, elementList }: RulerProps) {
             style={{ width: markerSize + 'px' }}
           >
             {marker * 100 <= viewportSize && <span>{marker * 100}</span>}
-            {/* Major tick mark */}
+            {/* 主刻度线 */}
             <div className="absolute right-0 bottom-0 w-[0.1px] h-3 bg-gray-600 last:content-none" />
-            {/* Minor tick mark (50) */}
+            {/* 次刻度线 (50) */}
             <div className="absolute right-1/2 bottom-0 w-[0.1px] h-2 bg-gray-600" />
           </div>
         ))}
@@ -82,7 +82,7 @@ export function Ruler({ viewportStyles, elementList }: RulerProps) {
         )}
       </div>
 
-      {/* Vertical ruler */}
+      {/* 垂直标尺 */}
       <div
         className="v absolute bg-white border border-gray-200 w-5 overflow-hidden"
         style={{
@@ -100,9 +100,9 @@ export function Ruler({ viewportStyles, elementList }: RulerProps) {
             style={{ height: markerSize + 'px' }}
           >
             {marker * 100 <= viewportSize * viewportRatio && <span>{marker * 100}</span>}
-            {/* Major tick mark */}
+            {/* 主刻度线 */}
             <div className="absolute bottom-0 right-0 h-[0.1px] w-3 bg-gray-600 last:content-none" />
-            {/* Minor tick mark (50) */}
+            {/* 次刻度线 (50) */}
             <div className="absolute bottom-1/2 right-0 h-[0.1px] w-2 bg-gray-600" />
           </div>
         ))}

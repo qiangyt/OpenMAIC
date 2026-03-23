@@ -81,7 +81,7 @@ export type ConfirmationRequestProps = {
 export const ConfirmationRequest = ({ children }: ConfirmationRequestProps) => {
   const { state } = useConfirmation();
 
-  // Only show when approval is requested
+  // 仅在请求批准时显示
   if (state !== 'approval-requested') {
     return null;
   }
@@ -96,7 +96,7 @@ export type ConfirmationAcceptedProps = {
 export const ConfirmationAccepted = ({ children }: ConfirmationAcceptedProps) => {
   const { approval, state } = useConfirmation();
 
-  // Only show when approved and in response states
+  // 仅在已批准且处于响应状态时显示
   if (
     !approval?.approved ||
     (state !== 'approval-responded' && state !== 'output-denied' && state !== 'output-available')
@@ -114,7 +114,7 @@ export type ConfirmationRejectedProps = {
 export const ConfirmationRejected = ({ children }: ConfirmationRejectedProps) => {
   const { approval, state } = useConfirmation();
 
-  // Only show when rejected and in response states
+  // 仅在已拒绝且处于响应状态时显示
   if (
     approval?.approved !== false ||
     (state !== 'approval-responded' && state !== 'output-denied' && state !== 'output-available')
@@ -130,7 +130,7 @@ export type ConfirmationActionsProps = ComponentProps<'div'>;
 export const ConfirmationActions = ({ className, ...props }: ConfirmationActionsProps) => {
   const { state } = useConfirmation();
 
-  // Only show when approval is requested
+  // 仅在请求批准时显示
   if (state !== 'approval-requested') {
     return null;
   }

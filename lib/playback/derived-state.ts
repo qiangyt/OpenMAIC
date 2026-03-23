@@ -1,16 +1,15 @@
 /**
- * Derived Playback State - Pure function that computes a high-level PlaybackView
- * from the ~15 raw state variables scattered across Stage.
+ * 派生播放状态 - 纯函数，从分散在 Stage 中的约 15 个原始状态变量
+ * 计算出高层级的 PlaybackView。
  *
- * This centralises all "what is happening now?" derivation logic so that
- * both Stage and Roundtable can consume a single, consistent view object
- * instead of re-deriving the same conditions inline.
+ * 这将所有"当前正在发生什么？"的推导逻辑集中化，使 Stage 和 Roundtable
+ * 都能消费单一、一致的视图对象，而不是内联重复推导相同的条件。
  */
 
 import type { EngineMode, TriggerEvent } from './types';
 
 // ---------------------------------------------------------------------------
-// Input: raw state collected from Stage's useState variables
+// 输入：从 Stage 的 useState 变量收集的原始状态
 // ---------------------------------------------------------------------------
 
 export interface PlaybackRawState {
@@ -25,14 +24,14 @@ export interface PlaybackRawState {
   discussionTrigger: TriggerEvent | null;
   playbackCompleted: boolean;
   idleText: string | null;
-  /** Whether the speaking agent is a student (not teacher). Provided by caller. */
+  /** 当前发言的智能体是否为学生（非教师）。由调用方提供。 */
   speakingStudent: boolean;
-  /** Active session type — stays set between agent-loop turns (cleared only by doSessionCleanup). */
+  /** 当前会话类型 — 在智能体循环轮次之间保持设置（仅由 doSessionCleanup 清除）。 */
   sessionType: string | null;
 }
 
 // ---------------------------------------------------------------------------
-// Output: a single derived view consumed by Roundtable (and Stage for gating)
+// 输出：由 Roundtable（以及 Stage 用于门控）消费的单一派生视图
 // ---------------------------------------------------------------------------
 
 export type PlaybackPhase =
@@ -48,30 +47,30 @@ export type PlaybackPhase =
 export type BubbleButtonState = 'bars' | 'play' | 'restart' | 'none';
 
 export interface PlaybackView {
-  /** High-level phase — "what is happening right now?" */
+  /** 高层级阶段 — "当前正在发生什么？" */
   phase: PlaybackPhase;
 
-  /** Text to display in the speech bubble (without userMessage overlay) */
+  /** 在语音气泡中显示的文本（不含 userMessage 覆盖层） */
   sourceText: string;
 
-  /** Who owns the speech bubble */
+  /** 谁拥有语音气泡 */
   bubbleRole: 'teacher' | 'agent' | 'user' | null;
 
-  /** Who is actively speaking (avatar highlight) */
+  /** 谁正在主动发言（头像高亮） */
   activeRole: 'teacher' | 'agent' | 'user' | null;
 
-  /** Bubble button state */
+  /** 气泡按钮状态 */
   buttonState: BubbleButtonState;
 
-  /** Whether we're in a live SSE flow (suppresses lecture text) */
+  /** 是否处于实时 SSE 流中（抑制讲稿文本） */
   isInLiveFlow: boolean;
 
-  /** Whether any topic-related activity blocks scene switching */
+  /** 是否有任何主题相关活动阻止场景切换 */
   isTopicActive: boolean;
 }
 
 // ---------------------------------------------------------------------------
-// Pure computation
+// 纯计算
 // ---------------------------------------------------------------------------
 
 export function computePlaybackView(raw: PlaybackRawState): PlaybackView {
@@ -92,19 +91,18 @@ export function computePlaybackView(raw: PlaybackRawState): PlaybackView {
   } = raw;
 
   // ---- isInLiveFlow ----
-  // True when there's any live SSE activity (agent speaking, thinking, or streaming).
-  // Includes chatIsStreaming to cover the entire QA session (gaps between
-  // agent response completion and user's next message).
-  // Includes sessionType to bridge the gap between agent-loop turns: the `done`
-  // event clears chatIsStreaming, but the session is still active until
-  // doSessionCleanup runs. Without this, bubbleRole briefly falls through to
-  // the 'teacher' idleText case, causing a visible flash.
+  // 当存在任何实时 SSE 活动（智能体发言、思考或流式传输）时为真。
+  // 包含 chatIsStreaming 以覆盖整个问答会话（智能体响应完成与用户
+  // 下一条消息之间的间隙）。
+  // 包含 sessionType 以桥接智能体循环轮次之间的间隙：`done` 事件
+  // 会清除 chatIsStreaming，但会话在 doSessionCleanup 运行前仍处于
+  // 活动状态。若没有这个，bubbleRole 会短暂落入 teacher 的 idleText
+  // 分支，导致可见的闪烁。
   const isInLiveFlow = !!(speakingAgentId || thinkingState || chatIsStreaming || sessionType);
 
   // ---- phase ----
-  // Live flow states MUST be checked before playbackCompleted so that
-  // starting a QA from the completed state doesn't leak the restart icon
-  // into agent bubbles.
+  // 实时流状态必须在 playbackCompleted 之前检查，这样从完成状态
+  // 开始问答时不会让重启图标泄漏到智能体气泡中。
   let phase: PlaybackPhase;
   if (isCueUser) {
     phase = 'cueUser';
@@ -124,12 +122,12 @@ export function computePlaybackView(raw: PlaybackRawState): PlaybackView {
     phase = 'idle';
   }
 
-  // ---- sourceText (without userMessage — Roundtable overlays that locally) ----
+  // ---- sourceText（不含 userMessage — Roundtable 在本地覆盖它） ----
   let sourceText: string;
   if (liveSpeech) {
     sourceText = liveSpeech;
   } else if (isInLiveFlow) {
-    // In live flow but no text yet — show empty (loading dots handled by bubble)
+    // 在实时流中但还没有文本 — 显示空（加载点由气泡处理）
     sourceText = '';
   } else if (lectureSpeech) {
     sourceText = lectureSpeech;
@@ -139,7 +137,7 @@ export function computePlaybackView(raw: PlaybackRawState): PlaybackView {
     sourceText = idleText || '';
   }
 
-  // ---- bubble loading states ----
+  // ---- 气泡加载状态 ----
   const isBubbleLoading = !!(speakingAgentId && !liveSpeech);
   const isAgentLoading = !!(speakingStudent && !liveSpeech);
 
@@ -184,9 +182,9 @@ export function computePlaybackView(raw: PlaybackRawState): PlaybackView {
   // ---- buttonState ----
   let buttonState: BubbleButtonState;
   if (isTopicPending) {
-    buttonState = 'play'; // resume topic
+    buttonState = 'play'; // 恢复主题
   } else if (phase === 'lecturePlaying') {
-    buttonState = 'bars'; // breathing bars + hover pause
+    buttonState = 'bars'; // 呼吸条 + 悬停暂停
   } else if (phase === 'discussionActive') {
     buttonState = 'bars';
   } else if (phase === 'completed') {

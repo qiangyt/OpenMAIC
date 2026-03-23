@@ -74,7 +74,7 @@ export const settingsZhCN = {
     },
     close: '关闭',
     save: '保存',
-    // Provider settings
+    // 模型提供方设置
     providers: '语言模型',
     addProviderDescription: '添加自定义模型提供方以扩展可用的AI模型',
     providerNames: {
@@ -115,7 +115,7 @@ export const settingsZhCN = {
     fetch: '获取',
     connectionSuccess: '连接成功',
     connectionFailed: '连接失败',
-    // Model capabilities
+    // 模型能力
     capabilities: {
       vision: '视觉',
       tools: '工具',
@@ -124,7 +124,7 @@ export const settingsZhCN = {
     contextWindow: '上下文',
     contextShort: '上下文',
     outputWindow: '输出',
-    // Provider management
+    // 提供方管理
     addProviderButton: '添加',
     addProviderDialog: '添加模型提供方',
     providerName: '名称',
@@ -153,7 +153,7 @@ export const settingsZhCN = {
     modelIdRequired: '请输入模型 ID',
     noModelsAvailable: '没有可用于测试的模型',
     providerMetadata: 'Provider 元数据',
-    // Model editing
+    // 模型编辑
     editModel: '编辑模型',
     editModelDescription: '编辑模型配置和能力',
     addNewModel: '新建模型',
@@ -174,7 +174,7 @@ export const settingsZhCN = {
     saveModel: '保存',
     modelsManagementDescription:
       '在此管理该提供方的模型列表。若需选择使用的模型，请前往"常规设置"。',
-    // General settings
+    // 常规设置
     howToUse: '使用说明',
     step1ConfigureProvider:
       '前往"模型提供方"页面，选择或添加一个提供方，配置连接信息（API 密钥、Base URL 等）',
@@ -188,11 +188,11 @@ export const settingsZhCN = {
     noConfiguredProviders: '暂无已配置的提供方',
     configureProvidersFirst: '请先在左侧"模型提供方"中配置提供方连接信息',
     currentlyUsing: '当前使用',
-    // TTS settings
+    // 语音合成设置
     ttsSettings: '语音合成',
-    // ASR settings
+    // 语音识别设置
     asrSettings: '语音识别',
-    // Audio settings (legacy)
+    // 音频设置（旧版）
     audioSettings: '音频设置',
     ttsSection: '文字转语音 (TTS)',
     asrSection: '语音识别 (ASR)',
@@ -216,7 +216,7 @@ export const settingsZhCN = {
     enterApiKey: '输入 API Key',
     enterCustomBaseUrl: '输入自定义 Base URL',
     browserNativeNote: '浏览器原生 ASR 无需配置，完全免费',
-    // Audio provider names
+    // 音频提供方名称
     providerOpenAITTS: 'OpenAI TTS (gpt-4o-mini-tts)',
     providerAzureTTS: 'Azure TTS',
     providerGLMTTS: 'GLM TTS',
@@ -261,7 +261,7 @@ export const settingsZhCN = {
     noTranscriptionResult: '无识别结果',
     baseUrlOptional: 'Base URL（可选）',
     defaultValue: '默认',
-    // TTS Voice descriptions (OpenAI)
+    // TTS 音色描述（OpenAI）
     voiceMarin: '推荐 - 最佳质量',
     voiceCedar: '推荐 - 最佳质量',
     voiceAlloy: '中性、平衡',
@@ -275,7 +275,7 @@ export const settingsZhCN = {
     voiceSage: '智慧、沉着',
     voiceShimmer: '女性、柔和',
     voiceVerse: '自然、流畅',
-    // TTS Voice descriptions (GLM)
+    // TTS 音色描述（GLM）
     glmVoiceTongtong: '默认音色',
     glmVoiceChuichui: '锤锤音色',
     glmVoiceXiaochen: '小陈音色',
@@ -283,7 +283,7 @@ export const settingsZhCN = {
     glmVoiceKazi: '动动动物圈kazi音色',
     glmVoiceDouji: '动动动物圈douji音色',
     glmVoiceLuodo: '动动动物圈luodo音色',
-    // TTS Voice descriptions (Qwen)
+    // TTS 音色描述（Qwen）
     qwenVoiceCherry: '阳光积极、亲切自然小姐姐',
     qwenVoiceSerena: '温柔小姐姐',
     qwenVoiceEthan: '阳光、温暖、活力、朝气',
@@ -334,7 +334,7 @@ export const settingsZhCN = {
     qwenVoiceEric: '跳脱市井的成都男子',
     qwenVoiceRocky: '幽默风趣的阿强',
     qwenVoiceKiki: '甜美的港妹闺蜜',
-    // ASR Language names (native forms - autoglossonyms)
+    // ASR 语言名称（本地形式 - 自称名）
     lang_auto: '自动检测',
     lang_zh: '中文',
     lang_yue: '粤語',
@@ -395,7 +395,7 @@ export const settingsZhCN = {
     lang_ur: 'اردو',
     lang_vi: 'Tiếng Việt',
     lang_cy: 'Cymraeg',
-    // BCP-47 format language codes (for Web Speech API)
+    // BCP-47 格式语言代码（用于 Web Speech API）
     'lang_zh-CN': '中文（简体，中国）',
     'lang_zh-TW': '中文（繁體，台灣）',
     'lang_zh-HK': '粵語（香港）',
@@ -445,7 +445,7 @@ export const settingsZhCN = {
     'lang_fil-PH': 'Filipino (Pilipinas)',
     'lang_af-ZA': 'Afrikaans (Suid-Afrika)',
     'lang_uk-UA': 'Українська (Україна)',
-    // PDF settings
+    // PDF 解析设置
     pdfSettings: 'PDF 解析',
     pdfParsingSettings: 'PDF 解析设置',
     pdfDescription: '选择 PDF 解析引擎，支持文本提取、图片处理和表格识别',
@@ -470,7 +470,7 @@ export const settingsZhCN = {
     featureFormulas: '公式识别',
     featureLayoutAnalysis: '布局分析',
     featureMetadata: '元数据',
-    // Image Generation settings
+    // 图像生成设置
     enableImageGeneration: '启用 AI 图片生成',
     imageGenerationDisabledHint: '启用后，课程生成时将自动生成配图',
     imageSettings: '图像生成',
@@ -490,7 +490,7 @@ export const settingsZhCN = {
     imageTestPromptDefault: '一只可爱的猫咪坐在书桌上',
     imageGenerating: '正在生成图像...',
     imageGenerationFailed: '图像生成失败',
-    // Video Generation settings
+    // 视频生成设置
     enableVideoGeneration: '启用 AI 视频生成',
     videoGenerationDisabledHint: '启用后，课程生成时将自动生成视频',
     videoSettings: '视频生成',
@@ -514,21 +514,21 @@ export const settingsZhCN = {
     mediaRetry: '重试',
     mediaContentSensitive: '抱歉，该内容触发了安全检查',
     mediaGenerationDisabled: '已在设置中关闭生成',
-    // Agent settings (kept with main settings block above)
+    // 智能体设置（保留在上面的主设置块中）
     singleAgent: '单智能体模式',
     multiAgent: '多智能体模式',
     selectAgents: '选择智能体',
     noVisionWarning:
       '当前模型不支持视觉能力，图片仍可放入幻灯片，但模型无法理解图片内容来优化选择和布局',
-    // Server provider configuration
+    // 服务端提供方配置
     serverConfigured: '服务端',
     serverConfiguredNotice:
       '管理员已在服务端配置了此提供方的 API Key，可直接使用。也可输入自己的 Key 覆盖。',
     optionalOverride: '可选，留空则使用服务端配置',
-    // Access code
+    // 访问码
     setupNeeded: '请先完成配置',
     modelNotConfigured: '请选择一个模型以开始使用',
-    // Clear cache
+    // 清空缓存
     dangerZone: '危险区域',
     clearCache: '清空本地缓存',
     clearCacheDescription:
@@ -541,7 +541,7 @@ export const settingsZhCN = {
     clearCacheButton: '永久删除所有数据',
     clearCacheSuccess: '缓存已清空，页面即将刷新',
     clearCacheFailed: '清空缓存失败，请重试',
-    // Web Search settings
+    // 网络搜索设置
     webSearchSettings: '网络搜索',
     webSearchApiKey: 'Tavily API Key',
     webSearchApiKeyPlaceholder: '输入你的 Tavily API Key',
@@ -657,7 +657,7 @@ export const settingsEnUS = {
     },
     close: 'Close',
     save: 'Save',
-    // Provider settings
+    // 模型提供方设置
     providers: 'LLM',
     addProviderDescription: 'Add custom model providers to extend available AI models',
     providerNames: {
@@ -698,7 +698,7 @@ export const settingsEnUS = {
     fetch: 'Fetch',
     connectionSuccess: 'Connection successful',
     connectionFailed: 'Connection failed',
-    // Model capabilities
+    // 模型能力
     capabilities: {
       vision: 'Vision',
       tools: 'Tools',
@@ -707,7 +707,7 @@ export const settingsEnUS = {
     contextWindow: 'Context',
     contextShort: 'ctx',
     outputWindow: 'Output',
-    // Provider management
+    // 提供方管理
     addProviderButton: 'Add',
     addProviderDialog: 'Add Model Provider',
     providerName: 'Name',
@@ -737,7 +737,7 @@ export const settingsEnUS = {
     modelIdRequired: 'Please enter model ID',
     noModelsAvailable: 'No models available for testing',
     providerMetadata: 'Provider Metadata',
-    // Model editing
+    // 模型编辑
     editModel: 'Edit Model',
     editModelDescription: 'Edit model configuration and capabilities',
     addNewModel: 'New Model',
@@ -758,7 +758,7 @@ export const settingsEnUS = {
     saveModel: 'Save',
     modelsManagementDescription:
       'Manage models for this provider. To select the active model, go to "General".',
-    // General settings
+    // 常规设置
     howToUse: 'How to Use',
     step1ConfigureProvider:
       'Go to "Model Providers", select or add a provider, and configure connection settings (API key, Base URL, etc.)',
@@ -773,11 +773,11 @@ export const settingsEnUS = {
     configureProvidersFirst:
       'Please configure provider connection settings in "Model Providers" on the left',
     currentlyUsing: 'Currently using',
-    // TTS settings
+    // 语音合成设置
     ttsSettings: 'Text-to-Speech',
-    // ASR settings
+    // 语音识别设置
     asrSettings: 'Speech Recognition',
-    // Audio settings (legacy)
+    // 音频设置（旧版）
     audioSettings: 'Audio Settings',
     ttsSection: 'Text-to-Speech (TTS)',
     asrSection: 'Automatic Speech Recognition (ASR)',
@@ -801,7 +801,7 @@ export const settingsEnUS = {
     enterApiKey: 'Enter API Key',
     enterCustomBaseUrl: 'Enter custom Base URL',
     browserNativeNote: 'Browser Native ASR requires no configuration and is completely free',
-    // Audio provider names
+    // 音频提供方名称
     providerOpenAITTS: 'OpenAI TTS (gpt-4o-mini-tts)',
     providerAzureTTS: 'Azure TTS',
     providerGLMTTS: 'GLM TTS',
@@ -847,7 +847,7 @@ export const settingsEnUS = {
     noTranscriptionResult: 'No transcription result',
     baseUrlOptional: 'Base URL (Optional)',
     defaultValue: 'Default',
-    // TTS Voice descriptions (OpenAI)
+    // TTS 音色描述（OpenAI）
     voiceMarin: 'Recommended - Best Quality',
     voiceCedar: 'Recommended - Best Quality',
     voiceAlloy: 'Neutral, Balanced',
@@ -861,7 +861,7 @@ export const settingsEnUS = {
     voiceSage: 'Wise, Composed',
     voiceShimmer: 'Female, Soft',
     voiceVerse: 'Natural, Smooth',
-    // TTS Voice descriptions (GLM)
+    // TTS 音色描述（GLM）
     glmVoiceTongtong: 'Default voice',
     glmVoiceChuichui: 'Chuichui voice',
     glmVoiceXiaochen: 'Xiaochen voice',
@@ -869,7 +869,7 @@ export const settingsEnUS = {
     glmVoiceKazi: 'Kazi voice',
     glmVoiceDouji: 'Douji voice',
     glmVoiceLuodo: 'Luodo voice',
-    // TTS Voice descriptions (Qwen)
+    // TTS 音色描述（Qwen）
     qwenVoiceCherry: 'Sunny, warm and natural',
     qwenVoiceSerena: 'Gentle and soft',
     qwenVoiceEthan: 'Energetic and vibrant',
@@ -919,7 +919,7 @@ export const settingsEnUS = {
     qwenVoiceEric: 'Chengdu gentleman',
     qwenVoiceRocky: 'Humorous Hong Kong guy',
     qwenVoiceKiki: 'Sweet Hong Kong girl',
-    // ASR Language names (native forms - autoglossonyms)
+    // ASR 语言名称（本地形式 - 自称名）
     lang_auto: 'Auto Detect',
     lang_zh: '中文',
     lang_yue: '粤語',
@@ -980,7 +980,7 @@ export const settingsEnUS = {
     lang_ur: 'اردو',
     lang_vi: 'Tiếng Việt',
     lang_cy: 'Cymraeg',
-    // BCP-47 format language codes (for Web Speech API)
+    // BCP-47 格式语言代码（用于 Web Speech API）
     'lang_zh-CN': '中文（简体，中国）',
     'lang_zh-TW': '中文（繁體，台灣）',
     'lang_zh-HK': '粵語（香港）',
@@ -1030,7 +1030,7 @@ export const settingsEnUS = {
     'lang_fil-PH': 'Filipino (Pilipinas)',
     'lang_af-ZA': 'Afrikaans (Suid-Afrika)',
     'lang_uk-UA': 'Українська (Україна)',
-    // PDF settings
+    // PDF 解析设置
     pdfSettings: 'PDF Parsing',
     pdfParsingSettings: 'PDF Parsing Settings',
     pdfDescription:
@@ -1057,7 +1057,7 @@ export const settingsEnUS = {
     featureFormulas: 'Formula Recognition',
     featureLayoutAnalysis: 'Layout Analysis',
     featureMetadata: 'Metadata',
-    // Image Generation settings
+    // 图像生成设置
     enableImageGeneration: 'Enable AI Image Generation',
     imageGenerationDisabledHint:
       'When enabled, images will be auto-generated during course creation',
@@ -1078,7 +1078,7 @@ export const settingsEnUS = {
     imageTestPromptDefault: 'A cute cat sitting on a desk',
     imageGenerating: 'Generating image...',
     imageGenerationFailed: 'Image generation failed',
-    // Video Generation settings
+    // 视频生成设置
     enableVideoGeneration: 'Enable AI Video Generation',
     videoGenerationDisabledHint:
       'When enabled, videos will be auto-generated during course creation',
@@ -1103,21 +1103,21 @@ export const settingsEnUS = {
     mediaRetry: 'Retry',
     mediaContentSensitive: 'Sorry, this content triggered a safety check.',
     mediaGenerationDisabled: 'Generation disabled in settings',
-    // Agent settings (kept with main settings block above)
+    // 智能体设置（保留在上面的主设置块中）
     singleAgent: 'Single Agent',
     multiAgent: 'Multi-Agent',
     selectAgents: 'Select Agents',
     noVisionWarning:
       'Current model does not support vision. Images can still be placed in slides, but the model cannot understand image content to optimize selection and layout',
-    // Server provider configuration
+    // 服务端提供方配置
     serverConfigured: 'Server',
     serverConfiguredNotice:
       'Admin has configured an API key for this provider on the server. You can use it directly or enter your own key to override.',
     optionalOverride: 'Optional — leave empty to use server config',
-    // Access code
+    // 访问码
     setupNeeded: 'Setup required',
     modelNotConfigured: 'Please select a model to get started',
-    // Clear cache
+    // 清空缓存
     dangerZone: 'Danger Zone',
     clearCache: 'Clear Local Cache',
     clearCacheDescription:
@@ -1132,7 +1132,7 @@ export const settingsEnUS = {
     clearCacheButton: 'Permanently Delete All Data',
     clearCacheSuccess: 'Cache cleared, page will refresh shortly',
     clearCacheFailed: 'Failed to clear cache, please try again',
-    // Web Search settings
+    // 网络搜索设置
     webSearchSettings: 'Web Search',
     webSearchApiKey: 'Tavily API Key',
     webSearchApiKeyPlaceholder: 'Enter your Tavily API Key',

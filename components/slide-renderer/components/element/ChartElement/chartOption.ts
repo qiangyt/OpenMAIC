@@ -275,7 +275,7 @@ export const getChartOption = ({
     };
   }
   if (type === 'radar') {
-    // Display is broken without max in indicator; setting max triggers console warnings. No workaround — waiting for ECharts to fix this bug
+    // 如果 indicator 中没有 max，显示会出错；设置 max 会触发控制台警告。暂无解决方案 — 等待 ECharts 修复此 bug
     // const values: number[] = []
     // for (const item of data.series) {
     //   values.push(...item)

@@ -17,11 +17,11 @@ export interface TTSPreviewOptions {
 }
 
 /**
- * Shared hook for TTS preview playback (browser-native and API-based).
+ * TTS 预览播放的共享 Hook（浏览器原生和基于 API）。
  *
- * - `previewing`: true while a preview is active (including audio playback)
- * - `startPreview(opts)`: start a preview; rejects with non-abort errors
- * - `stopPreview()`: cancel any active preview and reset state
+ * - `previewing`：预览激活时为 true（包括音频播放中）
+ * - `startPreview(opts)`：开始预览；非中止错误会抛出
+ * - `stopPreview()`：取消任何活动预览并重置状态
  */
 export function useTTSPreview() {
   const [previewing, setPreviewing] = useState(false);
@@ -30,7 +30,7 @@ export function useTTSPreview() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
 
-  /** Cancel in-flight work and release resources (no state update). */
+  /** 取消进行中的工作并释放资源（不更新状态）。 */
   const cleanup = useCallback(() => {
     requestIdRef.current += 1;
     cancelRef.current?.();
@@ -45,18 +45,18 @@ export function useTTSPreview() {
     }
   }, []);
 
-  /** Cancel any active preview and reset the previewing flag. */
+  /** 取消任何活动预览并重置 previewing 标志。 */
   const stopPreview = useCallback(() => {
     cleanup();
     setPreviewing(false);
   }, [cleanup]);
 
-  // Cleanup on unmount (skip state update to avoid React warnings).
+  // 卸载时清理（跳过状态更新以避免 React 警告）。
   useEffect(() => cleanup, [cleanup]);
 
   /**
-   * Start a TTS preview.
-   * Abort errors are swallowed; all other errors are re-thrown for the caller.
+   * 开始 TTS 预览。
+   * 中止错误会被吞掉；所有其他错误会重新抛出给调用者。
    */
   const startPreview = useCallback(
     async (options: TTSPreviewOptions): Promise<void> => {
@@ -90,7 +90,7 @@ export function useTTSPreview() {
           return;
         }
 
-        // API-based TTS
+        // 基于 API 的 TTS
         const body: Record<string, unknown> = {
           text: options.text,
           audioId: 'preview',
@@ -115,7 +115,7 @@ export function useTTSPreview() {
           throw new Error(data.error || 'TTS preview failed');
         }
 
-        // Decode base64 → Blob → Object URL
+        // 解码 base64 → Blob → Object URL
         const binaryStr = atob(data.base64);
         const bytes = new Uint8Array(binaryStr.length);
         for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);

@@ -6,13 +6,13 @@ import { Loader2, CheckCircle2, XCircle, Circle } from 'lucide-react';
 import { useI18n } from '@/lib/hooks/use-i18n';
 
 interface GeneratingProgressProps {
-  outlineReady: boolean; // Is outline generation complete?
-  firstPageReady: boolean; // Is first page generated?
+  outlineReady: boolean; // 大纲生成是否完成？
+  firstPageReady: boolean; // 首页是否已生成？
   statusMessage: string;
   error?: string | null;
 }
 
-// Status item component - declared outside main component
+// 状态项组件 - 在主组件外部声明
 function StatusItem({
   completed,
   inProgress,
@@ -63,7 +63,7 @@ export function GeneratingProgress({
   const { t } = useI18n();
   const [dots, setDots] = useState('');
 
-  // Animated dots for loading state
+  // 加载状态的动态点动画
   useEffect(() => {
     if (!error && !firstPageReady) {
       const interval = setInterval(() => {
@@ -98,7 +98,7 @@ export function GeneratingProgress({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Two milestone status items */}
+          {/* 两个里程碑状态项 */}
           <div className="divide-y">
             <StatusItem
               completed={outlineReady}
@@ -120,14 +120,14 @@ export function GeneratingProgress({
             />
           </div>
 
-          {/* Status message */}
+          {/* 状态消息 */}
           {statusMessage && !error && (
             <div className="pt-2 border-t">
               <p className="text-sm text-muted-foreground">{statusMessage}</p>
             </div>
           )}
 
-          {/* Error message */}
+          {/* 错误消息 */}
           {error && (
             <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
               <p className="text-sm text-destructive">{error}</p>

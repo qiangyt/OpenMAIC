@@ -13,11 +13,11 @@ interface ShapePathData {
 }
 
 /**
- * Move shape keypoint Hook
+ * 移动形状关键点 Hook
  *
- * @param elementListRef - Element list ref (used to read the latest value on mouseup)
- * @param setElementList - Element list setter (used to trigger re-render)
- * @param canvasScale - Canvas scale ratio
+ * @param elementListRef - 元素列表 ref（用于在 mouseup 时读取最新值）
+ * @param setElementList - 元素列表 setter（用于触发重新渲染）
+ * @param canvasScale - 画布缩放比例
  */
 export function useMoveShapeKeypoint(
   elementListRef: React.RefObject<PPTElement[]>,
@@ -64,7 +64,7 @@ export function useMoveShapeKeypoint(
         const moveX = (currentPageX - startPageX) / canvasScale;
         const moveY = (currentPageY - startPageY) / canvasScale;
 
-        // Update local element list during mousemove
+        // 在 mousemove 期间更新本地元素列表
         const newElements = elementListRef.current.map((el) => {
           if (el.id === element.id && shapePathData) {
             const { baseSize, originPos, min, max, relative } = shapePathData;
@@ -100,7 +100,7 @@ export function useMoveShapeKeypoint(
           return el;
         });
 
-        // Update both ref and state
+        // 同时更新 ref 和 state
         elementListRef.current = newElements;
         setElementList(newElements);
       };

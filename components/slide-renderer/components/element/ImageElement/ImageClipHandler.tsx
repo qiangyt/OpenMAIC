@@ -37,7 +37,7 @@ export function ImageClipHandler({
   });
   const [isSettingClipRange, setIsSettingClipRange] = useState(false);
   const [currentRange, setCurrentRange] = useState<ImageClipDataRange | null>(null);
-  // Top image container position and size (clip highlight area)
+  // 顶层图片容器位置和尺寸（裁剪高亮区域）
   const [topImgWrapperPosition, setTopImgWrapperPosition] = useState({
     top: 0,
     left: 0,
@@ -47,7 +47,7 @@ export function ImageClipHandler({
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Get clip area info (clip area's width/height ratio relative to the original image and its position within it)
+  // 获取裁剪区域信息（裁剪区域相对于原图的宽高比及其在其中的位置）
   const getClipDataTransformInfo = useCallback(() => {
     const [start, end] = clipData
       ? clipData.range
@@ -64,7 +64,7 @@ export function ImageClipHandler({
     return { widthScale, heightScale, left, top };
   }, [clipData]);
 
-  // Bottom image position and size (masked area image)
+  // 底层图片位置和尺寸（遮罩区域图片）
   const imgPosition = useMemo(() => {
     const { widthScale, heightScale, left, top } = getClipDataTransformInfo();
     return {
@@ -75,7 +75,7 @@ export function ImageClipHandler({
     };
   }, [getClipDataTransformInfo]);
 
-  // Bottom image position and size style (masked area image)
+  // 底层图片位置和尺寸样式（遮罩区域图片）
   const bottomImgPositionStyle = useMemo(() => {
     return {
       top: imgPosition.top + '%',
@@ -85,7 +85,7 @@ export function ImageClipHandler({
     };
   }, [imgPosition]);
 
-  // Top image container position and size style (clip highlight area)
+  // 顶层图片容器位置和尺寸样式（裁剪高亮区域）
   const topImgWrapperPositionStyle = useMemo(() => {
     const { top, left, width, height } = topImgWrapperPosition;
     return {
@@ -96,7 +96,7 @@ export function ImageClipHandler({
     };
   }, [topImgWrapperPosition]);
 
-  // Top image position and size style (clipped area image)
+  // 顶层图片位置和尺寸样式（裁剪区域图片）
   const topImgPositionStyle = useMemo(() => {
     const bottomWidth = imgPosition.width;
     const bottomHeight = imgPosition.height;
@@ -111,7 +111,7 @@ export function ImageClipHandler({
     };
   }, [imgPosition, topImgWrapperPosition]);
 
-  // Initialize clip position info
+  // 初始化裁剪位置信息
   const initClipPosition = useCallback(() => {
     const { left, top } = getClipDataTransformInfo();
     setTopImgWrapperPosition({
@@ -127,7 +127,7 @@ export function ImageClipHandler({
     });
   }, [getClipDataTransformInfo]);
 
-  // Perform clip: calculate the clipped image position/size and clip info, then emit the data
+  // 执行裁剪：计算裁剪后的图片位置/尺寸和裁剪信息，然后发送数据
   const handleClip = useCallback(() => {
     if (isSettingClipRange) return;
 
@@ -160,7 +160,7 @@ export function ImageClipHandler({
     onClip,
   ]);
 
-  // Calculate and update clip area range data
+  // 计算并更新裁剪区域范围数据
   const updateRange = useCallback(() => {
     const retPosition = {
       left: parseInt(topImgPositionStyle.left),
@@ -181,7 +181,7 @@ export function ImageClipHandler({
     setCurrentRange([start, end]);
   }, [topImgPositionStyle]);
 
-  // Move clip area
+  // 移动裁剪区域
   const moveClipRange = useCallback(
     (e: React.MouseEvent) => {
       setIsSettingClipRange(true);
@@ -246,7 +246,7 @@ export function ImageClipHandler({
     [canvasScale, rotate, width, height, imgPosition, topImgWrapperPosition, updateRange],
   );
 
-  // Scale clip area
+  // 缩放裁剪区域
   const scaleClipRange = useCallback(
     (e: React.MouseEvent, type: OperateResizeHandlers) => {
       e.stopPropagation();
@@ -442,7 +442,7 @@ export function ImageClipHandler({
     ],
   );
 
-  // Rotate class name
+  // 旋转类名
   const rotateClassName = useMemo(() => {
     const prefix = 'rotate-';
     if (rotate > -22.5 && rotate <= 22.5) return prefix + '0';
@@ -469,13 +469,13 @@ export function ImageClipHandler({
     OperateResizeHandlers.RIGHT,
   ];
 
-  // Initialize on mount
+  // 挂载时初始化
   useEffect(() => {
     initClipPosition();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keyboard listener: Enter to confirm clip
+  // 键盘监听：回车键确认裁剪
   useEffect(() => {
     const keyboardListener = (e: KeyboardEvent) => {
       const key = e.key.toUpperCase();
@@ -488,7 +488,7 @@ export function ImageClipHandler({
     };
   }, [handleClip]);
 
-  // Click outside listener
+  // 点击外部监听器
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {

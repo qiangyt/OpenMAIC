@@ -3,11 +3,11 @@
 import { createContext, useContext } from 'react';
 
 /**
- * Provides the current stageId to media-aware components (BaseImageElement, BaseVideoElement).
+ * 为媒体感知组件（BaseImageElement、BaseVideoElement）提供当前 stageId。
  *
- * When set, these components subscribe to the media generation store and only use
- * tasks whose stageId matches (preventing cross-course contamination).
- * When undefined (e.g. homepage thumbnails), store subscription is skipped entirely.
+ * 设置后，这些组件会订阅媒体生成 store，且仅使用 stageId 匹配的任务
+ * （防止跨课程污染）。
+ * 未定义时（如首页缩略图），将完全跳过 store 订阅。
  */
 const MediaStageContext = createContext<string | undefined>(undefined);
 

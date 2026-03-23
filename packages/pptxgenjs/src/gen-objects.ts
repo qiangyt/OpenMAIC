@@ -1,5 +1,5 @@
 /**
- * PptxGenJS: Slide Object Generators
+ * PptxGenJS: 幻灯片对象生成器
  */
 
 import {
@@ -51,20 +51,20 @@ import {
 import { getSlidesForTableRows } from './gen-tables'
 import { encodeXmlEntities, getNewRelId, getSmartParseNumber, inch2Emu, valToPts, correctShadowOptions } from './gen-utils'
 
-/** counter for included charts (used for index in their filenames) */
+/** 已包含图表的计数器（用于其文件名中的索引） */
 let _chartCounter = 0
 
 /**
- * Transforms a slide definition to a slide object that is then passed to the XML transformation process.
- * @param {SlideMasterProps} props - slide definition
- * @param {PresSlide|SlideLayout} target - empty slide object that should be updated by the passed definition
+ * 将幻灯片定义转换为幻灯片对象，然后传递给 XML 转换过程。
+ * @param {SlideMasterProps} props - 幻灯片定义
+ * @param {PresSlide|SlideLayout} target - 应由传递的定义更新的空幻灯片对象
  */
 export function createSlideMaster(props: SlideMasterProps, target: SlideLayout): void {
-	// STEP 1: Add background if either the slide or layout has background props
+	// 步骤 1: 如果幻灯片或布局有背景属性，则添加背景
 	// if (props.background || target.background) addBackgroundDefinition(props.background, target)
-	if (props.bkgd) target.bkgd = props.bkgd // DEPRECATED: (remove in v4.0.0)
+	if (props.bkgd) target.bkgd = props.bkgd // 已废弃: (在 v4.0.0 中移除)
 
-	// STEP 2: Add all Slide Master objects in the order they were given
+	// 步骤 2: 按给定顺序添加所有幻灯片母版对象
 	if (props.objects && Array.isArray(props.objects) && props.objects.length > 0) {
 		props.objects.forEach((object, idx) => {
 			const key = Object.keys(object)[0]
@@ -100,19 +100,19 @@ export function createSlideMaster(props: SlideMasterProps, target: SlideLayout):
 		})
 	}
 
-	// STEP 3: Add Slide Numbers (NOTE: Do this last so numbers are not covered by objects!)
+	// 步骤 3: 添加幻灯片编号（注意：最后执行此操作，以免编号被对象覆盖！）
 	if (props.slideNumber && typeof props.slideNumber === 'object') target._slideNumberProps = props.slideNumber
 }
 
 /**
- * Generate the chart based on input data.
- * OOXML Chart Spec: ISO/IEC 29500-1:2016(E)
+ * 根据输入数据生成图表。
+ * OOXML 图表规范: ISO/IEC 29500-1:2016(E)
  *
- * @param {CHART_NAME | IChartMulti[]} `type` should belong to: 'column', 'pie'
- * @param {[]} `data` a JSON object with follow the following format
- * @param {IChartOptsLib} `opt` chart options
- * @param {PresSlide} `target` slide object that the chart will be added to
- * @return {object} chart object
+ * @param {CHART_NAME | IChartMulti[]} `type` 应属于: 'column', 'pie'
+ * @param {[]} `data` 遵循以下格式的 JSON 对象
+ * @param {IChartOptsLib} `opt` 图表选项
+ * @param {PresSlide} `target` 将添加图表的幻灯片对象
+ * @return {object} 图表对象
  * {
  *    title: 'eSurvey chart',
  *    data: [

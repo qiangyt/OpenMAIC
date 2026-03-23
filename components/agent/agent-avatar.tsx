@@ -1,18 +1,18 @@
 /**
- * Agent Avatar Component
- * Displays agent avatar and name in chat messages
+ * 智能体头像组件
+ * 在聊天消息中显示智能体头像和名称
  */
 
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface AgentAvatarProps {
-  avatar: string; // Image URL or emoji
-  color: string; // Theme color (hex)
-  name: string; // Agent display name
+  avatar: string; // 图片 URL 或表情符号
+  color: string; // 主题颜色（十六进制）
+  name: string; // 智能体显示名称
   size?: 'sm' | 'md' | 'lg';
 }
 
-// Check if string is a URL
+// 检查字符串是否为 URL
 function isUrl(str: string): boolean {
   return str.startsWith('http') || str.startsWith('/') || str.startsWith('data:');
 }

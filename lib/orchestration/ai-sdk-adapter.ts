@@ -1,9 +1,9 @@
 /**
- * AI SDK Adapter for LangGraph
+ * LangGraph 的 AI SDK 适配器
  *
- * Provides LangChain-compatible interface for LLM calls.
- * Uses the unified callLLM / streamLLM layer which goes through
- * Vercel AI SDK, supporting all providers (OpenAI, Anthropic, Google, etc.).
+ * 为 LLM 调用提供 LangChain 兼容的接口。
+ * 使用统一的 callLLM / streamLLM 层，该层通过
+ * Vercel AI SDK，支持所有提供商（OpenAI、Anthropic、Google 等）。
  */
 
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
@@ -19,7 +19,7 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('AISdkAdapter');
 
 /**
- * Stream chunk types for streaming generation
+ * 流式生成的流块类型
  */
 export type StreamChunk =
   | { type: 'delta'; content: string }
@@ -35,10 +35,10 @@ export type StreamChunk =
   | { type: 'done'; content: string };
 
 /**
- * Adapter to use any AI SDK LanguageModel with LangGraph
+ * 将任意 AI SDK LanguageModel 与 LangGraph 配合使用的适配器
  *
- * Accepts a LanguageModel instance (from getModel()) instead of raw
- * API credentials, enabling support for all providers.
+ * 接受 LanguageModel 实例（来自 getModel()）而非原始
+ * API 凭证，从而支持所有提供商。
  */
 export class AISdkLangGraphAdapter extends BaseChatModel {
   private languageModel: LanguageModel;
@@ -59,7 +59,7 @@ export class AISdkLangGraphAdapter extends BaseChatModel {
   }
 
   /**
-   * Convert LangChain messages to AI SDK message format
+   * 将 LangChain 消息转换为 AI SDK 消息格式
    */
   private convertMessages(
     messages: BaseMessage[],
@@ -101,7 +101,7 @@ export class AISdkLangGraphAdapter extends BaseChatModel {
         textLength: content.length,
       });
 
-      // Create AI message
+      // 创建 AI 消息
       const aiMessage = new AIMessage({ content });
 
       return {
@@ -120,10 +120,10 @@ export class AISdkLangGraphAdapter extends BaseChatModel {
   }
 
   /**
-   * Stream generate with text deltas
+   * 带文本增量的流式生成
    *
-   * Yields chunks of text as they arrive, then yields done with full content.
-   * Uses streamLLM which goes through Vercel AI SDK's streamText.
+   * 按到达顺序产出文本块，然后产出包含完整内容的 done。
+   * 使用 streamLLM，该函数通过 Vercel AI SDK 的 streamText 实现。
    */
   async *streamGenerate(
     messages: BaseMessage[],
@@ -150,7 +150,7 @@ export class AISdkLangGraphAdapter extends BaseChatModel {
       }
     }
 
-    // Yield done with full content
+    // 产出包含完整内容的 done
     yield { type: 'done', content: fullContent };
   }
 }

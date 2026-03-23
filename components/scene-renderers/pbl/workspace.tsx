@@ -33,9 +33,9 @@ export function PBLWorkspace({
 
   return (
     <div className="flex h-full w-full">
-      {/* Left: Issueboard (~35%) */}
+      {/* 左侧：问题看板（约 35%） */}
       <div className="w-[35%] min-w-[280px] border-r overflow-hidden flex flex-col">
-        {/* Back button bar */}
+        {/* 返回按钮栏 */}
         <div className="px-3 pt-2 flex items-center gap-1.5">
           {!showConfirm ? (
             <div className="flex items-center gap-1 flex-1">
@@ -77,7 +77,7 @@ export function PBLWorkspace({
         </div>
       </div>
 
-      {/* Right: Chat (~65%) */}
+      {/* 右侧：聊天（约 65%） */}
       <div className="flex-1 overflow-hidden">
         <ChatPanel
           messages={messages}

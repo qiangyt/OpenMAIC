@@ -35,7 +35,7 @@ import {
 const log = createLogger('AudioSettings');
 
 /**
- * Get provider display name with i18n
+ * 获取服务商的国际化显示名称
  */
 function getTTSProviderName(providerId: TTSProviderId, t: (key: string) => string): string {
   const names: Record<TTSProviderId, string> = {
@@ -60,7 +60,7 @@ function getASRProviderName(providerId: ASRProviderId, t: (key: string) => strin
 function getLanguageName(code: string, t: (key: string) => string): string {
   const key = `settings.lang_${code}`;
   const translated = t(key);
-  // If translation key not found, return the code itself
+  // 如果翻译键未找到，返回代码本身
   return translated === key ? code : translated;
 }
 
@@ -71,7 +71,7 @@ interface AudioSettingsProps {
 export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
   const { t } = useI18n();
 
-  // TTS state
+  // TTS 状态
   const ttsProviderId = useSettingsStore((state) => state.ttsProviderId);
   const ttsVoice = useSettingsStore((state) => state.ttsVoice);
   const ttsSpeed = useSettingsStore((state) => state.ttsSpeed);
@@ -81,7 +81,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
   const setTTSSpeed = useSettingsStore((state) => state.setTTSSpeed);
   const setTTSProviderConfig = useSettingsStore((state) => state.setTTSProviderConfig);
 
-  // ASR state
+  // ASR 状态
   const asrProviderId = useSettingsStore((state) => state.asrProviderId);
   const asrLanguage = useSettingsStore((state) => state.asrLanguage);
   const asrProvidersConfig = useSettingsStore((state) => state.asrProvidersConfig);
@@ -96,10 +96,10 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
 
   const ttsProvider = TTS_PROVIDERS[ttsProviderId] ?? TTS_PROVIDERS['openai-tts'];
 
-  // Azure voices - load from static JSON
+  // Azure 音色 - 从静态 JSON 加载
   const azureVoices = useMemo(() => azureVoicesData.voices, []);
 
-  // Wrapped setters that trigger onSave callback
+  // 触发 onSave 回调的包装 setter
   const handleTTSProviderChange = (providerId: TTSProviderId) => {
     setTTSProvider(providerId);
     onSave?.();
@@ -141,14 +141,14 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
     onSave?.();
   };
 
-  // Password visibility state
+  // 密码可见性状态
   const [showTTSApiKey, setShowTTSApiKey] = useState(false);
   const [showASRApiKey, setShowASRApiKey] = useState(false);
 
-  // Language filter state
+  // 语言筛选状态
   const [selectedLocale, setSelectedLocale] = useState<string>('all');
 
-  // Test state
+  // 测试状态
   const [testingTTS, setTestingTTS] = useState(false);
   const [testText, setTestText] = useState(t('settings.ttsTestTextDefault'));
   const [ttsTestStatus, setTTSTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>(
@@ -169,14 +169,14 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
 
   const asrProvider = ASR_PROVIDERS[asrProviderId] ?? ASR_PROVIDERS['openai-whisper'];
 
-  // Update test text when language changes (derived state pattern)
+  // 当语言变更时更新测试文本（派生状态模式）
   const [prevT, setPrevT] = useState(() => t);
   if (t !== prevT) {
     setPrevT(t);
     setTestText(t('settings.ttsTestTextDefault'));
   }
 
-  // Reset locale filter when provider changes (derived state pattern)
+  // 当服务商变更时重置语言筛选（派生状态模式）
   const [prevTTSProviderId, setPrevTTSProviderId] = useState(ttsProviderId);
   if (ttsProviderId !== prevTTSProviderId) {
     setPrevTTSProviderId(ttsProviderId);
@@ -202,21 +202,21 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
     }
   }, []);
 
-  // Update voice selection when locale filter changes
+  // 当语言筛选变更时更新音色选择
   useEffect(() => {
     if (ttsProviderId === 'azure-tts' && selectedLocale !== 'all') {
-      // Filter Azure voices by selected locale
+      // 按选中的语言筛选 Azure 音色
       const filteredVoices = azureVoices.filter((voice) => voice.Locale === selectedLocale);
 
-      // Check if current voice is in the filtered list
+      // 检查当前音色是否在筛选列表中
       const currentVoiceInFilter = filteredVoices.some((voice) => voice.ShortName === ttsVoice);
 
-      // If current voice is not in filtered list, select the first voice in the filtered list
+      // 如果当前音色不在筛选列表中，选择筛选列表中的第一个音色
       if (!currentVoiceInFilter && filteredVoices.length > 0) {
         setTTSVoice(filteredVoices[0].ShortName);
       }
     }
-    // Intentionally exclude ttsVoice from dependencies to avoid infinite loop
+    // 故意排除 ttsVoice 以避免无限循环
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedLocale, ttsProviderId, azureVoices, setTTSVoice]);
 
@@ -226,27 +226,27 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
     setTTSTestMessage('');
   }, [ttsProviderId, stopTTSPreview]);
 
-  // Initialize and reset TTS voice when provider changes
+  // 当服务商变更时初始化并重置 TTS 音色
   useEffect(() => {
     let availableVoices: Array<{ id: string; name: string }> = [];
 
     if (ttsProviderId === 'azure-tts') {
-      // Use Azure voices from JSON
+      // 从 JSON 使用 Azure 音色
       availableVoices = azureVoices.map((voice) => ({
         id: voice.ShortName,
         name: voice.LocalName,
       }));
     } else {
-      // Use static voices from constants
+      // 从常量使用静态音色
       availableVoices = getTTSVoices(ttsProviderId);
     }
 
     if (availableVoices.length > 0) {
-      // Initialize default voice if not set
+      // 如果未设置则初始化默认音色
       if (!ttsVoice) {
         setTTSVoice(availableVoices[0].id);
       } else {
-        // Check if current voice is available in new provider
+        // 检查当前音色在新服务商中是否可用
         const currentVoiceExists = availableVoices.some((v) => v.id === ttsVoice);
         if (!currentVoiceExists) {
           setTTSVoice(availableVoices[0].id);
@@ -255,15 +255,15 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
     }
   }, [ttsProviderId, ttsVoice, azureVoices, setTTSVoice]);
 
-  // Initialize and reset ASR language when provider changes
+  // 当服务商变更时初始化并重置 ASR 语言
   useEffect(() => {
     const availableLanguages = getASRSupportedLanguages(asrProviderId);
     if (availableLanguages.length > 0) {
-      // Initialize default language if not set
+      // 如果未设置则初始化默认语言
       if (!asrLanguage) {
         setASRLanguage(availableLanguages[0]);
       } else {
-        // Check if current language is available in new provider
+        // 检查当前语言在新服务商中是否可用
         const currentLanguageExists = availableLanguages.includes(asrLanguage);
         if (!currentLanguageExists) {
           setASRLanguage(availableLanguages[0]);
@@ -278,7 +278,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
     };
   }, [stopTTSPreview]);
 
-  // Clear ASR test status when provider changes (derived state pattern)
+  // 当服务商变更时清除 ASR 测试状态（派生状态模式）
   const [prevASRProviderId, setPrevASRProviderId] = useState(asrProviderId);
   if (asrProviderId !== prevASRProviderId) {
     setPrevASRProviderId(asrProviderId);
@@ -287,7 +287,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
     setASRResult('');
   }
 
-  // Test TTS
+  // 测试 TTS
   const handleTestTTS = async () => {
     if (!testText.trim()) {
       return;
@@ -404,7 +404,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
     }
   };
 
-  // Test ASR
+  // 测试 ASR
   const handleToggleASRRecording = async () => {
     if (isRecording) {
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
@@ -471,7 +471,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
             formData.append('providerId', asrProviderId);
             formData.append('language', asrLanguage);
 
-            // Only append non-empty values
+            // 仅追加非空值
             const apiKeyValue = asrProvidersConfig[asrProviderId]?.apiKey;
             if (apiKeyValue && apiKeyValue.trim()) {
               formData.append('apiKey', apiKeyValue);
@@ -497,7 +497,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                 const errorData = await response
                   .json()
                   .catch(() => ({ error: response.statusText }));
-                // Show details if available, otherwise show error message
+                // 如果可用则显示详情，否则显示错误消息
                 setASRTestMessage(
                   errorData.details || errorData.error || t('settings.asrTestFailed'),
                 );
@@ -522,7 +522,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      {/* TTS Section */}
+      {/* TTS 部分 */}
       <div className="space-y-4">
         <div
           className={cn(
@@ -650,7 +650,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                   ttsProvidersConfig[ttsProviderId]?.baseUrl || ttsProvider.defaultBaseUrl || '';
                 if (!effectiveBaseUrl) return null;
 
-                // Get endpoint path based on provider
+                // 根据服务商获取端点路径
                 let endpointPath = '';
                 switch (ttsProviderId) {
                   case 'openai-tts':
@@ -678,7 +678,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
             </>
           )}
 
-          {/* Voice Selection Row */}
+          {/* 音色选择行 */}
           <div
             className="grid gap-4"
             style={{
@@ -686,7 +686,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                 ttsProviderId === 'azure-tts' ? '280px 280px 200px' : '280px 200px',
             }}
           >
-            {/* Language Filter for Azure TTS */}
+            {/* Azure TTS 语言筛选 */}
             {ttsProviderId === 'azure-tts' && (
               <div className="space-y-2">
                 <Label className="text-sm">{t('settings.ttsLanguageFilter')}</Label>
@@ -697,24 +697,24 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                   <SelectContent>
                     <SelectItem value="all">{t('settings.allLanguages')}</SelectItem>
                     {(() => {
-                      // Extract unique locales from Azure voices
+                      // 从 Azure 音色中提取唯一语言
                       const uniqueLocales = Array.from(
                         new Set(azureVoices.map((voice) => voice.Locale)),
                       );
 
-                      // Sort: Chinese dialects first, then other major languages, then alphabetically
+                      // 排序：中文方言优先，然后是其他主要语言，最后按字母顺序
                       const sortedLocales = uniqueLocales.sort((a, b) => {
-                        // Get LocaleName for both locales
+                        // 获取两个语言的 LocaleName
                         const voiceA = azureVoices.find((v) => v.Locale === a);
                         const voiceB = azureVoices.find((v) => v.Locale === b);
                         const localeNameA = voiceA?.LocaleName || a;
                         const localeNameB = voiceB?.LocaleName || b;
 
-                        // Check if LocaleName contains "Chinese" (case-insensitive)
+                        // 检查 LocaleName 是否包含 "Chinese"（不区分大小写）
                         const aIsChinese = /chinese/i.test(localeNameA);
                         const bIsChinese = /chinese/i.test(localeNameB);
 
-                        // Both are Chinese - sort by priority
+                        // 都是中文 - 按优先级排序
                         if (aIsChinese && bIsChinese) {
                           const chinesePriority = [
                             'zh-CN', // Chinese (Simplified, China)
@@ -736,12 +736,12 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                           return localeNameA.localeCompare(localeNameB);
                         }
 
-                        // Only a is Chinese
+                        // 只有 a 是中文
                         if (aIsChinese) return -1;
-                        // Only b is Chinese
+                        // 只有 b 是中文
                         if (bIsChinese) return 1;
 
-                        // Neither is Chinese - sort by priority for other major languages
+                        // 都不是中文 - 按其他主要语言的优先级排序
                         const otherPriority = [
                           'en-US',
                           'en-GB',
@@ -762,12 +762,12 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                         if (aIndex !== -1) return -1;
                         if (bIndex !== -1) return 1;
 
-                        // Sort alphabetically
+                        // 按字母顺序排序
                         return a.localeCompare(b);
                       });
 
                       return sortedLocales.map((locale) => {
-                        // Find a voice with this locale to get the LocaleName
+                        // 查找具有此语言的音色以获取 LocaleName
                         const voiceWithLocale = azureVoices.find((v) => v.Locale === locale);
                         const localeName = voiceWithLocale?.LocaleName || locale;
                         return (
@@ -790,9 +790,9 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                 </SelectTrigger>
                 <SelectContent>
                   {(() => {
-                    // For Azure TTS, use JSON data
+                    // 对于 Azure TTS，使用 JSON 数据
                     if (ttsProviderId === 'azure-tts') {
-                      // Filter voices by selected locale
+                      // 按选中的语言筛选音色
                       const filteredVoices =
                         selectedLocale === 'all'
                           ? azureVoices
@@ -805,7 +805,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                       ));
                     }
 
-                    // For other providers, use static voices
+                    // 对于其他服务商，使用静态音色
                     const allVoices = getTTSVoices(ttsProviderId);
                     return allVoices.map((voice) => (
                       <SelectItem key={voice.id} value={voice.id}>
@@ -838,7 +838,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
             )}
           </div>
 
-          {/* Test TTS Section */}
+          {/* 测试 TTS 部分 */}
           <div className="space-y-2">
             <Label className="text-sm">{t('settings.testTTS')}</Label>
             <div className="flex gap-2">
@@ -894,7 +894,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
         </div>
       </div>
 
-      {/* ASR Section */}
+      {/* ASR 部分 */}
       <div className="space-y-4 pt-4 border-t">
         <div
           className={cn(
@@ -1022,7 +1022,7 @@ export function AudioSettings({ onSave }: AudioSettingsProps = {}) {
                   asrProvidersConfig[asrProviderId]?.baseUrl || asrProvider.defaultBaseUrl || '';
                 if (!effectiveBaseUrl) return null;
 
-                // Get endpoint path based on provider
+                // 根据服务商获取端点路径
                 let endpointPath = '';
                 switch (asrProviderId) {
                   case 'openai-whisper':

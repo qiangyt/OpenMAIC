@@ -46,15 +46,15 @@ export interface CanvasProps {
 }
 
 /**
- * Canvas component
+ * 画布组件
  *
- * Architecture:
- * - Slide data (elements, background) → Scene Context (from stageStore)
- * - Local element list → useRef + useState (for drag/scale/rotate operations)
- * - Canvas UI state (selection, toolbar) → Canvas Store
- * - Keyboard state → Keyboard Store
+ * 架构：
+ * - 幻灯片数据（元素、背景）→ Scene Context（来自 stageStore）
+ * - 本地元素列表 → useRef + useState（用于拖拽/缩放/旋转操作）
+ * - 画布 UI 状态（选择、工具栏）→ Canvas Store
+ * - 键盘状态 → Keyboard Store
  *
- * Usage:
+ * 用法：
  * <SceneProvider>
  *   <Canvas />
  * </SceneProvider>
@@ -63,12 +63,12 @@ export function Canvas(_props: CanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
 
-  // Subscribe to specific parts for performance optimization
+  // 订阅特定部分以优化性能
   const elements = useSceneSelector<SlideContent, PPTElement[]>(
     (content) => content.canvas.elements,
   );
 
-  // Canvas UI state
+  // 画布 UI 状态
   const canvasScale = useCanvasStore.use.canvasScale();
   const activeElementIdList = useCanvasStore.use.activeElementIdList();
   const activeGroupElementId = useCanvasStore.use.activeGroupElementId();
@@ -82,41 +82,41 @@ export function Canvas(_props: CanvasProps) {
   const setGridLineSize = useCanvasStore.use.setGridLineSize();
   const setRulerState = useCanvasStore.use.setRulerState();
 
-  // Keyboard state
+  // 键盘状态
   const spaceKeyState = useKeyboardStore((state) => state.spaceKeyState);
 
   const [alignmentLines, setAlignmentLines] = useState<AlignmentLineProps[]>([]);
   const [linkDialogVisible, setLinkDialogVisible] = useState(false);
 
-  // Local element list for drag/scale/rotate operations
+  // 用于拖拽/缩放/旋转操作的本地元素列表
   const elementListRef = useRef<PPTElement[]>(elements || []);
   const [elementList, setElementList] = useState<PPTElement[]>(elements || []);
 
-  // Sync store elements to local state
+  // 同步 store 元素到本地状态
   useEffect(() => {
     const newElements = elements ? JSON.parse(JSON.stringify(elements)) : [];
     elementListRef.current = newElements;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Sync store elements to local state
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 同步 store 元素到本地状态
     setElementList(newElements);
   }, [elements]);
 
-  // Viewport size and positioning
+  // 视口尺寸和定位
   const { viewportStyles, dragViewport } = useViewportSize(canvasRef);
 
-  // Initialize drop handler
+  // 初始化放置处理器
   useDrop(canvasRef);
 
-  // Element drag (with alignment snapping)
+  // 元素拖拽（带对齐吸附）
   const { dragElement } = useDragElement(elementListRef, setElementList, setAlignmentLines);
 
-  // Element selection
+  // 元素选择
   const { selectElement } = useSelectElement(elementListRef, dragElement);
 
-  // Mouse selection
+  // 鼠标选区
   const { mouseSelection, mouseSelectionVisible, mouseSelectionQuadrant, updateMouseSelection } =
     useMouseSelection(elementListRef, viewportRef);
 
-  // Element operations
+  // 元素操作
   const { scaleElement, scaleMultiElement } = useScaleElement(
     elementListRef,
     setElementList,
@@ -131,12 +131,12 @@ export function Canvas(_props: CanvasProps) {
   const { dragLineElement } = useDragLineElement(elementListRef, setElementList);
   const { moveShapeKeypoint } = useMoveShapeKeypoint(elementListRef, setElementList, canvasScale);
 
-  // Create element from selection
+  // 从选区创建元素
   const { insertElementFromCreateSelection } = useInsertFromCreateSelection(viewportRef);
 
-  // Click on blank canvas area: clear active elements
+  // 点击画布空白区域：清除活动元素
   const handleClickBlankArea = (e: React.MouseEvent) => {
-    // Check if the click target is a context menu element (menu content in Portal)
+    // 检查点击目标是否为右键菜单元素（Portal 中的菜单内容）
     const target = e.target as HTMLElement;
     if (
       target.closest('[data-slot="context-menu-content"]') ||
@@ -144,7 +144,7 @@ export function Canvas(_props: CanvasProps) {
       target.closest('[data-slot="context-menu-item"]') ||
       target.closest('[data-slot="context-menu-sub-trigger"]')
     ) {
-      return; // Skip blank area handling if clicking on context menu
+      return; // 如果点击右键菜单则跳过空白区域处理
     }
 
     if (activeElementIdList.length) {
@@ -158,13 +158,13 @@ export function Canvas(_props: CanvasProps) {
     }
   };
 
-  // Double-click blank area to insert text
+  // 双击空白区域插入文本
   const handleDblClick = (_e: React.MouseEvent) => {
     if (activeElementIdList.length || creatingElement || creatingCustomShape) return;
     if (!viewportRef.current) return;
 
     const _viewportRect = viewportRef.current.getBoundingClientRect();
-    // TODO: implement createTextElement (use _viewportRect + e.pageX/Y + canvasScale)
+    // TODO: 实现 createTextElement（使用 _viewportRect + e.pageX/Y + canvasScale）
   };
 
   const openLinkDialog = () => {
@@ -232,21 +232,21 @@ export function Canvas(_props: CanvasProps) {
           onMouseDown={handleClickBlankArea}
           onDoubleClick={handleDblClick}
         >
-          {/* Element creation selection */}
+          {/* 元素创建选区 */}
           {creatingElement && (
             <ElementCreateSelection onCreated={insertElementFromCreateSelection} />
           )}
 
-          {/* Custom shape creation canvas */}
+          {/* 自定义形状创建画布 */}
           {creatingCustomShape && (
             <ShapeCreateCanvas
               onCreated={(_data) => {
-                // TODO: implement insertCustomShape
+                // TODO: 实现 insertCustomShape
               }}
             />
           )}
 
-          {/* Viewport wrapper */}
+          {/* 视口包装器 */}
           <div
             className="viewport-wrapper absolute shadow-[0_0_0_1px_rgba(0,0,0,0.01),0_0_12px_0_rgba(0,0,0,0.1)]"
             style={{
@@ -256,9 +256,9 @@ export function Canvas(_props: CanvasProps) {
               top: `${viewportStyles.top}px`,
             }}
           >
-            {/* Operations layer - alignment lines and selection handles */}
+            {/* 操作层 - 对齐线和选择手柄 */}
             <div className="operates absolute top-0 left-0 w-full h-full pointer-events-none">
-              {/* Alignment lines */}
+              {/* 对齐线 */}
               {alignmentLines.map((line, index) => (
                 <AlignmentLine
                   key={`${line.type}-${line.axis.x}-${line.axis.y}-${index}`}
@@ -269,7 +269,7 @@ export function Canvas(_props: CanvasProps) {
                 />
               ))}
 
-              {/* Multi-select operations */}
+              {/* 多选操作 */}
               {activeElementIdList.length > 1 && (
                 <MultiSelectOperate
                   elementList={elementList}
@@ -277,7 +277,7 @@ export function Canvas(_props: CanvasProps) {
                 />
               )}
 
-              {/* Single element operations */}
+              {/* 单元素操作 */}
               {elementList.map(
                 (element: PPTElement) =>
                   !hiddenElementIdList.includes(element.id) && (
@@ -300,7 +300,7 @@ export function Canvas(_props: CanvasProps) {
               <ViewportBackground />
             </div>
 
-            {/* Viewport - the actual slide canvas */}
+            {/* 视口 - 实际的幻灯片画布 */}
             <div
               ref={viewportRef}
               className="viewport absolute top-0 left-0 origin-top-left"
@@ -310,10 +310,10 @@ export function Canvas(_props: CanvasProps) {
                 transform: `scale(${canvasScale})`,
               }}
             >
-              {/* Grid lines */}
+              {/* 网格线 */}
               {gridLineSize > 0 && <GridLines />}
 
-              {/* Mouse selection rectangle */}
+              {/* 鼠标选区矩形 */}
               {mouseSelectionVisible && (
                 <MouseSelection
                   top={mouseSelection.top}
@@ -325,7 +325,7 @@ export function Canvas(_props: CanvasProps) {
                 />
               )}
 
-              {/* Render all elements */}
+              {/* 渲染所有元素 */}
               {elementList.map((element: PPTElement, index: number) =>
                 !hiddenElementIdList.includes(element.id) ? (
                   <EditableElement
@@ -341,13 +341,13 @@ export function Canvas(_props: CanvasProps) {
             </div>
           </div>
 
-          {/* Ruler */}
+          {/* 标尺 */}
           {showRuler && <Ruler viewportStyles={viewportStyles} elementList={elementList} />}
 
-          {/* Drag mask when space key is pressed */}
+          {/* 按住空格键时的拖拽遮罩 */}
           {spaceKeyState && <div className="drag-mask absolute inset-0 cursor-grab" />}
 
-          {/* TODO: Add LinkDialog modal */}
+          {/* TODO: 添加 LinkDialog 弹窗 */}
           {linkDialogVisible && <div>LinkDialog placeholder</div>}
         </div>
       </ContextMenuTrigger>
@@ -357,7 +357,7 @@ export function Canvas(_props: CanvasProps) {
             return <ContextMenuSeparator key={index} />;
           }
 
-          // If has children, use submenu component
+          // 如果有子项，使用子菜单组件
           if (item.children && item.children.length > 0) {
             return (
               <ContextMenuSub key={index}>
@@ -391,7 +391,7 @@ export function Canvas(_props: CanvasProps) {
             );
           }
 
-          // Regular menu item
+          // 常规菜单项
           return (
             <ContextMenuItem
               key={index}

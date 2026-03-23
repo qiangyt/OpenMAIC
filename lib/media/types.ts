@@ -1,47 +1,47 @@
 /**
- * Media (Image & Video) Generation Provider Type Definitions
+ * 媒体（图像和视频）生成提供商类型定义
  *
- * Unified types for image generation and video generation
- * with extensible architecture to support multiple providers.
+ * 图像生成和视频生成的统一类型定义，
+ * 采用可扩展架构以支持多个提供商。
  *
- * Currently Supported Image Providers:
- * - Seedream (ByteDance SDXL-based image generation)
- * - Qwen Image (Alibaba Cloud Wanx image generation)
- * - Nano Banana (Lightweight image generation via Banana.dev)
+ * 当前支持的图像提供商：
+ * - Seedream（字节跳动基于 SDXL 的图像生成）
+ * - Qwen Image（阿里云 Wanx 图像生成）
+ * - Nano Banana（通过 Banana.dev 的轻量级图像生成）
  *
- * Currently Supported Video Providers (Phase 2):
- * - Seedance (ByteDance video generation)
- * - Kling (Kuaishou video generation)
- * - Veo (Google DeepMind video generation)
- * - Sora (OpenAI video generation)
+ * 当前支持的视频提供商（第二阶段）：
+ * - Seedance（字节跳动视频生成）
+ * - Kling（快手视频生成）
+ * - Veo（Google DeepMind 视频生成）
+ * - Sora（OpenAI 视频生成）
  *
- * HOW TO ADD A NEW PROVIDER:
+ * 如何添加新提供商：
  *
- * Step 1: Add provider ID to the union type
- *   - For Image: Add to ImageProviderId below
- *   - For Video: Add to VideoProviderId below
+ * 步骤 1：将提供商 ID 添加到联合类型
+ *   - 对于图像：添加到下方的 ImageProviderId
+ *   - 对于视频：添加到下方的 VideoProviderId
  *
- * Step 2: Add provider configuration to constants.ts
- *   - Define provider metadata (name, icon, aspect ratios, styles, etc.)
- *   - Add to IMAGE_PROVIDERS or VIDEO_PROVIDERS registry
+ * 步骤 2：在 constants.ts 中添加提供商配置
+ *   - 定义提供商元数据（名称、图标、宽高比、风格等）
+ *   - 添加到 IMAGE_PROVIDERS 或 VIDEO_PROVIDERS 注册表
  *
- * Step 3: Implement provider logic in image-providers.ts or video-providers.ts
- *   - Add case to generateImage() or generateVideo() switch statement
- *   - Implement API call logic for the new provider
- *   - For async task-based providers, implement MediaTaskAdapter
+ * 步骤 3：在 image-providers.ts 或 video-providers.ts 中实现提供商逻辑
+ *   - 在 generateImage() 或 generateVideo() switch 语句中添加 case
+ *   - 为新提供商实现 API 调用逻辑
+ *   - 对于异步任务型提供商，实现 MediaTaskAdapter
  *
- * Step 4: Add i18n translations
- *   - Add provider name translations in lib/i18n.ts
- *   - Format: `provider{ProviderName}Image` or `provider{ProviderName}Video`
+ * 步骤 4：添加 i18n 翻译
+ *   - 在 lib/i18n.ts 中添加提供商名称翻译
+ *   - 格式：`provider{ProviderName}Image` 或 `provider{ProviderName}Video`
  *
- * Step 5 (Optional): Add provider-specific options
- *   - Extend ImageGenerationOptions or VideoGenerationOptions as needed
- *   - Document provider-specific parameters in JSDoc
+ * 步骤 5（可选）：添加提供商特定选项
+ *   - 根据需要扩展 ImageGenerationOptions 或 VideoGenerationOptions
+ *   - 在 JSDoc 中记录提供商特定参数
  *
- * Example: Adding DALL-E Image Provider
- * =======================================
- * 1. Add 'dall-e' to ImageProviderId union type
- * 2. In constants.ts:
+ * 示例：添加 DALL-E 图像提供商
+ * ==================================
+ * 1. 将 'dall-e' 添加到 ImageProviderId 联合类型
+ * 2. 在 constants.ts 中：
  *    IMAGE_PROVIDERS['dall-e'] = {
  *      id: 'dall-e',
  *      name: 'DALL-E',
@@ -52,61 +52,61 @@
  *      supportedStyles: ['natural', 'vivid'],
  *      maxResolution: { width: 1024, height: 1024 }
  *    }
- * 3. In image-providers.ts:
+ * 3. 在 image-providers.ts 中：
  *    case 'dall-e':
  *      return await generateDallEImage(config, options);
- * 4. In i18n.ts:
+ * 4. 在 i18n.ts 中：
  *    providerDallEImage: 'DALL-E' / 'DALL-E 图像生成'
  */
 
 // ============================================================================
-// Image Generation Types
+// 图像生成类型
 // ============================================================================
 
 /**
- * Image Provider IDs
+ * 图像提供商 ID
  *
- * Add new image providers here as union members.
- * Keep in sync with IMAGE_PROVIDERS registry in constants.ts
+ * 在此处将新的图像提供商添加为联合成员。
+ * 与 constants.ts 中的 IMAGE_PROVIDERS 注册表保持同步
  */
 export type ImageProviderId = 'seedream' | 'qwen-image' | 'nano-banana';
-// Add new image providers below (uncomment and modify):
+// 在下方添加新的图像提供商（取消注释并修改）：
 // | 'dall-e'
 // | 'midjourney'
 // | 'stable-diffusion'
 
 /**
- * Image Provider Configuration
+ * 图像提供商配置
  *
- * Describes the capabilities and metadata of an image generation provider.
- * Used to populate UI controls and validate generation requests.
+ * 描述图像生成提供商的能力和元数据。
+ * 用于填充 UI 控件并验证生成请求。
  */
-/** Model metadata for an image generation model */
+/** 图像生成模型的元数据 */
 export interface ImageModelInfo {
-  /** Model identifier passed to the API */
+  /** 传递给 API 的模型标识符 */
   id: string;
-  /** Human-readable display name */
+  /** 人类可读的显示名称 */
   name: string;
 }
 
 export interface ImageProviderConfig {
-  /** Unique provider identifier */
+  /** 唯一提供商标识符 */
   id: ImageProviderId;
-  /** Human-readable provider name */
+  /** 人类可读的提供商名称 */
   name: string;
-  /** Whether the provider requires an API key for authentication */
+  /** 提供商是否需要 API 密钥进行认证 */
   requiresApiKey: boolean;
-  /** Default API base URL (can be overridden in user settings) */
+  /** 默认 API 基础 URL（可在用户设置中覆盖） */
   defaultBaseUrl?: string;
-  /** Path to provider icon asset */
+  /** 提供商图标资源路径 */
   icon?: string;
-  /** Available models for this provider */
+  /** 此提供商可用的模型 */
   models: ImageModelInfo[];
-  /** Aspect ratios supported by this provider */
+  /** 此提供商支持的宽高比 */
   supportedAspectRatios: Array<'16:9' | '4:3' | '1:1' | '9:16'>;
-  /** Optional artistic styles supported by this provider */
+  /** 此提供商支持的可选艺术风格 */
   supportedStyles?: string[];
-  /** Maximum supported output resolution */
+  /** 最大支持的输出分辨率 */
   maxResolution?: {
     width: number;
     height: number;
@@ -114,207 +114,206 @@ export interface ImageProviderConfig {
 }
 
 /**
- * Image Generation Configuration
+ * 图像生成配置
  *
- * Runtime configuration for making image generation API calls.
- * Combines provider selection with authentication credentials.
+ * 进行图像生成 API 调用的运行时配置。
+ * 结合提供商选择和认证凭据。
  */
 export interface ImageGenerationConfig {
-  /** Which image provider to use */
+  /** 要使用的图像提供商 */
   providerId: ImageProviderId;
-  /** API key for authentication */
+  /** 用于认证的 API 密钥 */
   apiKey: string;
-  /** Optional override for the provider's base URL */
+  /** 可选的提供商基础 URL 覆盖 */
   baseUrl?: string;
-  /** Optional model ID override (uses provider default if omitted) */
+  /** 可选的模型 ID 覆盖（如省略则使用提供商默认值） */
   model?: string;
 }
 
 /**
- * Image Generation Options
+ * 图像生成选项
  *
- * Parameters for a single image generation request.
- * Passed alongside ImageGenerationConfig to the provider.
+ * 单次图像生成请求的参数。
+ * 与 ImageGenerationConfig 一起传递给提供商。
  */
 export interface ImageGenerationOptions {
-  /** Text prompt describing the desired image */
+  /** 描述所需图像的文本提示词 */
   prompt: string;
-  /** Optional negative prompt to exclude undesired elements */
+  /** 可选的反向提示词，用于排除不需要的元素 */
   negativePrompt?: string;
-  /** Desired output width in pixels */
+  /** 期望的输出宽度（像素） */
   width?: number;
-  /** Desired output height in pixels */
+  /** 期望的输出高度（像素） */
   height?: number;
-  /** Desired aspect ratio (provider will calculate dimensions if width/height not set) */
+  /** 期望的宽高比（如未设置 width/height，提供商将计算尺寸） */
   aspectRatio?: '16:9' | '4:3' | '1:1' | '9:16';
-  /** Optional artistic style (must be supported by the chosen provider) */
+  /** 可选的艺术风格（必须被所选提供商支持） */
   style?: string;
 }
 
 /**
- * Image Generation Result
+ * 图像生成结果
  *
- * The output of a successful image generation request.
- * Contains either a URL or base64-encoded image data (or both).
+ * 成功图像生成请求的输出。
+ * 包含 URL 或 base64 编码的图像数据（或两者）。
  */
 export interface ImageGenerationResult {
-  /** URL to the generated image (if hosted by the provider) */
+  /** 生成图像的 URL（如由提供商托管） */
   url?: string;
-  /** Base64-encoded image data (if returned inline) */
+  /** Base64 编码的图像数据（如内联返回） */
   base64?: string;
-  /** Width of the generated image in pixels */
+  /** 生成图像的宽度（像素） */
   width: number;
-  /** Height of the generated image in pixels */
+  /** 生成图像的高度（像素） */
   height: number;
 }
 
 // ============================================================================
-// Video Generation Types (Phase 2)
+// 视频生成类型（第二阶段）
 // ============================================================================
 
 /**
- * Video Provider IDs
+ * 视频提供商 ID
  *
- * Add new video providers here as union members.
- * Keep in sync with VIDEO_PROVIDERS registry in constants.ts
+ * 在此处将新的视频提供商添加为联合成员。
+ * 与 constants.ts 中的 VIDEO_PROVIDERS 注册表保持同步
  */
 export type VideoProviderId = 'seedance' | 'kling' | 'veo' | 'sora';
-// Add new video providers below (uncomment and modify):
+// 在下方添加新的视频提供商（取消注释并修改）：
 // | 'runway'
 // | 'pika'
 
 /**
- * Video Provider Configuration
+ * 视频提供商配置
  *
- * Describes the capabilities and metadata of a video generation provider.
- * Used to populate UI controls and validate generation requests.
+ * 描述视频生成提供商的能力和元数据。
+ * 用于填充 UI 控件并验证生成请求。
  */
-/** Model metadata for a video generation model (same shape as image) */
+/** 视频生成模型的元数据（与图像模型形状相同） */
 export type VideoModelInfo = ImageModelInfo;
 
 export interface VideoProviderConfig {
-  /** Unique provider identifier */
+  /** 唯一提供商标识符 */
   id: VideoProviderId;
-  /** Human-readable provider name */
+  /** 人类可读的提供商名称 */
   name: string;
-  /** Whether the provider requires an API key for authentication */
+  /** 提供商是否需要 API 密钥进行认证 */
   requiresApiKey: boolean;
-  /** Default API base URL (can be overridden in user settings) */
+  /** 默认 API 基础 URL（可在用户设置中覆盖） */
   defaultBaseUrl?: string;
-  /** Path to provider icon asset */
+  /** 提供商图标资源路径 */
   icon?: string;
-  /** Available models for this provider */
+  /** 此提供商可用的模型 */
   models: VideoModelInfo[];
-  /** Aspect ratios supported by this provider */
+  /** 此提供商支持的宽高比 */
   supportedAspectRatios: Array<'16:9' | '4:3' | '1:1' | '9:16' | '3:4' | '21:9'>;
-  /** Supported video durations in seconds */
+  /** 支持的视频时长（秒） */
   supportedDurations?: number[];
-  /** Supported output resolutions */
+  /** 支持的输出分辨率 */
   supportedResolutions?: Array<'480p' | '720p' | '1080p'>;
-  /** Maximum video duration in seconds */
+  /** 最大视频时长（秒） */
   maxDuration?: number;
 }
 
 /**
- * Video Generation Configuration
+ * 视频生成配置
  *
- * Runtime configuration for making video generation API calls.
- * Combines provider selection with authentication credentials.
+ * 进行视频生成 API 调用的运行时配置。
+ * 结合提供商选择和认证凭据。
  */
 export interface VideoGenerationConfig {
-  /** Which video provider to use */
+  /** 要使用的视频提供商 */
   providerId: VideoProviderId;
-  /** API key for authentication */
+  /** 用于认证的 API 密钥 */
   apiKey: string;
-  /** Optional override for the provider's base URL */
+  /** 可选的提供商基础 URL 覆盖 */
   baseUrl?: string;
-  /** Optional model ID override (uses provider default if omitted) */
+  /** 可选的模型 ID 覆盖（如省略则使用提供商默认值） */
   model?: string;
 }
 
 /**
- * Video Generation Options
+ * 视频生成选项
  *
- * Parameters for a single video generation request.
- * Passed alongside VideoGenerationConfig to the provider.
+ * 单次视频生成请求的参数。
+ * 与 VideoGenerationConfig 一起传递给提供商。
  */
 export interface VideoGenerationOptions {
-  /** Text prompt describing the desired video */
+  /** 描述所需视频的文本提示词 */
   prompt: string;
-  /** Desired video duration in seconds */
+  /** 期望的视频时长（秒） */
   duration?: number;
-  /** Desired aspect ratio */
+  /** 期望的宽高比 */
   aspectRatio?: '16:9' | '4:3' | '1:1' | '9:16' | '3:4' | '21:9';
-  /** Desired output resolution */
+  /** 期望的输出分辨率 */
   resolution?: '480p' | '720p' | '1080p';
 }
 
 /**
- * Video Generation Result
+ * 视频生成结果
  *
- * The output of a successful video generation request.
- * Contains the URL to the generated video along with metadata.
+ * 成功视频生成请求的输出。
+ * 包含生成视频的 URL 及其元数据。
  */
 export interface VideoGenerationResult {
-  /** URL to the generated video */
+  /** 生成视频的 URL */
   url: string;
-  /** Duration of the generated video in seconds */
+  /** 生成视频的时长（秒） */
   duration: number;
-  /** Width of the generated video in pixels */
+  /** 生成视频的宽度（像素） */
   width: number;
-  /** Height of the generated video in pixels */
+  /** 生成视频的高度（像素） */
   height: number;
-  /** Optional URL to a poster/thumbnail image for the video */
+  /** 可选的视频封面/缩略图 URL */
   poster?: string;
 }
 
 // ============================================================================
-// Shared / Cross-cutting Types
+// 共享 / 跨领域类型
 // ============================================================================
 
 /**
- * Media Generation Request
+ * 媒体生成请求
  *
- * A unified request type used by the whiteboard/canvas to request
- * media generation. Maps to either image or video generation internally.
+ * 白板/画布用于请求媒体生成的统一请求类型。
+ * 内部映射到图像或视频生成。
  */
 export interface MediaGenerationRequest {
-  /** Type of media to generate */
+  /** 要生成的媒体类型 */
   type: 'image' | 'video';
-  /** Text prompt describing the desired media */
+  /** 描述所需媒体的文本提示词 */
   prompt: string;
-  /** Identifier for the target element on the canvas (e.g. "gen_img_1") */
+  /** 画布上目标元素的标识符（如 "gen_img_1"） */
   elementId: string;
-  /** Desired aspect ratio */
+  /** 期望的宽高比 */
   aspectRatio?: '16:9' | '4:3' | '1:1' | '9:16';
-  /** Optional artistic style hint */
+  /** 可选的艺术风格提示 */
   style?: string;
 }
 
 /**
- * Media Task Adapter
+ * 媒体任务适配器
  *
- * Generic interface for providers that use an asynchronous task pattern
- * (submit task, then poll for completion). Many image/video generation
- * APIs are async — this adapter abstracts that pattern.
+ * 使用异步任务模式（提交任务，然后轮询完成状态）的提供商的通用接口。
+ * 许多图像/视频生成 API 是异步的 —— 此适配器抽象了这种模式。
  *
- * @template TOptions - The generation options type (e.g. ImageGenerationOptions)
- * @template TResult - The generation result type (e.g. ImageGenerationResult)
+ * @template TOptions - 生成选项类型（如 ImageGenerationOptions）
+ * @template TResult - 生成结果类型（如 ImageGenerationResult）
  */
 export interface MediaTaskAdapter<TOptions, TResult> {
   /**
-   * Submit a generation task to the provider.
+   * 向提供商提交生成任务。
    *
-   * @param options - Generation options for the task
-   * @returns A task ID that can be used to poll for status
+   * @param options - 任务的生成选项
+   * @returns 可用于轮询状态的任务 ID
    */
   submitTask(options: TOptions): Promise<string>;
 
   /**
-   * Poll the status of a previously submitted task.
+   * 轮询先前提交的任务状态。
    *
-   * @param taskId - The task ID returned by submitTask()
-   * @returns The generation result if complete, or null if still processing
+   * @param taskId - submitTask() 返回的任务 ID
+   * @returns 如完成则返回生成结果，如仍在处理则返回 null
    */
   pollTaskStatus(taskId: string): Promise<TResult | null>;
 }

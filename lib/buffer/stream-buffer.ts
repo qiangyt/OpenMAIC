@@ -1,21 +1,20 @@
 import type { DirectorState } from '@/lib/types/chat';
 
 /**
- * StreamBuffer — unified presentation pacing layer.
+ * StreamBuffer — 统一的展示节奏控制层。
  *
- * Sits between data sources (SSE stream / PlaybackEngine) and React state.
- * Events are pushed into an ordered queue; a fixed-rate tick loop reveals
- * text character-by-character and fires typed callbacks so both the Chat
- * area and the Roundtable bubble consume identically-paced content.
+ * 位于数据源（SSE 流 / PlaybackEngine）和 React 状态之间。
+ * 事件被推入有序队列；固定频率的 tick 循环以逐字符方式揭示文本，
+ * 并触发类型化回调，使聊天区域和圆桌气泡消费相同节奏的内容。
  *
- * Key invariants:
- *   - ONE source of pacing (this tick loop) — no double typewriter.
- *   - pause() is O(1) instant — tick returns immediately.
- *   - Actions fire only when the tick cursor reaches them (after preceding text).
- *   - Roundtable sees only the current speech segment (resets on action / agent switch).
+ * 关键不变量：
+ *   - 唯一的节奏来源（此 tick 循环）— 不会出现双重打字机效果。
+ *   - pause() 是 O(1) 即时操作 — tick 立即返回。
+ *   - 动作仅在 tick 光标到达时触发（在前面的文本之后）。
+ *   - 圆桌仅看到当前语音片段（在动作/智能体切换时重置）。
  */
 
-// ─── Buffer Item Types ───────────────────────────────────────────────
+// ─── 缓冲区项类型 ───────────────────────────────────────────────
 
 export interface AgentStartItem {
   kind: 'agent_start';
@@ -36,11 +35,11 @@ export interface TextItem {
   kind: 'text';
   messageId: string;
   agentId: string;
-  /** Unique ID for this text part — distinguishes multiple text items within one message (e.g. lecture). */
+  /** 此文本部分的唯一 ID — 区分一条消息中的多个文本项（如讲座）。 */
   partId: string;
-  /** Growable — SSE deltas append here. */
+  /** 可增长的 — SSE 增量追加到这里。 */
   text: string;
-  /** When true, no more text will be appended. Tick can advance past once fully revealed. */
+  /** 为 true 时，不会再追加文本。完全揭示后 tick 可以继续前进。 */
   sealed: boolean;
 }
 
@@ -88,31 +87,31 @@ export type BufferItem =
   | DoneItem
   | ErrorItem;
 
-// ─── Callbacks ───────────────────────────────────────────────────────
+// ─── 回调 ───────────────────────────────────────────────────────
 
 export interface StreamBufferCallbacks {
   onAgentStart(data: AgentStartItem): void;
   onAgentEnd(data: AgentEndItem): void;
   /**
-   * Fired each tick while a text item is being revealed.
-   * @param messageId  — which message to update
-   * @param partId     — unique ID for this text part (stable across ticks)
-   * @param revealedText — text visible so far (slice of full text)
-   * @param isComplete — true when this text item is fully revealed AND sealed
+   * 在文本项揭示期间每个 tick 触发。
+   * @param messageId  — 要更新的消息 ID
+   * @param partId     — 此文本部分的唯一 ID（跨 tick 稳定）
+   * @param revealedText — 目前可见的文本（完整文本的切片）
+   * @param isComplete — 当此文本项完全揭示且已封印时为 true
    */
   onTextReveal(messageId: string, partId: string, revealedText: string, isComplete: boolean): void;
-  /** Fired when tick reaches an action item. Callers should execute the effect + add badge. */
+  /** 当 tick 到达动作项时触发。调用者应执行效果并添加徽章。 */
   onActionReady(messageId: string, data: ActionItem): void;
   /**
-   * Unified speech feed for the Roundtable bubble.
-   * Reports only the CURRENT segment text (resets on action / agent switch).
-   * Called with (null, null) when buffer completes or is disposed.
+   * 圆桌气泡的统一语音流。
+   * 仅报告当前片段文本（在动作/智能体切换时重置）。
+   * 缓冲区完成或销毁时以 (null, null) 调用。
    */
   onLiveSpeech(text: string | null, agentId: string | null): void;
   /**
-   * Speech progress ratio for the Roundtable bubble auto-scroll.
-   * Fired each tick during text reveal: ratio = charCursor / totalTextLength.
-   * Called with null when buffer completes or is disposed.
+   * 圆桌气泡自动滚动的语音进度比例。
+   * 文本揭示期间每个 tick 触发：ratio = charCursor / totalTextLength。
+   * 缓冲区完成或销毁时以 null 调用。
    */
   onSpeechProgress(ratio: number | null): void;
   onThinking(data: { stage: string; agentId?: string } | null): void;
@@ -126,47 +125,46 @@ export interface StreamBufferCallbacks {
   onError(message: string): void;
 }
 
-// ─── Options ─────────────────────────────────────────────────────────
+// ─── 选项 ─────────────────────────────────────────────────────────
 
 export interface StreamBufferOptions {
-  /** Milliseconds between ticks. Default: 30 */
+  /** tick 之间的毫秒数。默认值：30 */
   tickMs?: number;
-  /** Characters revealed per tick. Default: 1  (≈33 chars/s) */
+  /** 每个 tick 揭示的字符数。默认值：1（≈33 字符/秒） */
   charsPerTick?: number;
   /**
-   * Fixed delay (ms) after a text segment is fully revealed before advancing
-   * to the next item. Gives the reader a breathing pause after each speech
-   * block. Default: 0 (no delay).
+   * 文本片段完全揭示后、前进到下一项之前的固定延迟（毫秒）。
+   * 给读者在每个语音块后一个喘息的停顿。默认值：0（无延迟）。
    */
   postTextDelayMs?: number;
   /**
-   * Delay (ms) after firing an action callback before advancing to the next
-   * item. Gives action animations time to play out. Default: 0.
+   * 触发动作回调后、前进到下一项之前的延迟（毫秒）。
+   * 给动作动画播放的时间。默认值：0。
    */
   actionDelayMs?: number;
 }
 
-// ─── StreamBuffer Class ──────────────────────────────────────────────
+// ─── StreamBuffer 类 ──────────────────────────────────────────────
 
 export class StreamBuffer {
-  // Queue
+  // 队列
   private items: BufferItem[] = [];
   private readIndex = 0;
   private charCursor = 0;
 
-  // Roundtable segment tracking
+  // 圆桌片段追踪
   private currentSegmentText = '';
   private currentAgentId: string | null = null;
 
-  // Control
+  // 控制
   private _paused = false;
   private _disposed = false;
   private timer: ReturnType<typeof setInterval> | null = null;
 
-  // Dwell / delay counters (in ticks)
+  // 驻留/延迟计数器（以 tick 为单位）
   private _dwellTicksRemaining = 0;
 
-  // Config
+  // 配置
   private readonly tickMs: number;
   private readonly charsPerTick: number;
   private readonly postTextDelayTicks: number;
@@ -184,7 +182,7 @@ export class StreamBuffer {
     this.actionDelayTicks = Math.ceil((options?.actionDelayMs ?? 0) / this.tickMs);
   }
 
-  // ─── Push Methods ────────────────────────────────────────────────
+  // ─── 推送方法 ────────────────────────────────────────────────
 
   pushAgentStart(data: Omit<AgentStartItem, 'kind'>): void {
     if (this._disposed) return;
@@ -199,9 +197,9 @@ export class StreamBuffer {
   }
 
   /**
-   * Append text for a message.
-   * If the last queue item is an unsealed text item for the same messageId,
-   * the delta is appended in-place. Otherwise a new text item is created.
+   * 为消息追加文本。
+   * 如果队列最后一项是同一 messageId 的未封印文本项，
+   * 则增量会原地追加。否则创建新的文本项。
    */
   pushText(messageId: string, delta: string, agentId?: string): void {
     if (this._disposed) return;
@@ -220,7 +218,7 @@ export class StreamBuffer {
     }
   }
 
-  /** Mark the current (last) text item as complete — no more appends expected. */
+  /** 将当前（最后）文本项标记为完成 — 不再预期追加。 */
   sealText(messageId: string): void {
     if (this._disposed) return;
     for (let i = this.items.length - 1; i >= 0; i--) {
@@ -264,28 +262,27 @@ export class StreamBuffer {
     this.items.push({ kind: 'error', message });
   }
 
-  // ─── Control ─────────────────────────────────────────────────────
+  // ─── 控制 ─────────────────────────────────────────────────────
 
-  /** Start the tick loop. Idempotent — calling twice is safe. */
+  /** 启动 tick 循环。幂等 — 调用两次是安全的。 */
   start(): void {
     if (this._disposed || this.timer) return;
     this.timer = setInterval(() => this.tick(), this.tickMs);
   }
 
-  /** Instantly pause — tick becomes a no-op. */
+  /** 立即暂停 — tick 变为空操作。 */
   pause(): void {
     this._paused = true;
   }
 
-  /** Resume from exactly where we left off. */
+  /** 从离开的位置精确恢复。 */
   resume(): void {
     this._paused = false;
   }
 
   /**
-   * Returns a Promise that resolves when the buffer has processed all items
-   * including the final `done` item. Rejects if the buffer is disposed/shutdown
-   * before draining completes.
+   * 返回一个 Promise，在缓冲区处理完所有项（包括最后的 `done` 项）后 resolve。
+   * 如果缓冲区在排空前被 dispose/shutdown 则 reject。
    */
   waitUntilDrained(): Promise<void> {
     if (this._disposed) {
@@ -306,8 +303,8 @@ export class StreamBuffer {
   }
 
   /**
-   * Flush: instantly reveal everything remaining.
-   * Used when restoring persisted sessions or force-completing.
+   * 刷新：立即揭示所有剩余内容。
+   * 用于恢复持久化会话或强制完成。
    */
   flush(): void {
     if (this._disposed) return;
@@ -328,7 +325,7 @@ export class StreamBuffer {
         case 'agent_start':
           this.currentAgentId = item.agentId;
           this.currentSegmentText = '';
-          this.cb.onThinking(null); // Agent selected — clear thinking indicator
+          this.cb.onThinking(null); // 智能体已选中 — 清除思考指示器
           this.cb.onAgentStart(item);
           this.cb.onLiveSpeech(null, item.agentId);
           break;
@@ -346,7 +343,7 @@ export class StreamBuffer {
           this.cb.onSpeechProgress(null);
           this.cb.onThinking(null);
           this.cb.onDone(item);
-          // Resolve drain promise
+          // resolve 排空 promise
           this._drainResolve?.();
           this._drainResolve = null;
           this._drainReject = null;
@@ -360,7 +357,7 @@ export class StreamBuffer {
     }
   }
 
-  /** Stop tick loop, release resources. No more callbacks after this. */
+  /** 停止 tick 循环，释放资源。此后不再有回调。 */
   dispose(): void {
     if (this._disposed) return;
     this._disposed = true;
@@ -368,19 +365,19 @@ export class StreamBuffer {
       clearInterval(this.timer);
       this.timer = null;
     }
-    // Reject waiting drain promise
+    // reject 等待中的排空 promise
     this._drainReject?.(new Error('Buffer disposed'));
     this._drainResolve = null;
     this._drainReject = null;
-    // Final cleanup signal
+    // 最终清理信号
     this.cb.onLiveSpeech(null, null);
     this.cb.onSpeechProgress(null);
   }
 
   /**
-   * Stop the tick timer and mark disposed WITHOUT firing final onLiveSpeech.
-   * Used when replacing a buffer (e.g. resume after soft-pause) to avoid
-   * the dispose callback clearing roundtable state via a stale microtask.
+   * 停止 tick 计时器并标记已销毁，但不触发最终的 onLiveSpeech。
+   * 用于替换缓冲区（如软暂停后恢复）时，避免 dispose 回调
+   * 通过过期的微任务清除圆桌状态。
    */
   shutdown(): void {
     if (this._disposed) return;
@@ -389,15 +386,15 @@ export class StreamBuffer {
       clearInterval(this.timer);
       this.timer = null;
     }
-    // Reject waiting drain promise
+    // reject 等待中的排空 promise
     this._drainReject?.(new Error('Buffer shutdown'));
     this._drainResolve = null;
     this._drainReject = null;
   }
 
-  // ─── Internals ───────────────────────────────────────────────────
+  // ─── 内部方法 ───────────────────────────────────────────────────
 
-  /** Seal the last text item in the queue (if any). */
+  /** 封印队列中最后的文本项（如果有的话）。 */
   private sealLastText(): void {
     for (let i = this.items.length - 1; i >= 0; i--) {
       const item = this.items[i];
@@ -405,7 +402,7 @@ export class StreamBuffer {
         item.sealed = true;
         break;
       }
-      // Stop searching once we hit a non-text item
+      // 一旦遇到非文本项就停止搜索
       if (item.kind !== 'text') break;
     }
   }
@@ -413,59 +410,59 @@ export class StreamBuffer {
   private tick(): void {
     if (this._paused || this._disposed) return;
 
-    // Honour dwell / action-delay countdown before advancing
+    // 在前进前遵守驻留/动作延迟倒计时
     if (this._dwellTicksRemaining > 0) {
       this._dwellTicksRemaining--;
       return;
     }
 
     const item = this.items[this.readIndex];
-    if (!item) return; // Queue empty or caught up — wait
+    if (!item) return; // 队列为空或已追上 — 等待
 
     switch (item.kind) {
       case 'text': {
-        // Advance character cursor
+        // 前进字符光标
         this.charCursor = Math.min(this.charCursor + this.charsPerTick, item.text.length);
         const revealed = item.text.slice(0, this.charCursor);
         const fullyRevealed = this.charCursor >= item.text.length;
         const isComplete = fullyRevealed && item.sealed;
 
-        // Update chat area
+        // 更新聊天区域
         this.cb.onTextReveal(item.messageId, item.partId, revealed, isComplete);
 
-        // Update roundtable (current segment only).
-        // Use this.currentAgentId (set when tick processes agent_start) rather than
-        // item.agentId — push-time race means item.agentId can carry a stale value
-        // from the previous agent when SSE pushes outpace the tick loop.
+        // 更新圆桌（仅当前片段）。
+        // 使用 this.currentAgentId（tick 处理 agent_start 时设置）而非
+        // item.agentId — 推送时的竞态意味着当 SSE 推送速度超过 tick 循环时，
+        // item.agentId 可能携带前一个智能体的过期值。
         this.currentSegmentText = revealed;
         this.cb.onLiveSpeech(this.currentSegmentText, this.currentAgentId);
         this.cb.onSpeechProgress(item.text.length > 0 ? this.charCursor / item.text.length : 1);
 
-        // Advance to next item if fully revealed and sealed
+        // 如果完全揭示且已封印则前进到下一项
         if (isComplete) {
           this.readIndex++;
           this.charCursor = 0;
 
-          // Fixed pause after text finishes — gives the reader a breathing gap
-          // before the next action or agent turn fires.
+          // 文本结束后的固定暂停 — 给读者在下一个动作或智能体轮次
+          // 触发前的喘息间隙。
           if (this.postTextDelayTicks > 0) {
             this._dwellTicksRemaining = this.postTextDelayTicks;
-            return; // next tick will count down, then advanceNonText
+            return; // 下一个 tick 将倒计时，然后 advanceNonText
           }
 
-          // Process any immediately-advanceable items in the same tick
-          // (e.g. action badges right after text)
+          // 在同一个 tick 中处理任何可立即前进的项
+          // （例如文本后的动作徽章）
           this.advanceNonText();
         }
-        // If fullyRevealed but !sealed: wait for more SSE deltas
+        // 如果 fullyRevealed 但 !sealed：等待更多 SSE 增量
         break;
       }
 
-      // Non-text items are processed immediately
+      // 非文本项立即处理
       case 'agent_start':
         this.currentAgentId = item.agentId;
         this.currentSegmentText = '';
-        this.cb.onThinking(null); // Agent selected — clear thinking indicator
+        this.cb.onThinking(null); // 智能体已选中 — 清除思考指示器
         this.cb.onAgentStart(item);
         this.cb.onLiveSpeech(null, item.agentId);
         this.readIndex++;
@@ -486,7 +483,7 @@ export class StreamBuffer {
         this.cb.onLiveSpeech(null, this.currentAgentId);
         this.readIndex++;
         this.charCursor = 0;
-        // Delay after action so animations have time to play out
+        // 动作后延迟以便动画播放
         if (this.actionDelayTicks > 0) {
           this._dwellTicksRemaining = this.actionDelayTicks;
           return;
@@ -515,12 +512,12 @@ export class StreamBuffer {
         this.cb.onDone(item);
         this.readIndex++;
         this.charCursor = 0;
-        // Stop the timer — nothing more to process
+        // 停止计时器 — 无更多内容需处理
         if (this.timer) {
           clearInterval(this.timer);
           this.timer = null;
         }
-        // Resolve drain promise
+        // resolve 排空 promise
         this._drainResolve?.();
         this._drainResolve = null;
         this._drainReject = null;
@@ -536,23 +533,22 @@ export class StreamBuffer {
   }
 
   /**
-   * After processing a non-text item, keep advancing through consecutive
-   * non-text items in the same tick. Stop when we hit a text item or
-   * the end of the queue — the next tick will handle the text item
-   * (so we don't skip the character-by-character reveal).
+   * 处理非文本项后，继续在同一个 tick 中前进连续的非文本项。
+   * 遇到文本项或队列末尾时停止 — 下一个 tick 将处理文本项
+   * （这样我们不会跳过逐字符揭示）。
    *
-   * Also stops when an action triggers a delay so its animation can play.
+   * 当动作触发延迟时也会停止，以便其动画播放。
    */
   private advanceNonText(): void {
     while (this.readIndex < this.items.length) {
       const next = this.items[this.readIndex];
-      if (next.kind === 'text') break; // Let the next tick handle text
+      if (next.kind === 'text') break; // 让下一个 tick 处理文本
 
       switch (next.kind) {
         case 'agent_start':
           this.currentAgentId = next.agentId;
           this.currentSegmentText = '';
-          this.cb.onThinking(null); // Agent selected — clear thinking indicator
+          this.cb.onThinking(null); // 智能体已选中 — 清除思考指示器
           this.cb.onAgentStart(next);
           this.cb.onLiveSpeech(null, next.agentId);
           break;
@@ -565,12 +561,12 @@ export class StreamBuffer {
           this.cb.onLiveSpeech(null, this.currentAgentId);
           this.readIndex++;
           this.charCursor = 0;
-          // Pause after action to let animation play
+          // 动作后暂停以便动画播放
           if (this.actionDelayTicks > 0) {
             this._dwellTicksRemaining = this.actionDelayTicks;
-            return; // resume on next tick after countdown
+            return; // 倒计时后在下一个 tick 恢复
           }
-          continue; // no delay — keep advancing
+          continue; // 无延迟 — 继续前进
         case 'thinking':
           this.cb.onThinking(next);
           break;
@@ -588,11 +584,11 @@ export class StreamBuffer {
             clearInterval(this.timer);
             this.timer = null;
           }
-          // Resolve drain promise
+          // resolve 排空 promise
           this._drainResolve?.();
           this._drainResolve = null;
           this._drainReject = null;
-          return; // done — stop advancing
+          return; // 完成 — 停止前进
         case 'error':
           this.cb.onError(next.message);
           break;

@@ -1,8 +1,8 @@
 /**
- * Single TTS Generation API
+ * 单次 TTS 生成 API
  *
- * Generates TTS audio for a single text string and returns base64-encoded audio.
- * Called by the client in parallel for each speech action after a scene is generated.
+ * 为单个文本字符串生成 TTS 音频并返回 base64 编码的音频。
+ * 在场景生成后，由客户端并行调用以处理每个语音动作。
  *
  * POST /api/generate/tts
  */
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       ttsBaseUrl?: string;
     };
 
-    // Validate required fields
+    // 验证必填字段
     if (!text || !audioId || !ttsProviderId || !ttsVoice) {
       return apiError(
         'MISSING_REQUIRED_FIELD',
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Reject browser-native TTS — must be handled client-side
+    // 拒绝浏览器原生 TTS — 必须在客户端处理
     if (ttsProviderId === 'browser-native-tts') {
       return apiError('INVALID_REQUEST', 400, 'browser-native-tts must be handled client-side');
     }
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       ? clientBaseUrl
       : resolveTTSBaseUrl(ttsProviderId, ttsBaseUrl || undefined);
 
-    // Build TTS config
+    // 构建 TTS 配置
     const config = {
       providerId: ttsProviderId,
       voice: ttsVoice,
@@ -74,10 +74,10 @@ export async function POST(req: NextRequest) {
       `Generating TTS: provider=${ttsProviderId}, voice=${ttsVoice}, audioId=${audioId}, textLen=${text.length}`,
     );
 
-    // Generate audio
+    // 生成音频
     const { audio, format } = await generateTTS(config, text);
 
-    // Convert to base64
+    // 转换为 base64
     const base64 = Buffer.from(audio).toString('base64');
 
     return apiSuccess({ audioId, base64, format });

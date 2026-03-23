@@ -18,7 +18,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const resolvedTheme = theme === 'system' ? systemTheme : theme;
 
-  // Hydrate from localStorage after mount (avoids SSR mismatch)
+  // 挂载后从 localStorage 恢复（避免 SSR 不匹配）
   /* eslint-disable react-hooks/set-state-in-effect -- Hydration from localStorage must happen in effect */
   useEffect(() => {
     const stored = localStorage.getItem('theme') as Theme | null;
@@ -29,7 +29,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  // Apply theme to document
+  // 将主题应用到文档
   useEffect(() => {
     const root = document.documentElement;
     if (resolvedTheme === 'dark') {
@@ -39,7 +39,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [resolvedTheme]);
 
-  // Listen to system theme changes
+  // 监听系统主题变化
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
@@ -49,7 +49,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  // Save theme to localStorage
+  // 将主题保存到 localStorage
   const handleSetTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     localStorage.setItem('theme', newTheme);

@@ -9,8 +9,8 @@ export interface ViewportStyles {
 }
 
 /**
- * Hook for managing Canvas viewport size and position
- * Handles viewport scaling, positioning, and Canvas dragging
+ * 管理画布视口尺寸和位置的 Hook
+ * 处理视口缩放、定位和画布拖拽
  */
 export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
   const [viewportLeft, setViewportLeft] = useState(0);
@@ -24,7 +24,7 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
   const viewportRatio = useCanvasStore.use.viewportRatio();
   const viewportSize = useCanvasStore.use.viewportSize();
 
-  // Initialize viewport position
+  // 初始化视口位置
   const initViewportPosition = useCallback(() => {
     if (!canvasRef.current) return;
     const canvasWidth = canvasRef.current.clientWidth;
@@ -43,7 +43,7 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
     }
   }, [canvasRef, canvasPercentage, viewportRatio, viewportSize, setCanvasScale]);
 
-  // Update viewport position
+  // 更新视口位置
   const setViewportPosition = useCallback(
     (newValue: number, oldValue: number) => {
       if (!canvasRef.current) return;
@@ -75,10 +75,10 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
     [canvasRef, viewportRatio, viewportSize, setCanvasScale],
   );
 
-  // Track previous Canvas percentage for detecting changes
+  // 跟踪上一个画布百分比用于检测变化
   const prevCanvasPercentageRef = useRef(canvasPercentage);
 
-  // Update viewport position when canvas percentage changes
+  // 当画布百分比变化时更新视口位置
   useEffect(() => {
     if (prevCanvasPercentageRef.current !== canvasPercentage) {
       setViewportPosition(canvasPercentage, prevCanvasPercentageRef.current);
@@ -86,19 +86,19 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
     }
   }, [canvasPercentage, setViewportPosition]);
 
-  // Reset viewport position when viewport ratio or size changes
+  // 当视口比例或尺寸变化时重置视口位置
   useEffect(() => {
     initViewportPosition();
   }, [viewportRatio, viewportSize, initViewportPosition]);
 
-  // Reset viewport position when drag state is restored
+  // 当拖拽状态恢复时重置视口位置
   useEffect(() => {
     if (!canvasDragged) {
       initViewportPosition();
     }
   }, [canvasDragged, initViewportPosition]);
 
-  // Reset viewport position when canvas is resized
+  // 当画布尺寸变化时重置视口位置
   useEffect(() => {
     const el = canvasRef.current;
     const resizeObserver = new ResizeObserver(initViewportPosition);
@@ -112,7 +112,7 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
     };
   }, [canvasRef, initViewportPosition]);
 
-  // Drag canvas viewport
+  // 拖拽画布视口
   const dragViewport = useCallback(
     (e: React.MouseEvent) => {
       let isMouseDown = true;
@@ -147,7 +147,7 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
     [viewportLeft, viewportTop, setCanvasDragged],
   );
 
-  // Viewport position and size styles
+  // 视口位置和尺寸样式
   const viewportStyles: ViewportStyles = useMemo(
     () => ({
       width: viewportSize,

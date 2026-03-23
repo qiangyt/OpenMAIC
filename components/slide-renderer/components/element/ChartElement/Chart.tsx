@@ -44,7 +44,7 @@ export function Chart({
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
 
-  // Generate theme colors
+  // 生成主题颜色
   const themeColors = useMemo(() => {
     let colors: string[] = [];
     if (rawThemeColors.length >= 10) {
@@ -63,7 +63,7 @@ export function Chart({
     return colors;
   }, [rawThemeColors]);
 
-  // Update chart option
+  // 更新图表配置
   const updateOption = useMemo(() => {
     return () => {
       if (!chartInstance.current) return;
@@ -84,7 +84,7 @@ export function Chart({
     };
   }, [type, data, themeColors, textColor, lineColor, options]);
 
-  // Initialize chart
+  // 初始化图表
   useEffect(() => {
     if (!chartRef.current) return;
 
@@ -103,10 +103,10 @@ export function Chart({
       chartInstance.current?.dispose();
       chartInstance.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Init-only effect: chart setup and resize observer
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅初始化的 effect：图表设置和尺寸监听
   }, []);
 
-  // Update chart when props change
+  // 当 props 变化时更新图表
   useEffect(() => {
     updateOption();
   }, [updateOption]);

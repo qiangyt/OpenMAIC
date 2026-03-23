@@ -5,8 +5,8 @@ import { useI18n } from '@/lib/hooks/use-i18n';
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card';
 
 /**
- * Inline guide shown below the role selection cards.
- * Hover to reveal the 3-step PBL workflow as a popover above.
+ * 显示在角色选择卡片下方的内联指南。
+ * 悬停时在上方弹出 3 步 PBL 工作流程。
  */
 export function PBLGuideInline() {
   const { t } = useI18n();
@@ -36,7 +36,7 @@ export function PBLGuideInline() {
 }
 
 /**
- * Help button in workspace toolbar — hover to show guide popover.
+ * 工作区工具栏中的帮助按钮 — 悬停时显示指南弹出框。
  */
 export function PBLGuidePanel() {
   const { t } = useI18n();
@@ -71,7 +71,7 @@ function GuideContent() {
 
   return (
     <div className="space-y-5 text-[13px] leading-relaxed text-foreground">
-      {/* Step 1 */}
+      {/* 步骤 1 */}
       <section>
         <h4 className="font-semibold mb-1">{t('pbl.guide.step1.title')}</h4>
         <p className="text-muted-foreground">{t('pbl.guide.step1.desc')}</p>
@@ -79,7 +79,7 @@ function GuideContent() {
 
       <hr className="border-border" />
 
-      {/* Step 2 */}
+      {/* 步骤 2 */}
       <section>
         <h4 className="font-semibold mb-1">{t('pbl.guide.step2.title')}</h4>
         <p className="text-muted-foreground mb-3">{t('pbl.guide.step2.desc')}</p>
@@ -131,7 +131,7 @@ function GuideContent() {
 
       <hr className="border-border" />
 
-      {/* Step 3 */}
+      {/* 步骤 3 */}
       <section>
         <h4 className="font-semibold mb-1">{t('pbl.guide.step3.title')}</h4>
         <p className="text-muted-foreground">{t('pbl.guide.step3.desc')}</p>

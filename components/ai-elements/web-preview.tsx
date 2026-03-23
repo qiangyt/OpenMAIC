@@ -115,7 +115,7 @@ export const WebPreviewUrl = ({ value, onChange, onKeyDown, ...props }: WebPrevi
   const { url, setUrl } = useWebPreview();
   const [inputValue, setInputValue] = useState(url);
 
-  // Sync input value with context URL when it changes externally
+  // 当上下文 URL 外部变化时同步输入值
   useEffect(() => {
     setInputValue(url);
   }, [url]);

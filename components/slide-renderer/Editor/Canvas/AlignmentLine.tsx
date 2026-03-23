@@ -7,15 +7,15 @@ export interface AlignmentLineComponentProps extends AlignmentLineProps {
 }
 
 /**
- * Alignment line component
- * Displays visual alignment guides during element dragging
+ * 对齐线组件
+ * 在元素拖拽时显示视觉对齐参考线
  */
 export function AlignmentLine({ type, axis, length, canvasScale }: AlignmentLineComponentProps) {
-  // Alignment line position
+  // 对齐线位置
   const left = axis.x * canvasScale;
   const top = axis.y * canvasScale;
 
-  // Alignment line length
+  // 对齐线长度
   const sizeStyle =
     type === 'vertical'
       ? { height: `${length * canvasScale}px` }

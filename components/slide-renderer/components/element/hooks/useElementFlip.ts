@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 
 /**
- * Calculate element flip transform style
- * Handles horizontal and/or vertical flip
- * @param flipH Flip horizontally
- * @param flipV Flip vertically
+ * 计算元素翻转变换样式
+ * 处理水平和/或垂直翻转
+ * @param flipH 水平翻转
+ * @param flipV 垂直翻转
  */
 export function useElementFlip(flipH?: boolean, flipV?: boolean) {
   const flipStyle = useMemo(() => {

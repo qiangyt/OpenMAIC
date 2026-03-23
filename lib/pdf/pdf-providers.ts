@@ -1,21 +1,21 @@
 /**
- * PDF Parsing Provider Implementation
+ * PDF 解析提供商实现
  *
- * Factory pattern for routing PDF parsing requests to appropriate provider implementations.
- * Follows the same architecture as lib/ai/providers.ts for consistency.
+ * 工厂模式，将 PDF 解析请求路由到相应的提供商实现。
+ * 遵循与 lib/ai/providers.ts 相同的架构以保持一致性。
  *
- * Currently Supported Providers:
- * - unpdf: Built-in Node.js PDF parser with text and image extraction
- * - MinerU: Advanced commercial service with OCR, formula, and table extraction
- *   (https://mineru.ai or self-hosted)
+ * 当前支持的提供商：
+ * - unpdf：内置 Node.js PDF 解析器，支持文本和图片提取
+ * - MinerU：高级商业服务，支持 OCR、公式和表格提取
+ *   (https://mineru.ai 或自托管)
  *
- * HOW TO ADD A NEW PROVIDER:
+ * 如何添加新提供商：
  *
- * 1. Add provider ID to PDFProviderId in lib/pdf/types.ts
- *    Example: | 'tesseract-ocr'
+ * 1. 在 lib/pdf/types.ts 的 PDFProviderId 中添加提供商 ID
+ *    示例：| 'tesseract-ocr'
  *
- * 2. Add provider configuration to lib/pdf/constants.ts
- *    Example:
+ * 2. 在 lib/pdf/constants.ts 中添加提供商配置
+ *    示例：
  *    'tesseract-ocr': {
  *      id: 'tesseract-ocr',
  *      name: 'Tesseract OCR',
@@ -24,29 +24,29 @@
  *      features: ['text', 'images', 'ocr']
  *    }
  *
- * 3. Implement provider function in this file
- *    Pattern: async function parseWithXxx(config, pdfBuffer): Promise<ParsedPdfContent>
- *    - Accept PDF as Buffer
- *    - Extract text, images, tables, formulas as needed
- *    - Return unified format:
+ * 3. 在本文件中实现提供商函数
+ *    模式：async function parseWithXxx(config, pdfBuffer): Promise<ParsedPdfContent>
+ *    - 接受 PDF 作为 Buffer
+ *    - 根据需要提取文本、图片、表格、公式
+ *    - 返回统一格式：
  *      {
- *        text: string,               // Markdown or plain text
- *        images: string[],           // Base64 data URLs
+ *        text: string,               // Markdown 或纯文本
+ *        images: string[],           // Base64 数据 URL
  *        metadata: {
  *          pageCount: number,
  *          parser: string,
- *          ...                       // Provider-specific metadata
+ *          ...                       // 提供商特定的元数据
  *        }
  *      }
  *
- *    Example:
+ *    示例：
  *    async function parseWithTesseractOCR(
  *      config: PDFParserConfig,
  *      pdfBuffer: Buffer
  *    ): Promise<ParsedPdfContent> {
  *      const { createWorker } = await import('tesseract.js');
  *
- *      // Convert PDF pages to images
+ *      // 将 PDF 页面转换为图片
  *      const pdf = await getDocumentProxy(new Uint8Array(pdfBuffer));
  *      const numPages = pdf.numPages;
  *
@@ -54,20 +54,20 @@
  *      const images: string[] = [];
  *
  *      for (let pageNum = 1; pageNum <= numPages; pageNum++) {
- *        // Render page to canvas/image
+ *        // 将页面渲染为 canvas/图片
  *        const page = await pdf.getPage(pageNum);
  *        const viewport = page.getViewport({ scale: 2.0 });
  *        const canvas = createCanvas(viewport.width, viewport.height);
  *        const context = canvas.getContext('2d');
  *        await page.render({ canvasContext: context, viewport }).promise;
  *
- *        // OCR the image
+ *        // OCR 图片
  *        const worker = await createWorker('eng+chi_sim');
  *        const { data: { text } } = await worker.recognize(canvas.toBuffer());
  *        texts.push(text);
  *        await worker.terminate();
  *
- *        // Save image
+ *        // 保存图片
  *        images.push(canvas.toDataURL());
  *      }
  *
@@ -81,60 +81,60 @@
  *      };
  *    }
  *
- * 4. Add case to parsePDF() switch statement
+ * 4. 在 parsePDF() switch 语句中添加 case
  *    case 'tesseract-ocr':
  *      result = await parseWithTesseractOCR(config, pdfBuffer);
  *      break;
  *
- * 5. Add i18n translations in lib/i18n.ts
+ * 5. 在 lib/i18n.ts 中添加 i18n 翻译
  *    providerTesseractOCR: { zh: 'Tesseract OCR', en: 'Tesseract OCR' }
  *
- * 6. Update features in constants.ts to reflect parser capabilities
- *    features: ['text', 'images', 'ocr'] // OCR-capable
+ * 6. 更新 constants.ts 中的 features 以反映解析器能力
+ *    features: ['text', 'images', 'ocr'] // 支持 OCR
  *
- * Provider Implementation Patterns:
+ * 提供商实现模式：
  *
- * Pattern 1: Local Node.js Parser (like unpdf)
- * - Import parsing library
- * - Process Buffer directly
- * - Extract text and images synchronously or asynchronously
- * - Convert images to base64 data URLs
- * - Return immediately
+ * 模式 1：本地 Node.js 解析器（如 unpdf）
+ * - 导入解析库
+ * - 直接处理 Buffer
+ * - 同步或异步提取文本和图片
+ * - 将图片转换为 base64 数据 URL
+ * - 立即返回
  *
- * Pattern 2: Remote API (like MinerU)
- * - Upload PDF or provide URL
- * - Create task and get task ID
- * - Poll for completion (with timeout)
- * - Download results (text, images, metadata)
- * - Parse and convert to unified format
+ * 模式 2：远程 API（如 MinerU）
+ * - 上传 PDF 或提供 URL
+ * - 创建任务并获取任务 ID
+ * - 轮询完成状态（带超时）
+ * - 下载结果（文本、图片、元数据）
+ * - 解析并转换为统一格式
  *
- * Pattern 3: OCR-based Parser (Tesseract, Google Vision)
- * - Render PDF pages to images
- * - Send images to OCR service
- * - Collect text from all pages
- * - Combine with layout analysis if available
- * - Return combined text and original images
+ * 模式 3：基于 OCR 的解析器（Tesseract、Google Vision）
+ * - 将 PDF 页面渲染为图片
+ * - 将图片发送到 OCR 服务
+ * - 收集所有页面的文本
+ * - 如果可用，结合布局分析
+ * - 返回合并的文本和原始图片
  *
- * Image Extraction Best Practices:
- * - Always convert to base64 data URLs (data:image/png;base64,...)
- * - Use PNG for lossless quality
- * - Use sharp for efficient image processing
- * - Handle errors per image (don't fail entire parsing)
- * - Log extraction failures but continue processing
+ * 图片提取最佳实践：
+ * - 始终转换为 base64 数据 URL (data:image/png;base64,...)
+ * - 使用 PNG 以保持无损质量
+ * - 使用 sharp 进行高效的图片处理
+ * - 按图片处理错误（不要使整个解析失败）
+ * - 记录提取失败但继续处理
  *
- * Metadata Recommendations:
- * - pageCount: Number of pages in PDF
- * - parser: Provider ID for debugging
- * - processingTime: Time taken (auto-added)
- * - taskId/jobId: For async providers (useful for troubleshooting)
- * - Custom fields: imageMapping, pdfImages, tables, formulas, etc.
+ * 元数据建议：
+ * - pageCount：PDF 中的页数
+ * - parser：提供商 ID，用于调试
+ * - processingTime：耗时（自动添加）
+ * - taskId/jobId：对于异步提供商（便于故障排查）
+ * - 自定义字段：imageMapping、pdfImages、tables、formulas 等
  *
- * Error Handling:
- * - Validate API key if requiresApiKey is true
- * - Throw descriptive errors for missing configuration
- * - For async providers, handle timeout and polling errors
- * - Log warnings for non-critical failures (e.g., single page errors)
- * - Always include provider name in error messages
+ * 错误处理：
+ * - 如果 requiresApiKey 为 true，验证 API key
+ * - 对缺少配置抛出描述性错误
+ * - 对于异步提供商，处理超时和轮询错误
+ * - 对非关键失败记录警告（例如单个页面错误）
+ * - 始终在错误消息中包含提供商名称
  */
 
 import { extractText, getDocumentProxy, extractImages } from 'unpdf';
@@ -147,7 +147,7 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('PDFProviders');
 
 /**
- * Parse PDF using specified provider
+ * 使用指定提供商解析 PDF
  */
 export async function parsePDF(
   config: PDFParserConfig,
@@ -158,7 +158,7 @@ export async function parsePDF(
     throw new Error(`Unknown PDF provider: ${config.providerId}`);
   }
 
-  // Validate API key if required
+  // 如果需要则验证 API key
   if (provider.requiresApiKey && !config.apiKey) {
     throw new Error(`API key required for PDF provider: ${config.providerId}`);
   }
@@ -180,7 +180,7 @@ export async function parsePDF(
       throw new Error(`Unsupported PDF provider: ${config.providerId}`);
   }
 
-  // Add processing time to metadata
+  // 将处理时间添加到元数据
   if (result.metadata) {
     result.metadata.processingTime = Date.now() - startTime;
   }
@@ -189,19 +189,19 @@ export async function parsePDF(
 }
 
 /**
- * Parse PDF using unpdf (existing implementation)
+ * 使用 unpdf 解析 PDF（现有实现）
  */
 async function parseWithUnpdf(pdfBuffer: Buffer): Promise<ParsedPdfContent> {
   const uint8Array = new Uint8Array(pdfBuffer);
   const pdf = await getDocumentProxy(uint8Array);
   const numPages = pdf.numPages;
 
-  // Extract text using the document proxy
+  // 使用文档代理提取文本
   const { text: pdfText } = await extractText(pdf, {
     mergePages: true,
   });
 
-  // Extract images using the same document proxy
+  // 使用相同的文档代理提取图片
   const images: string[] = [];
   const pdfImagesMeta: Array<{
     id: string;
@@ -218,7 +218,7 @@ async function parseWithUnpdf(pdfBuffer: Buffer): Promise<ParsedPdfContent> {
       for (let i = 0; i < pageImages.length; i++) {
         const imgData = pageImages[i];
         try {
-          // Use sharp to convert raw image data to PNG base64
+          // 使用 sharp 将原始图片数据转换为 PNG base64
           const pngBuffer = await sharp(Buffer.from(imgData.data), {
             raw: {
               width: imgData.width,
@@ -229,7 +229,7 @@ async function parseWithUnpdf(pdfBuffer: Buffer): Promise<ParsedPdfContent> {
             .png()
             .toBuffer();
 
-          // Convert to base64
+          // 转换为 base64
           const base64 = `data:image/png;base64,${pngBuffer.toString('base64')}`;
           imageCounter++;
           const imgId = `img_${imageCounter}`;
@@ -263,12 +263,12 @@ async function parseWithUnpdf(pdfBuffer: Buffer): Promise<ParsedPdfContent> {
 }
 
 /**
- * Parse PDF using self-hosted MinerU service (mineru-api)
+ * 使用自托管的 MinerU 服务 (mineru-api) 解析 PDF
  *
- * Official MinerU API endpoint:
+ * 官方 MinerU API 端点：
  * POST /file_parse  (multipart/form-data)
  *
- * Response format:
+ * 响应格式：
  * { results: { "document.pdf": { md_content, images, content_list, ... } } }
  *
  * @see https://github.com/opendatalab/MinerU
@@ -289,10 +289,10 @@ async function parseWithMinerU(
 
   const fileName = 'document.pdf';
 
-  // Create FormData for file upload
+  // 为文件上传创建 FormData
   const formData = new FormData();
 
-  // Convert Buffer to Blob
+  // 将 Buffer 转换为 Blob
   const arrayBuffer = pdfBuffer.buffer.slice(
     pdfBuffer.byteOffset,
     pdfBuffer.byteOffset + pdfBuffer.byteLength,
@@ -302,16 +302,16 @@ async function parseWithMinerU(
   });
   formData.append('files', blob, fileName);
 
-  // MinerU API form fields
-  // Defaults already: return_md=true, formula_enable=true, table_enable=true
+  // MinerU API 表单字段
+  // 默认值已设置：return_md=true, formula_enable=true, table_enable=true
   formData.append('parse_method', 'auto');
-  // hybrid-auto-engine: best accuracy, uses VLM for layout understanding (requires GPU)
-  // pipeline: basic mode, no VLM, faster but lower quality image extraction
+  // hybrid-auto-engine：最佳精度，使用 VLM 进行布局理解（需要 GPU）
+  // pipeline：基础模式，无 VLM，更快但图片提取质量较低
   formData.append('backend', 'hybrid-auto-engine');
   formData.append('return_content_list', 'true');
   formData.append('return_images', 'true');
 
-  // API key (if required by deployment)
+  // API key（如果部署需要）
   const headers: Record<string, string> = {};
   if (config.apiKey) {
     headers['Authorization'] = `Bearer ${config.apiKey}`;
@@ -331,11 +331,11 @@ async function parseWithMinerU(
 
   const json = await response.json();
 
-  // Response: { results: { "<fileName>": { md_content, images, content_list, ... } } }
+  // 响应：{ results: { "<fileName>": { md_content, images, content_list, ... } } }
   const fileResult = json.results?.[fileName];
   if (!fileResult) {
     const keys = json.results ? Object.keys(json.results) : [];
-    // Try first available key in case filename doesn't match exactly
+    // 尝试第一个可用的 key，以防文件名不完全匹配
     const fallback = keys.length > 0 ? json.results[keys[0]] : null;
     if (!fallback) {
       throw new Error(`MinerU returned no results. Response keys: ${JSON.stringify(keys)}`);
@@ -347,20 +347,20 @@ async function parseWithMinerU(
   return extractMinerUResult(fileResult);
 }
 
-/** Extract ParsedPdfContent from a single MinerU file result */
+/** 从单个 MinerU 文件结果中提取 ParsedPdfContent */
 function extractMinerUResult(fileResult: Record<string, unknown>): ParsedPdfContent {
   const markdown: string = (fileResult.md_content as string) || '';
   const imageData: Record<string, string> = {};
   let pageCount = 0;
 
-  // Extract images from the images object (key → base64 string)
+  // 从 images 对象中提取图片（key → base64 字符串）
   if (fileResult.images && typeof fileResult.images === 'object') {
     Object.entries(fileResult.images as Record<string, string>).forEach(([key, value]) => {
       imageData[key] = value.startsWith('data:') ? value : `data:image/png;base64,${value}`;
     });
   }
 
-  // Parse content_list to build image metadata lookup (img_path → metadata)
+  // 解析 content_list 以构建图片元数据查找表（img_path → metadata）
   const imageMetaLookup = new Map<string, { pageIdx: number; bbox: number[]; caption?: string }>();
   const contentList =
     typeof fileResult.content_list === 'string'
@@ -381,8 +381,7 @@ function extractMinerUResult(fileResult: Record<string, unknown>): ParsedPdfCont
           bbox: item.bbox || [0, 0, 1000, 1000],
           caption: Array.isArray(item.image_caption) ? item.image_caption[0] : undefined,
         };
-        // Store under both the full path and basename so lookup works
-        // regardless of whether images dict uses "abc.jpg" or "images/abc.jpg"
+        // 同时存储完整路径和基本名称，以便无论 images 字典使用 "abc.jpg" 还是 "images/abc.jpg" 都能查找
         imageMetaLookup.set(item.img_path, metaEntry);
         const basename = item.img_path.split('/').pop();
         if (basename && basename !== item.img_path) {
@@ -392,7 +391,7 @@ function extractMinerUResult(fileResult: Record<string, unknown>): ParsedPdfCont
     }
   }
 
-  // Build image mapping and pdfImages array
+  // 构建 image 映射和 pdfImages 数组
   const imageMapping: Record<string, string> = {};
   const pdfImages: Array<{
     id: string;
@@ -406,7 +405,7 @@ function extractMinerUResult(fileResult: Record<string, unknown>): ParsedPdfCont
   Object.entries(imageData).forEach(([key, base64Url], index) => {
     const imageId = key.startsWith('img_') ? key : `img_${index + 1}`;
     imageMapping[imageId] = base64Url;
-    // Try exact key first, then with 'images/' prefix (MinerU content_list uses prefixed paths)
+    // 先尝试精确匹配的 key，再尝试带 'images/' 前缀（MinerU content_list 使用带前缀的路径）
     const meta = imageMetaLookup.get(key) || imageMetaLookup.get(`images/${key}`);
     pdfImages.push({
       id: imageId,
@@ -438,15 +437,15 @@ function extractMinerUResult(fileResult: Record<string, unknown>): ParsedPdfCont
 }
 
 /**
- * Get current PDF parser configuration from settings store
- * Note: This function should only be called in browser context
+ * 从设置 store 获取当前 PDF 解析器配置
+ * 注意：此函数只能在浏览器上下文中调用
  */
 export async function getCurrentPDFConfig(): Promise<PDFParserConfig> {
   if (typeof window === 'undefined') {
     throw new Error('getCurrentPDFConfig() can only be called in browser context');
   }
 
-  // Dynamic import to avoid circular dependency
+  // 动态导入以避免循环依赖
   const { useSettingsStore } = await import('@/lib/store/settings');
   const { pdfProviderId, pdfProvidersConfig } = useSettingsStore.getState();
 
@@ -459,5 +458,5 @@ export async function getCurrentPDFConfig(): Promise<PDFParserConfig> {
   };
 }
 
-// Re-export from constants for convenience
+// 为方便使用，从 constants 重新导出
 export { getAllPDFProviders, getPDFProvider } from './constants';

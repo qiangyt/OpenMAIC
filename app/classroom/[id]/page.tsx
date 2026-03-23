@@ -28,7 +28,7 @@ export default function ClassroomDetailPage() {
 
   const { generateRemaining, retrySingleOutline, stop } = useSceneGenerator({
     onComplete: () => {
-      log.info('[Classroom] All scenes generated');
+      log.info('[Classroom] 所有场景已生成');
     },
   });
 
@@ -36,9 +36,9 @@ export default function ClassroomDetailPage() {
     try {
       await loadFromStorage(classroomId);
 
-      // If IndexedDB had no data, try server-side storage (API-generated classrooms)
+      // 如果 IndexedDB 没有数据，尝试服务器端存储（API 生成的课堂）
       if (!useStageStore.getState().stage) {
-        log.info('No IndexedDB data, trying server-side storage for:', classroomId);
+        log.info('IndexedDB 无数据，尝试服务器端存储：', classroomId);
         try {
           const res = await fetch(`/api/classroom?id=${encodeURIComponent(classroomId)}`);
           if (res.ok) {
@@ -50,17 +50,17 @@ export default function ClassroomDetailPage() {
                 scenes,
                 currentSceneId: scenes[0]?.id ?? null,
               });
-              log.info('Loaded from server-side storage:', classroomId);
+              log.info('从服务器端存储加载：', classroomId);
             }
           }
         } catch (fetchErr) {
-          log.warn('Server-side storage fetch failed:', fetchErr);
+          log.warn('服务器端存储获取失败：', fetchErr);
         }
       }
 
-      // Restore completed media generation tasks from IndexedDB
+      // 从 IndexedDB 恢复已完成的媒体生成任务
       await useMediaGenerationStore.getState().restoreFromDB(classroomId);
-      // Restore generated agents for this stage
+      // 恢复此舞台的已生成智能体
       const { loadGeneratedAgentsForStage } = await import('@/lib/orchestration/registry/store');
       const agentIds = await loadGeneratedAgentsForStage(classroomId);
       if (agentIds.length > 0) {
@@ -68,7 +68,7 @@ export default function ClassroomDetailPage() {
         useSettingsStore.getState().setSelectedAgentIds(agentIds);
       }
     } catch (error) {
-      log.error('Failed to load classroom:', error);
+      log.error('加载课堂失败：', error);
       setError(error instanceof Error ? error.message : 'Failed to load classroom');
     } finally {
       setLoading(false);
@@ -76,49 +76,49 @@ export default function ClassroomDetailPage() {
   }, [classroomId, loadFromStorage]);
 
   useEffect(() => {
-    // Reset loading state on course switch to unmount Stage during transition,
-    // preventing stale data from syncing back to the new course
+    // 在切换课程时重置加载状态，以便在过渡期间卸载 Stage，
+    // 防止过期数据同步回新课程
     setLoading(true);
     setError(null);
     generationStartedRef.current = false;
 
-    // Clear previous classroom's media tasks to prevent cross-classroom contamination.
-    // Placeholder IDs (gen_img_1, gen_vid_1) are NOT globally unique across stages,
-    // so stale tasks from a previous classroom would shadow the new one's.
+    // 清除上一个课堂的媒体任务以防止跨课堂污染。
+    // 占位符 ID（gen_img_1、gen_vid_1）在各舞台间并非全局唯一，
+    // 因此上一个课堂的过期任务会覆盖新课堂的任务。
     const mediaStore = useMediaGenerationStore.getState();
     mediaStore.revokeObjectUrls();
     useMediaGenerationStore.setState({ tasks: {} });
 
-    // Clear whiteboard history to prevent snapshots from a previous course leaking in.
+    // 清空白板历史以防止上一个课程的快照泄露进来。
     useWhiteboardHistoryStore.getState().clearHistory();
 
     loadClassroom();
 
-    // Cancel ongoing generation when classroomId changes or component unmounts
+    // 当 classroomId 变更或组件卸载时取消正在进行的生成
     return () => {
       stop();
     };
   }, [classroomId, loadClassroom, stop]);
 
-  // Auto-resume generation for pending outlines
+  // 自动恢复待处理大纲的生成
   useEffect(() => {
     if (loading || error || generationStartedRef.current) return;
 
     const state = useStageStore.getState();
     const { outlines, scenes, stage } = state;
 
-    // Check if there are pending outlines
+    // 检查是否有待处理的大纲
     const completedOrders = new Set(scenes.map((s) => s.order));
     const hasPending = outlines.some((o) => !completedOrders.has(o.order));
 
     if (hasPending && stage) {
       generationStartedRef.current = true;
 
-      // Load generation params from sessionStorage (stored by generation-preview before navigating)
+      // 从 sessionStorage 加载生成参数（由 generation-preview 在导航前存储）
       const genParamsStr = sessionStorage.getItem('generationParams');
       const params = genParamsStr ? JSON.parse(genParamsStr) : {};
 
-      // Reconstruct imageMapping from IndexedDB using pdfImages storageIds
+      // 使用 pdfImages 的 storageId 从 IndexedDB 重建 imageMapping
       const storageIds = (params.pdfImages || [])
         .map((img: { storageId?: string }) => img.storageId)
         .filter(Boolean);
@@ -138,12 +138,12 @@ export default function ClassroomDetailPage() {
         });
       });
     } else if (outlines.length > 0 && stage) {
-      // All scenes are generated, but some media may not have finished.
-      // Resume media generation for any tasks not yet in IndexedDB.
-      // generateMediaForOutlines skips already-completed tasks automatically.
+      // 所有场景已生成，但部分媒体可能尚未完成。
+      // 恢复 IndexedDB 中尚未完成的任务的媒体生成。
+      // generateMediaForOutlines 会自动跳过已完成的任务。
       generationStartedRef.current = true;
       generateMediaForOutlines(outlines, stage.id).catch((err) => {
-        log.warn('[Classroom] Media generation resume error:', err);
+        log.warn('[Classroom] 媒体生成恢复错误：', err);
       });
     }
   }, [loading, error, generateRemaining]);

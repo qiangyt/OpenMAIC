@@ -15,8 +15,8 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('Database');
 
 /**
- * Legacy Snapshot type for undo/redo functionality
- * Used by useSnapshotStore
+ * 旧版快照类型，用于撤销/重做功能
+ * 由 useSnapshotStore 使用
  */
 export interface Snapshot {
   id?: number;
@@ -25,82 +25,82 @@ export interface Snapshot {
 }
 
 /**
- * MAIC Local Database
+ * MAIC 本地数据库
  *
- * Uses IndexedDB to store all user data locally
- * - Does not delete expired data; all data is stored permanently
- * - Uses a fixed database name
- * - Supports multi-course management
+ * 使用 IndexedDB 将所有用户数据存储在本地
+ * - 不删除过期数据；所有数据永久存储
+ * - 使用固定的数据库名称
+ * - 支持多课程管理
  */
 
-// ==================== Database Table Type Definitions ====================
+// ==================== 数据库表类型定义 ====================
 
 /**
- * Stage table - Course basic info
+ * Stage 表 - 课程基本信息
  */
 export interface StageRecord {
-  id: string; // Primary key
+  id: string; // 主键
   name: string;
   description?: string;
-  createdAt: number; // timestamp
-  updatedAt: number; // timestamp
+  createdAt: number; // 时间戳
+  updatedAt: number; // 时间戳
   language?: string;
   style?: string;
   currentSceneId?: string;
 }
 
 /**
- * Scene table - Scene/page data
+ * Scene 表 - 场景/页面数据
  */
 export interface SceneRecord {
-  id: string; // Primary key
-  stageId: string; // Foreign key -> stages.id
+  id: string; // 主键
+  stageId: string; // 外键 -> stages.id
   type: SceneType;
   title: string;
-  order: number; // Display order
-  content: SceneContent; // Stored as JSON
-  actions?: Action[]; // Stored as JSON
-  whiteboard?: Whiteboard[]; // Stored as JSON
+  order: number; // 显示顺序
+  content: SceneContent; // 以 JSON 存储
+  actions?: Action[]; // 以 JSON 存储
+  whiteboard?: Whiteboard[]; // 以 JSON 存储
   createdAt: number;
   updatedAt: number;
 }
 
 /**
- * AudioFile table - Audio files (TTS)
+ * AudioFile 表 - 音频文件（TTS）
  */
 export interface AudioFileRecord {
-  id: string; // Primary key (audioId)
-  blob: Blob; // Audio binary data
-  duration?: number; // Duration (seconds)
-  format: string; // mp3, wav, etc.
-  text?: string; // Corresponding text content
-  voice?: string; // Voice used
+  id: string; // 主键（audioId）
+  blob: Blob; // 音频二进制数据
+  duration?: number; // 时长（秒）
+  format: string; // mp3、wav 等
+  text?: string; // 对应的文本内容
+  voice?: string; // 使用的语音
   createdAt: number;
-  ossKey?: string; // Full CDN URL for this audio blob
+  ossKey?: string; // 此音频 blob 的完整 CDN URL
 }
 
 /**
- * ImageFile table - Image files
+ * ImageFile 表 - 图片文件
  */
 export interface ImageFileRecord {
-  id: string; // Primary key
-  blob: Blob; // Image binary data
-  filename: string; // Original filename
-  mimeType: string; // image/png, image/jpeg, etc.
-  size: number; // File size (bytes)
+  id: string; // 主键
+  blob: Blob; // 图片二进制数据
+  filename: string; // 原始文件名
+  mimeType: string; // image/png、image/jpeg 等
+  size: number; // 文件大小（字节）
   createdAt: number;
 }
 
 /**
- * ChatSession table - Chat session data
+ * ChatSession 表 - 聊天会话数据
  */
 export interface ChatSessionRecord {
-  id: string; // PK (session id)
-  stageId: string; // FK -> stages.id
+  id: string; // 主键（会话 ID）
+  stageId: string; // 外键 -> stages.id
   type: SessionType;
   title: string;
   status: SessionStatus;
-  messages: UIMessage[]; // JSON-safe serialized messages
+  messages: UIMessage[]; // JSON 安全的序列化消息
   config: SessionConfig;
   toolCalls: ToolCallRecord[];
   pendingToolCalls: ToolCallRequest[];
@@ -111,10 +111,10 @@ export interface ChatSessionRecord {
 }
 
 /**
- * PlaybackState table - Playback state snapshot (at most one per stage)
+ * PlaybackState 表 - 播放状态快照（每个课程最多一条）
  */
 export interface PlaybackStateRecord {
-  stageId: string; // PK
+  stageId: string; // 主键
   sceneIndex: number;
   actionIndex: number;
   consumedDiscussions: string[];
@@ -122,41 +122,41 @@ export interface PlaybackStateRecord {
 }
 
 /**
- * StageOutlines table - Persisted outlines for resume-on-refresh
+ * StageOutlines 表 - 持久化大纲，用于刷新后恢复
  */
 export interface StageOutlinesRecord {
-  stageId: string; // Primary key (FK -> stages.id)
+  stageId: string; // 主键（外键 -> stages.id）
   outlines: SceneOutline[];
   createdAt: number;
   updatedAt: number;
 }
 
 /**
- * MediaFile table - AI-generated media files (images/videos)
+ * MediaFile 表 - AI 生成的媒体文件（图片/视频）
  */
 export interface MediaFileRecord {
-  id: string; // Compound key: `${stageId}:${elementId}`
-  stageId: string; // FK → stages.id
+  id: string; // 复合键：`${stageId}:${elementId}`
+  stageId: string; // 外键 → stages.id
   type: 'image' | 'video';
-  blob: Blob; // Media binary
-  mimeType: string; // image/png, video/mp4
+  blob: Blob; // 媒体二进制数据
+  mimeType: string; // image/png、video/mp4
   size: number;
-  poster?: Blob; // Video thumbnail blob
-  prompt: string; // Original prompt (for retry)
-  params: string; // JSON-serialized generation params
-  error?: string; // If set, this is a failed task (blob is empty placeholder)
-  errorCode?: string; // Structured error code (e.g. 'CONTENT_SENSITIVE')
-  ossKey?: string; // Full CDN URL for this media blob
-  posterOssKey?: string; // Full CDN URL for the poster blob
+  poster?: Blob; // 视频缩略图 blob
+  prompt: string; // 原始提示词（用于重试）
+  params: string; // JSON 序列化的生成参数
+  error?: string; // 如果设置，表示任务失败（blob 为空占位符）
+  errorCode?: string; // 结构化错误代码（如 'CONTENT_SENSITIVE'）
+  ossKey?: string; // 此媒体 blob 的完整 CDN URL
+  posterOssKey?: string; // 海报 blob 的完整 CDN URL
   createdAt: number;
 }
 
 /**
- * GeneratedAgent table - AI-generated agent profiles
+ * GeneratedAgent 表 - AI 生成的智能体配置
  */
 export interface GeneratedAgentRecord {
-  id: string; // PK: agent ID (e.g. "gen-abc123")
-  stageId: string; // FK -> stages.id
+  id: string; // 主键：智能体 ID（如 "gen-abc123"）
+  stageId: string; // 外键 -> stages.id
   name: string;
   role: string; // 'teacher' | 'assistant' | 'student'
   persona: string;
@@ -166,26 +166,26 @@ export interface GeneratedAgentRecord {
   createdAt: number;
 }
 
-/** Build the compound primary key for mediaFiles: `${stageId}:${elementId}` */
+/** 构建 mediaFiles 的复合主键：`${stageId}:${elementId}` */
 export function mediaFileKey(stageId: string, elementId: string): string {
   return `${stageId}:${elementId}`;
 }
 
-// ==================== Database Definition ====================
+// ==================== 数据库定义 ====================
 
 const DATABASE_NAME = 'MAIC-Database';
 const _DATABASE_VERSION = 8;
 
 /**
- * MAIC Database Instance
+ * MAIC 数据库实例
  */
 class MAICDatabase extends Dexie {
-  // Table definitions
+  // 表定义
   stages!: EntityTable<StageRecord, 'id'>;
   scenes!: EntityTable<SceneRecord, 'id'>;
   audioFiles!: EntityTable<AudioFileRecord, 'id'>;
   imageFiles!: EntityTable<ImageFileRecord, 'id'>;
-  snapshots!: EntityTable<Snapshot, 'id'>; // Undo/redo snapshots (legacy)
+  snapshots!: EntityTable<Snapshot, 'id'>; // 撤销/重做快照（旧版）
   chatSessions!: EntityTable<ChatSessionRecord, 'id'>;
   playbackState!: EntityTable<PlaybackStateRecord, 'stageId'>;
   stageOutlines!: EntityTable<StageOutlinesRecord, 'stageId'>;
@@ -195,31 +195,31 @@ class MAICDatabase extends Dexie {
   constructor() {
     super(DATABASE_NAME);
 
-    // Version 1: Initial schema
+    // 版本 1：初始模式
     this.version(1).stores({
       stages: 'id, updatedAt',
       scenes: 'id, stageId, order, [stageId+order]',
       audioFiles: 'id, createdAt',
       imageFiles: 'id, createdAt',
       snapshots: '++id',
-      // Previously had: messages, participants, discussions, sceneSnapshots
+      // 之前包含：messages, participants, discussions, sceneSnapshots
     });
 
-    // Version 2: Remove unused tables
+    // 版本 2：移除未使用的表
     this.version(2).stores({
       stages: 'id, updatedAt',
       scenes: 'id, stageId, order, [stageId+order]',
       audioFiles: 'id, createdAt',
       imageFiles: 'id, createdAt',
       snapshots: '++id',
-      // Delete removed tables
+      // 删除已移除的表
       messages: null,
       participants: null,
       discussions: null,
       sceneSnapshots: null,
     });
 
-    // Version 3: Add chatSessions and playbackState tables
+    // 版本 3：添加 chatSessions 和 playbackState 表
     this.version(3).stores({
       stages: 'id, updatedAt',
       scenes: 'id, stageId, order, [stageId+order]',
@@ -230,7 +230,7 @@ class MAICDatabase extends Dexie {
       playbackState: 'stageId',
     });
 
-    // Version 4: Add stageOutlines table for resume-on-refresh
+    // 版本 4：添加 stageOutlines 表用于刷新后恢复
     this.version(4).stores({
       stages: 'id, updatedAt',
       scenes: 'id, stageId, order, [stageId+order]',
@@ -242,7 +242,7 @@ class MAICDatabase extends Dexie {
       stageOutlines: 'stageId',
     });
 
-    // Version 5: Add mediaFiles table for async media generation
+    // 版本 5：添加 mediaFiles 表用于异步媒体生成
     this.version(5).stores({
       stages: 'id, updatedAt',
       scenes: 'id, stageId, order, [stageId+order]',
@@ -255,8 +255,8 @@ class MAICDatabase extends Dexie {
       mediaFiles: 'id, stageId, [stageId+type]',
     });
 
-    // Version 6: Fix mediaFiles primary key — use compound key stageId:elementId
-    // to prevent cross-course collisions (gen_img_1 is NOT globally unique)
+    // 版本 6：修复 mediaFiles 主键 — 使用复合键 stageId:elementId
+    // 以防止跨课程冲突（gen_img_1 不是全局唯一的）
     this.version(6)
       .stores({
         stages: 'id, updatedAt',
@@ -274,15 +274,15 @@ class MAICDatabase extends Dexie {
         const allRecords = await table.toArray();
         for (const rec of allRecords) {
           const newKey = `${rec.stageId}:${rec.id}`;
-          // Skip if already migrated (idempotent)
+          // 如果已迁移则跳过（幂等性）
           if (rec.id.includes(':')) continue;
           await table.delete(rec.id);
           await table.put({ ...rec, id: newKey });
         }
       });
 
-    // Version 7: Add ossKey fields to mediaFiles and audioFiles for OSS storage plugin
-    // Non-indexed optional fields — Dexie handles these transparently.
+    // 版本 7：为 mediaFiles 和 audioFiles 添加 ossKey 字段以支持 OSS 存储插件
+    // 非索引可选字段 — Dexie 会透明处理这些字段。
     this.version(7).stores({
       stages: 'id, updatedAt',
       scenes: 'id, stageId, order, [stageId+order]',
@@ -295,7 +295,7 @@ class MAICDatabase extends Dexie {
       mediaFiles: 'id, stageId, [stageId+type]',
     });
 
-    // Version 8: Add generatedAgents table for AI-generated agent profiles
+    // 版本 8：添加 generatedAgents 表用于 AI 生成的智能体配置
     this.version(8).stores({
       stages: 'id, updatedAt',
       scenes: 'id, stageId, order, [stageId+order]',
@@ -311,20 +311,20 @@ class MAICDatabase extends Dexie {
   }
 }
 
-// Create database instance
+// 创建数据库实例
 export const db = new MAICDatabase();
 
-// ==================== Helper Functions ====================
+// ==================== 辅助函数 ====================
 
 /**
- * Initialize database
- * Call at application startup
+ * 初始化数据库
+ * 在应用启动时调用
  */
 export async function initDatabase(): Promise<void> {
   try {
     await db.open();
-    // Request persistent storage to prevent browser from evicting IndexedDB
-    // under storage pressure (large media blobs can trigger LRU cleanup)
+    // 请求持久化存储以防止浏览器在存储压力下清除 IndexedDB
+    // （大型媒体 blob 可能触发 LRU 清理）
     void navigator.storage?.persist?.();
     log.info('Database initialized successfully');
   } catch (error) {
@@ -334,8 +334,8 @@ export async function initDatabase(): Promise<void> {
 }
 
 /**
- * Clear database (optional)
- * Use with caution: deletes all data
+ * 清空数据库（可选）
+ * 谨慎使用：删除所有数据
  */
 export async function clearDatabase(): Promise<void> {
   await db.delete();
@@ -343,7 +343,7 @@ export async function clearDatabase(): Promise<void> {
 }
 
 /**
- * Export database contents (for backup)
+ * 导出数据库内容（用于备份）
  */
 export async function exportDatabase(): Promise<{
   stages: StageRecord[];
@@ -360,7 +360,7 @@ export async function exportDatabase(): Promise<{
 }
 
 /**
- * Import database contents (for restoring backups)
+ * 导入数据库内容（用于恢复备份）
  */
 export async function importDatabase(data: {
   stages?: StageRecord[];
@@ -381,17 +381,17 @@ export async function importDatabase(data: {
   log.info('Database imported successfully');
 }
 
-// ==================== Convenience Query Functions ====================
+// ==================== 便捷查询函数 ====================
 
 /**
- * Get all scenes for a course
+ * 获取课程的所有场景
  */
 export async function getScenesByStageId(stageId: string): Promise<SceneRecord[]> {
   return db.scenes.where('stageId').equals(stageId).sortBy('order');
 }
 
 /**
- * Delete a course and all its related data
+ * 删除课程及其所有相关数据
  */
 export async function deleteStageWithRelatedData(stageId: string): Promise<void> {
   await db.transaction(
@@ -418,7 +418,7 @@ export async function deleteStageWithRelatedData(stageId: string): Promise<void>
 }
 
 /**
- * Get all generated agents for a course
+ * 获取课程的所有生成智能体
  */
 export async function getGeneratedAgentsByStageId(
   stageId: string,
@@ -427,7 +427,7 @@ export async function getGeneratedAgentsByStageId(
 }
 
 /**
- * Get database statistics
+ * 获取数据库统计信息
  */
 export async function getDatabaseStats() {
   return {

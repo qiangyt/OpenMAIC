@@ -1,9 +1,9 @@
 /**
- * AI Provider Type Definitions
+ * AI 服务提供者类型定义
  */
 
 /**
- * Built-in provider IDs
+ * 内置服务提供者 ID
  */
 export type BuiltInProviderId =
   | 'openai'
@@ -18,50 +18,50 @@ export type BuiltInProviderId =
   | 'doubao';
 
 /**
- * Provider ID (built-in or custom)
- * For custom providers, use string literals prefixed with "custom-"
+ * 服务提供者 ID（内置或自定义）
+ * 对于自定义服务提供者，使用带 "custom-" 前缀的字符串字面量
  */
 export type ProviderId = BuiltInProviderId | `custom-${string}`;
 
 /**
- * Provider API types
+ * 服务提供者 API 类型
  */
 export type ProviderType = 'openai' | 'anthropic' | 'google';
 
 /**
- * Describes a model's thinking/reasoning API control capability.
- * Models without thinking support simply omit this field from capabilities.
+ * 描述模型的思考/推理 API 控制能力。
+ * 不支持思考的模型只需从 capabilities 中省略此字段。
  */
 export interface ThinkingCapability {
-  /** Can thinking be fully disabled via API? */
+  /** 是否可以通过 API 完全禁用思考？ */
   toggleable: boolean;
-  /** Can thinking budget/effort intensity be adjusted? */
+  /** 是否可以调整思考预算/努力强度？ */
   budgetAdjustable: boolean;
-  /** Is thinking enabled by default (when no config is passed)? */
+  /** 默认是否启用思考（未传递配置时）？ */
   defaultEnabled: boolean;
 }
 
 /**
- * Unified thinking configuration for LLM calls.
- * The adapter maps this to provider-specific providerOptions.
+ * LLM 调用的统一思考配置。
+ * 适配器将其映射为特定服务提供者的 providerOptions。
  */
 export interface ThinkingConfig {
   /**
-   * Whether thinking should be enabled.
-   * - true: enable (use model default or specified budget)
-   * - false: disable (adapter uses best-effort for non-toggleable models)
-   * - undefined: use model default behavior
+   * 是否启用思考。
+   * - true：启用（使用模型默认值或指定的预算）
+   * - false：禁用（适配器对不可切换的模型尽力而为）
+   * - undefined：使用模型默认行为
    */
   enabled?: boolean;
   /**
-   * Budget hint in tokens. Only used when enabled=true or undefined.
-   * Adapter maps to closest supported value per provider.
+   * 以 token 为单位的预算提示。仅在 enabled=true 或 undefined 时使用。
+   * 适配器映射为每个服务提供者最接近的支持值。
    */
   budgetTokens?: number;
 }
 
 /**
- * Model information
+ * 模型信息
  */
 export interface ModelInfo {
   id: string;
@@ -77,7 +77,7 @@ export interface ModelInfo {
 }
 
 /**
- * Provider configuration
+ * 服务提供者配置
  */
 export interface ProviderConfig {
   id: ProviderId;
@@ -90,14 +90,14 @@ export interface ProviderConfig {
 }
 
 /**
- * Model configuration for API calls
+ * API 调用的模型配置
  */
 export interface ModelConfig {
   providerId: ProviderId;
   modelId: string;
   apiKey: string;
   baseUrl?: string;
-  proxy?: string; // Optional: HTTP proxy URL for this provider
-  providerType?: ProviderType; // Optional: for custom providers on server-side
-  requiresApiKey?: boolean; // Optional: for custom providers on server-side
+  proxy?: string; // 可选：此服务提供者的 HTTP 代理 URL
+  providerType?: ProviderType; // 可选：用于服务端的自定义服务提供者
+  requiresApiKey?: boolean; // 可选：用于服务端的自定义服务提供者
 }

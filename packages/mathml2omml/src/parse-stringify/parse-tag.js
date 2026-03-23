@@ -16,7 +16,7 @@ export default function stringify(tag) {
       res.voidElement = true
     }
 
-    // handle comment tag
+    // 处理注释标签
     if (res.name.startsWith('!--')) {
       const endIndex = tag.indexOf('-->')
       return {

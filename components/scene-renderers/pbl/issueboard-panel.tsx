@@ -17,7 +17,7 @@ export function IssueboardPanel({ issueboard }: IssueboardPanelProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
+      {/* 标题栏 */}
       <div className="px-4 py-3 border-b">
         <h2 className="font-semibold text-sm">{t('pbl.issueboard.title')}</h2>
         <div className="mt-2 flex items-center gap-2">
@@ -33,7 +33,7 @@ export function IssueboardPanel({ issueboard }: IssueboardPanelProps) {
         </div>
       </div>
 
-      {/* Issue List */}
+      {/* 问题列表 */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {sortedIssues.map((issue) => (
           <IssueCard key={issue.id} issue={issue} />

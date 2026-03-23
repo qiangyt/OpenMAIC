@@ -1,12 +1,12 @@
 /**
- * ActionEngine — Unified execution layer for all agent actions.
+ * ActionEngine — 智能体动作的统一执行层
  *
- * Replaces the 28 Vercel AI SDK tools in ai-tools.ts with a single engine
- * that both online (streaming) and offline (playback) paths share.
+ * 用单一引擎替代 ai-tools.ts 中的 28 个 Vercel AI SDK 工具，
+ * 在线（流式）和离线（回放）两种路径共享此引擎。
  *
- * Two execution modes:
- * - Fire-and-forget: spotlight, laser — dispatch and return immediately
- * - Synchronous: speech, whiteboard, discussion — await completion
+ * 两种执行模式：
+ * - 即发即忘：spotlight、laser — 立即分发并返回
+ * - 同步：speech、whiteboard、discussion — 等待完成
  */
 
 import type { StageStore } from '@/lib/api/stage-api';
@@ -35,7 +35,7 @@ import { createLogger } from '@/lib/logger';
 
 const log = createLogger('ActionEngine');
 
-// ==================== SVG Paths for Shapes ====================
+// ==================== SVG 形状路径 ====================
 
 const SHAPE_PATHS: Record<string, string> = {
   rectangle: 'M 0 0 L 1000 0 L 1000 1000 L 0 1000 Z',
@@ -43,15 +43,15 @@ const SHAPE_PATHS: Record<string, string> = {
   triangle: 'M 500 0 L 1000 1000 L 0 1000 Z',
 };
 
-// ==================== Helpers ====================
+// ==================== 辅助函数 ====================
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// ==================== ActionEngine ====================
+// ==================== ActionEngine 类 ====================
 
-/** Default duration (ms) before fire-and-forget effects auto-clear */
+/** 即发即忘效果的默认自动清除时长（毫秒）*/
 const EFFECT_AUTO_CLEAR_MS = 5000;
 
 export class ActionEngine {
@@ -66,7 +66,7 @@ export class ActionEngine {
     this.audioPlayer = audioPlayer ?? null;
   }
 
-  /** Clean up timers when the engine is no longer needed */
+  /** 当引擎不再需要时清理计时器 */
   dispose(): void {
     if (this.effectTimer) {
       clearTimeout(this.effectTimer);
@@ -75,29 +75,29 @@ export class ActionEngine {
   }
 
   /**
-   * Execute a single action.
-   * Fire-and-forget actions return immediately.
-   * Synchronous actions return a Promise that resolves when the action is complete.
+   * 执行单个动作。
+   * 即发即忘动作立即返回。
+   * 同步动作返回一个 Promise，在动作完成时 resolve。
    */
   async execute(action: Action): Promise<void> {
-    // Auto-open whiteboard if a draw/clear/delete action is attempted while it's closed
+    // 如果在白板关闭时尝试执行绘制/清除/删除动作，自动打开白板
     if (action.type.startsWith('wb_') && action.type !== 'wb_open' && action.type !== 'wb_close') {
       await this.ensureWhiteboardOpen();
     }
 
     switch (action.type) {
-      // Fire-and-forget
+      // 即发即忘
       case 'spotlight':
         this.executeSpotlight(action);
         return;
       case 'laser':
         this.executeLaser(action);
         return;
-      // Synchronous — Video
+      // 同步 — 视频
       case 'play_video':
         return this.executePlayVideo(action as PlayVideoAction);
 
-      // Synchronous
+      // 同步
       case 'speech':
         return this.executeSpeech(action);
       case 'wb_open':
@@ -121,12 +121,12 @@ export class ActionEngine {
       case 'wb_close':
         return this.executeWbClose();
       case 'discussion':
-        // Discussion lifecycle is managed externally via engine callbacks
+        // 讨论生命周期通过引擎回调在外部管理
         return;
     }
   }
 
-  /** Clear all active visual effects */
+  /** 清除所有活动的视觉效果 */
   clearEffects(): void {
     if (this.effectTimer) {
       clearTimeout(this.effectTimer);
@@ -135,7 +135,7 @@ export class ActionEngine {
     useCanvasStore.getState().clearAllEffects();
   }
 
-  /** Schedule auto-clear for fire-and-forget effects */
+  /** 为即发即忘效果安排自动清除 */
   private scheduleEffectClear(): void {
     if (this.effectTimer) {
       clearTimeout(this.effectTimer);
@@ -146,7 +146,7 @@ export class ActionEngine {
     }, EFFECT_AUTO_CLEAR_MS);
   }
 
-  // ==================== Fire-and-forget ====================
+  // ==================== 即发即忘 ====================
 
   private executeSpotlight(action: SpotlightAction): void {
     useCanvasStore.getState().setSpotlight(action.elementId, {
@@ -162,7 +162,7 @@ export class ActionEngine {
     this.scheduleEffectClear();
   }
 
-  // ==================== Synchronous — Speech ====================
+  // ==================== 同步 — 语音 ====================
 
   private async executeSpeech(action: SpeechAction): Promise<void> {
     if (!this.audioPlayer) return;
@@ -177,18 +177,18 @@ export class ActionEngine {
     });
   }
 
-  // ==================== Synchronous — Video ====================
+  // ==================== 同步 — 视频 ====================
 
   private async executePlayVideo(action: PlayVideoAction): Promise<void> {
-    // Resolve the video element's src to a media placeholder ID (e.g. gen_vid_1).
-    // action.elementId is the slide element ID (e.g. video_abc123), but the media
-    // store is keyed by placeholder IDs, so we need to bridge the two.
+    // 将视频元素的 src 解析为媒体占位符 ID（如 gen_vid_1）。
+    // action.elementId 是幻灯片元素 ID（如 video_abc123），但媒体
+    // 存储以占位符 ID 为键，因此需要桥接两者。
     const placeholderId = this.resolveMediaPlaceholderId(action.elementId);
 
     if (placeholderId) {
       const task = useMediaGenerationStore.getState().getTask(placeholderId);
       if (task && task.status !== 'done') {
-        // Wait for media to be ready (or fail)
+        // 等待媒体就绪（或失败）
         await new Promise<void>((resolve) => {
           const unsubscribe = useMediaGenerationStore.subscribe((state) => {
             const t = state.tasks[placeholderId];
@@ -197,7 +197,7 @@ export class ActionEngine {
               resolve();
             }
           });
-          // Check again in case it resolved between getState and subscribe
+          // 再次检查，以防在 getState 和 subscribe 之间状态已改变
           const current = useMediaGenerationStore.getState().tasks[placeholderId];
           if (!current || current.status === 'done' || current.status === 'failed') {
             unsubscribe();
@@ -205,7 +205,7 @@ export class ActionEngine {
           }
         });
 
-        // If failed, skip playback
+        // 如果失败，跳过播放
         if (useMediaGenerationStore.getState().tasks[placeholderId]?.status === 'failed') {
           return;
         }
@@ -214,7 +214,7 @@ export class ActionEngine {
 
     useCanvasStore.getState().playVideo(action.elementId);
 
-    // Wait until the video finishes playing
+    // 等待视频播放完成
     return new Promise<void>((resolve) => {
       const unsubscribe = useCanvasStore.subscribe((state) => {
         if (state.playingVideoElementId !== action.elementId) {
@@ -229,16 +229,16 @@ export class ActionEngine {
     });
   }
 
-  // ==================== Helpers — Media Resolution ====================
+  // ==================== 辅助函数 — 媒体解析 ====================
 
   /**
-   * Look up a video/image element's src in the current stage's scenes.
-   * Returns the src if it's a media placeholder ID (gen_vid_*, gen_img_*), null otherwise.
+   * 在当前舞台的场景中查找视频/图片元素的 src。
+   * 如果 src 是媒体占位符 ID（gen_vid_*, gen_img_*），则返回该 ID，否则返回 null。
    */
   private resolveMediaPlaceholderId(elementId: string): string | null {
     const { scenes, currentSceneId } = this.stageStore.getState();
 
-    // Search current scene first for efficiency, then remaining scenes
+    // 为提高效率，优先搜索当前场景，然后搜索其余场景
     const orderedScenes = currentSceneId
       ? [
           scenes.find((s) => s.id === currentSceneId),
@@ -262,9 +262,9 @@ export class ActionEngine {
     return null;
   }
 
-  // ==================== Synchronous — Whiteboard ====================
+  // ==================== 同步 — 白板 ====================
 
-  /** Auto-open the whiteboard if it's not already open */
+  /** 如果白板未打开，自动打开 */
   private async ensureWhiteboardOpen(): Promise<void> {
     if (!useCanvasStore.getState().whiteboardOpen) {
       await this.executeWbOpen();
@@ -272,10 +272,10 @@ export class ActionEngine {
   }
 
   private async executeWbOpen(): Promise<void> {
-    // Ensure a whiteboard exists
+    // 确保白板存在
     this.stageAPI.whiteboard.get();
     useCanvasStore.getState().setWhiteboardOpen(true);
-    // Wait for open animation to complete (slow spring: stiffness 120, damping 18, mass 1.2)
+    // 等待打开动画完成（慢速弹簧动画：刚度 120，阻尼 18，质量 1.2）
     await delay(2000);
   }
 
@@ -306,7 +306,7 @@ export class ActionEngine {
       wb.data.id,
     );
 
-    // Wait for element fade-in animation
+    // 等待元素淡入动画完成
     await delay(800);
   }
 
@@ -332,7 +332,7 @@ export class ActionEngine {
       wb.data.id,
     );
 
-    // Wait for element fade-in animation
+    // 等待元素淡入动画完成
     await delay(800);
   }
 
@@ -404,10 +404,10 @@ export class ActionEngine {
     const cols = rows > 0 ? action.data[0].length : 0;
     if (rows === 0 || cols === 0) return;
 
-    // Build colWidths: equal distribution
+    // 构建 colWidths：等宽分布
     const colWidths = Array(cols).fill(1 / cols);
 
-    // Build TableCell[][] from string[][]
+    // 从 string[][] 构建 TableCell[][]
     let cellId = 0;
     const tableData = action.data.map((row) =>
       row.map((text) => ({
@@ -456,11 +456,11 @@ export class ActionEngine {
     const wb = this.stageAPI.whiteboard.get();
     if (!wb.success || !wb.data) return;
 
-    // Calculate bounding box — left/top is the minimum of start/end coordinates
+    // 计算边界框 — left/top 是起点/终点坐标的最小值
     const left = Math.min(action.startX, action.endX);
     const top = Math.min(action.startY, action.endY);
 
-    // Convert absolute coordinates to relative coordinates (relative to left/top)
+    // 将绝对坐标转换为相对坐标（相对于 left/top）
     const start: [number, number] = [action.startX - left, action.startY - top];
     const end: [number, number] = [action.endX - left, action.endY - top];
 
@@ -481,7 +481,7 @@ export class ActionEngine {
       wb.data.id,
     );
 
-    // Wait for element fade-in animation
+    // 等待元素淡入动画完成
     await delay(800);
   }
 
@@ -500,26 +500,26 @@ export class ActionEngine {
     const elementCount = wb.data.elements?.length || 0;
     if (elementCount === 0) return;
 
-    // Save snapshot before AI clear (mirrors UI handleClear in index.tsx)
+    // 在 AI 清除前保存快照（与 index.tsx 中的 UI handleClear 对应）
     useWhiteboardHistoryStore
       .getState()
       .pushSnapshot(wb.data.elements!, getClientTranslation('whiteboard.beforeAIClear'));
 
-    // Trigger cascade exit animation
+    // 触发级联退出动画
     useCanvasStore.getState().setWhiteboardClearing(true);
 
-    // Wait for cascade: base 380ms + 55ms per element, capped at 1400ms
+    // 等待级联动画：基础 380ms + 每个元素 55ms，上限 1400ms
     const animMs = Math.min(380 + elementCount * 55, 1400);
     await delay(animMs);
 
-    // Actually remove elements
+    // 实际移除元素
     this.stageAPI.whiteboard.update({ elements: [] }, wb.data.id);
     useCanvasStore.getState().setWhiteboardClearing(false);
   }
 
   private async executeWbClose(): Promise<void> {
     useCanvasStore.getState().setWhiteboardOpen(false);
-    // Wait for close animation (500ms ease-out tween)
+    // 等待关闭动画完成（500ms ease-out 补间动画）
     await delay(700);
   }
 }

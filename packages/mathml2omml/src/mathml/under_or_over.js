@@ -26,10 +26,10 @@ const UPPER_COMBINATION = {
 }
 
 function underOrOver(element, targetParent, previousSibling, nextSibling, ancestors, direction) {
-  // Munder/Mover
+  // Munder/Mover（下标/上标）
 
   if (element.children.length !== 2) {
-    // treat as mrow
+    // 视为 mrow 处理
     return targetParent
   }
 
@@ -39,15 +39,15 @@ function underOrOver(element, targetParent, previousSibling, nextSibling, ancest
   const base = element.children[0]
   const script = element.children[1]
 
-  // Munder/Mover can be translated to ooml in different ways.
+  // Munder/Mover 可以通过不同方式转换为 ooml。
 
-  // First we check for m:nAry.
+  // 首先检查 m:nAry。
   //
   // m:nAry
   //
-  // Conditions:
-  // 1. base text must be nary operator
-  // 2. no accents
+  // 条件：
+  // 1. 基底文本必须是 nary 运算符
+  // 2. 没有重音符号
   const naryChar = getNary(base)
 
   if (
@@ -103,16 +103,15 @@ function underOrOver(element, targetParent, previousSibling, nextSibling, ancest
   //
   // m:bar
   //
-  // Then we check whether it should be an m:bar.
-  // This happens if:
-  // 1. The script text is a single character that corresponds to
-  //    \u0332/\u005F (underbar) or \u0305/\u00AF (overbar)
-  // 2. The type of the script element is mo.
+  // 然后检查是否应该是 m:bar。
+  // 满足以下条件时为 m:bar：
+  // 1. 脚本文本是对应于 \u0332/\u005F（下划线）或 \u0305/\u00AF（上划线）的单个字符
+  // 2. 脚本元素的类型是 mo。
   if (
     (direction === 'under' && script.name === 'mo' && ['\u0332', '\u005F'].includes(scriptText)) ||
     (direction === 'over' && script.name === 'mo' && ['\u0305', '\u00AF'].includes(scriptText))
   ) {
-    // m:bar
+    // m:bar（划线）
     targetParent.children.push({
       type: 'tag',
       name: 'm:bar',
@@ -162,10 +161,10 @@ function underOrOver(element, targetParent, previousSibling, nextSibling, ancest
 
   // m:acc
   //
-  // Next we try to see if it is an m:acc. This is the case if:
-  // 1. The scriptText is 0-1 characters long.
-  // 2. The script is an mo-element
-  // 3. The accent is set.
+  // 接下来尝试判断是否是 m:acc。满足以下条件时为 m:acc：
+  // 1. scriptText 长度为 0-1 个字符。
+  // 2. 脚本是一个 mo 元素
+  // 3. 设置了 accent 属性。
   if (
     (direction === 'under' &&
       element.attribs?.accentunder?.toLowerCase() === 'true' &&
@@ -176,7 +175,7 @@ function underOrOver(element, targetParent, previousSibling, nextSibling, ancest
       script.name === 'mo' &&
       scriptText.length < 2)
   ) {
-    // m:acc
+    // m:acc（重音）
     targetParent.children.push({
       type: 'tag',
       name: 'm:acc',
@@ -204,10 +203,10 @@ function underOrOver(element, targetParent, previousSibling, nextSibling, ancest
   }
   // m:groupChr
   //
-  // Now we try m:groupChr. Conditions are:
-  // 1. Base is an 'mrow' and script is an 'mo'.
-  // 2. Script length is 1.
-  // 3. No accent
+  // 现在尝试 m:groupChr。条件是：
+  // 1. 基底是 'mrow' 且脚本是 'mo'。
+  // 2. 脚本长度为 1。
+  // 3. 没有重音符号
   if (
     element.attribs?.accent?.toLowerCase() !== 'true' &&
     element.attribs?.accentunder?.toLowerCase() !== 'true' &&
@@ -241,7 +240,7 @@ function underOrOver(element, targetParent, previousSibling, nextSibling, ancest
     })
     return
   }
-  // Fallback: m:lim
+  // 回退：m:lim
 
   const scriptTarget = {
     name: 'm:lim',
@@ -257,7 +256,7 @@ function underOrOver(element, targetParent, previousSibling, nextSibling, ancest
     attribs: {},
     children: [baseTarget, scriptTarget]
   })
-  // Don't iterate over children in the usual way.
+  // 不要以常规方式遍历子元素。
 }
 
 export function munder(element, targetParent, previousSibling, nextSibling, ancestors) {

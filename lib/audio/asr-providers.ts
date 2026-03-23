@@ -1,21 +1,21 @@
 /**
- * ASR (Automatic Speech Recognition) Provider Implementation
+ * ASR（自动语音识别）提供商实现
  *
- * Factory pattern for routing ASR requests to appropriate provider implementations.
- * Follows the same architecture as lib/ai/providers.ts for consistency.
+ * 使用工厂模式将 ASR 请求路由到相应的提供商实现。
+ * 遵循与 lib/ai/providers.ts 相同的架构以保持一致性。
  *
- * Currently Supported Providers:
- * - OpenAI Whisper: https://platform.openai.com/docs/guides/speech-to-text
- * - Browser Native: Web Speech API (https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
- * - Qwen ASR: https://bailian.console.aliyun.com/
+ * 当前支持的提供商：
+ * - OpenAI Whisper：https://platform.openai.com/docs/guides/speech-to-text
+ * - 浏览器原生：Web Speech API（https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API）
+ * - Qwen ASR：https://bailian.console.aliyun.com/
  *
- * HOW TO ADD A NEW PROVIDER:
+ * 如何添加新提供商：
  *
- * 1. Add provider ID to ASRProviderId in lib/audio/types.ts
- *    Example: | 'assemblyai-asr'
+ * 1. 在 lib/audio/types.ts 中将提供商 ID 添加到 ASRProviderId
+ *    示例：| 'assemblyai-asr'
  *
- * 2. Add provider configuration to lib/audio/constants.ts
- *    Example:
+ * 2. 在 lib/audio/constants.ts 中添加提供商配置
+ *    示例：
  *    'assemblyai-asr': {
  *      id: 'assemblyai-asr',
  *      name: 'AssemblyAI',
@@ -26,22 +26,22 @@
  *      supportedFormats: ['mp3', 'wav', 'flac', 'm4a']
  *    }
  *
- * 3. Implement provider function in this file
- *    Pattern: async function transcribeXxxASR(config, audioBuffer): Promise<ASRTranscriptionResult>
- *    - Handle Buffer/Blob conversion (see helper patterns below)
- *    - Build API request with audio data (FormData or base64)
- *    - Handle API authentication (apiKey, headers)
- *    - Convert language codes if needed
- *    - Return { text: string }
+ * 3. 在本文件中实现提供商函数
+ *    模式：async function transcribeXxxASR(config, audioBuffer): Promise<ASRTranscriptionResult>
+ *    - 处理 Buffer/Blob 转换（见下方的辅助模式）
+ *    - 使用音频数据构建 API 请求（FormData 或 base64）
+ *    - 处理 API 认证（apiKey、headers）
+ *    - 如需要，转换语言代码
+ *    - 返回 { text: string }
  *
- *    Example:
+ *    示例：
  *    async function transcribeAssemblyAIASR(
  *      config: ASRModelConfig,
  *      audioBuffer: Buffer | Blob
  *    ): Promise<ASRTranscriptionResult> {
  *      const baseUrl = config.baseUrl || ASR_PROVIDERS['assemblyai-asr'].defaultBaseUrl;
  *
- *      // Step 1: Upload audio file
+ *      // 步骤 1：上传音频文件
  *      let blob: Blob;
  *      if (audioBuffer instanceof Buffer) {
  *        blob = new Blob([audioBuffer.buffer.slice(
@@ -66,7 +66,7 @@
  *
  *      const { upload_url } = await uploadResponse.json();
  *
- *      // Step 2: Request transcription
+ *      // 步骤 2：请求转录
  *      const transcriptResponse = await fetch(`${baseUrl}/transcript`, {
  *        method: 'POST',
  *        headers: {
@@ -81,7 +81,7 @@
  *
  *      const { id } = await transcriptResponse.json();
  *
- *      // Step 3: Poll for completion
+ *      // 步骤 3：轮询完成状态
  *      while (true) {
  *        const statusResponse = await fetch(`${baseUrl}/transcript/${id}`, {
  *          headers: { 'authorization': config.apiKey! },
@@ -98,21 +98,21 @@
  *      }
  *    }
  *
- * 4. Add case to transcribeAudio() switch statement
+ * 4. 在 transcribeAudio() switch 语句中添加 case
  *    case 'assemblyai-asr':
  *      return await transcribeAssemblyAIASR(config, audioBuffer);
  *
- * 5. Add i18n translations in lib/i18n.ts
+ * 5. 在 lib/i18n.ts 中添加 i18n 翻译
  *    providerAssemblyAIASR: { zh: 'AssemblyAI 语音识别', en: 'AssemblyAI ASR' }
  *
- * Buffer/Blob Conversion Patterns:
+ * Buffer/Blob 转换模式：
  *
- * Pattern 1: Buffer to Blob (for FormData)
+ * 模式 1：Buffer 转 Blob（用于 FormData）
  *   const blob = new Blob([
  *     audioBuffer.buffer.slice(audioBuffer.byteOffset, audioBuffer.byteOffset + audioBuffer.byteLength) as ArrayBuffer
  *   ], { type: 'audio/webm' });
  *
- * Pattern 2: Buffer to base64 (for JSON API)
+ * 模式 2：Buffer 转 base64（用于 JSON API）
  *   let base64Audio: string;
  *   if (audioBuffer instanceof Buffer) {
  *     base64Audio = audioBuffer.toString('base64');
@@ -121,7 +121,7 @@
  *     base64Audio = Buffer.from(arrayBuffer).toString('base64');
  *   }
  *
- * Pattern 3: Buffer/Blob to File (for Vercel AI SDK)
+ * 模式 3：Buffer/Blob 转 File（用于 Vercel AI SDK）
  *   let audioFile: File;
  *   if (audioBuffer instanceof Buffer) {
  *     const arrayBuffer = audioBuffer.buffer.slice(...) as ArrayBuffer;
@@ -131,18 +131,18 @@
  *     audioFile = new File([audioBuffer], 'audio.webm', { type: 'audio/webm' });
  *   }
  *
- * Error Handling Patterns:
- * - Always validate API key if requiresApiKey is true
- * - Throw descriptive errors for API failures
- * - Include response.statusText or error messages from API
- * - For client-only providers (browser-native), throw error directing to client-side usage
- * - Handle polling/async APIs with proper timeout and error checking
+ * 错误处理模式：
+ * - 如果 requiresApiKey 为 true，始终验证 API 密钥
+ * - 为 API 失败抛出描述性错误
+ * - 包含 response.statusText 或 API 返回的错误消息
+ * - 对于仅客户端的提供商（browser-native），抛出错误引导使用客户端方式
+ * - 使用适当的超时和错误检查处理轮询/异步 API
  *
- * API Call Patterns:
- * - Vercel AI SDK: Use createOpenAI + transcribe (OpenAI, compatible providers)
- * - FormData: For providers expecting multipart/form-data (most providers)
- * - Base64: For providers expecting JSON with base64 audio (Qwen, DashScope)
- * - Upload + Poll: For async providers (AssemblyAI, Deepgram batch)
+ * API 调用模式：
+ * - Vercel AI SDK：使用 createOpenAI + transcribe（OpenAI、兼容提供商）
+ * - FormData：用于期望 multipart/form-data 的提供商（大多数提供商）
+ * - Base64：用于期望 JSON 带 base64 音频的提供商（Qwen、DashScope）
+ * - 上传 + 轮询：用于异步提供商（AssemblyAI、Deepgram batch）
  */
 
 import { createOpenAI } from '@ai-sdk/openai';
@@ -151,14 +151,14 @@ import type { ASRModelConfig } from './types';
 import { ASR_PROVIDERS } from './constants';
 
 /**
- * Result of ASR transcription
+ * ASR 转录结果
  */
 export interface ASRTranscriptionResult {
   text: string;
 }
 
 /**
- * Transcribe audio using specified ASR provider
+ * 使用指定的 ASR 提供商转录音频
  */
 export async function transcribeAudio(
   config: ASRModelConfig,
@@ -169,7 +169,7 @@ export async function transcribeAudio(
     throw new Error(`Unknown ASR provider: ${config.providerId}`);
   }
 
-  // Validate API key if required
+  // 如果需要，验证 API 密钥
   if (provider.requiresApiKey && !config.apiKey) {
     throw new Error(`API key required for ASR provider: ${config.providerId}`);
   }
@@ -190,7 +190,7 @@ export async function transcribeAudio(
 }
 
 /**
- * OpenAI Whisper implementation (using Vercel AI SDK)
+ * OpenAI Whisper 实现（使用 Vercel AI SDK）
  */
 async function transcribeOpenAIWhisper(
   config: ASRModelConfig,
@@ -201,7 +201,7 @@ async function transcribeOpenAIWhisper(
     baseURL: config.baseUrl || ASR_PROVIDERS['openai-whisper'].defaultBaseUrl,
   });
 
-  // Convert to Buffer or Uint8Array (which is required by the AI SDK)
+  // 转换为 Buffer 或 Uint8Array（AI SDK 要求）
   let audioData: Buffer | Uint8Array;
   if (audioBuffer instanceof Buffer) {
     audioData = audioBuffer;
@@ -225,7 +225,7 @@ async function transcribeOpenAIWhisper(
 
     return { text: result.text || '' };
   } catch (error: unknown) {
-    // Short/silent audio may cause the SDK to throw — treat as empty transcription
+    // 短/静音音频可能导致 SDK 抛出异常 —— 视为空转录
     const errMsg = error instanceof Error ? error.message : '';
     if (errMsg.includes('empty') || errMsg.includes('too short')) {
       return { text: '' };
@@ -235,7 +235,7 @@ async function transcribeOpenAIWhisper(
 }
 
 /**
- * Qwen ASR implementation (DashScope API - Qwen3 ASR Flash)
+ * Qwen ASR 实现（DashScope API - Qwen3 ASR Flash）
  */
 async function transcribeQwenASR(
   config: ASRModelConfig,
@@ -243,7 +243,7 @@ async function transcribeQwenASR(
 ): Promise<ASRTranscriptionResult> {
   const baseUrl = config.baseUrl || ASR_PROVIDERS['qwen-asr'].defaultBaseUrl;
 
-  // Convert audio to base64
+  // 将音频转换为 base64
   let base64Audio: string;
   if (audioBuffer instanceof Buffer) {
     base64Audio = audioBuffer.toString('base64');
@@ -254,7 +254,7 @@ async function transcribeQwenASR(
     throw new Error('Invalid audio buffer type');
   }
 
-  // Build request body
+  // 构建请求体
   const requestBody: Record<string, unknown> = {
     model: 'qwen3-asr-flash',
     input: {
@@ -271,8 +271,8 @@ async function transcribeQwenASR(
     },
   };
 
-  // Add language parameter in asr_options if specified (optional - improves accuracy for known languages)
-  // If language is uncertain or mixed, don't specify (auto-detect)
+  // 如果指定了语言，在 asr_options 中添加语言参数（可选 - 可提高已知语言的准确率）
+  // 如果语言不确定或混合，不指定（自动检测）
   if (config.language && config.language !== 'auto') {
     requestBody.parameters = {
       asr_options: {
@@ -293,7 +293,7 @@ async function transcribeQwenASR(
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => response.statusText);
-    // "The audio is empty" — treat as no speech detected
+    // "The audio is empty" —— 视为未检测到语音
     if (errorText.includes('audio is empty') || errorText.includes('InvalidParameter')) {
       return { text: '' };
     }
@@ -302,9 +302,9 @@ async function transcribeQwenASR(
 
   const data = await response.json();
 
-  // Check for transcription result in response
-  // Qwen3 ASR returns OpenAI-compatible format:
-  // { output: { choices: [{ message: { content: [{ text: "transcribed text" }] } }] } }
+  // 检查响应中的转录结果
+  // Qwen3 ASR 返回 OpenAI 兼容格式：
+  // { output: { choices: [{ message: { content: [{ text: "转录文本" }] } }] } }
   if (
     !data.output?.choices ||
     !Array.isArray(data.output.choices) ||
@@ -317,25 +317,25 @@ async function transcribeQwenASR(
   const messageContent = firstChoice?.message?.content;
 
   if (!Array.isArray(messageContent) || messageContent.length === 0) {
-    // Empty content typically means audio was too short or contained no speech
+    // 空内容通常意味着音频太短或不包含语音
     return { text: '' };
   }
 
-  // Extract text from first content item
+  // 从第一个内容项提取文本
   const transcribedText = messageContent[0]?.text || '';
   return { text: transcribedText };
 }
 
 /**
- * Get current ASR configuration from settings store
- * Note: This function should only be called in browser context
+ * 从设置存储获取当前 ASR 配置
+ * 注意：此函数只能在浏览器环境中调用
  */
 export async function getCurrentASRConfig(): Promise<ASRModelConfig> {
   if (typeof window === 'undefined') {
     throw new Error('getCurrentASRConfig() can only be called in browser context');
   }
 
-  // Lazy import to avoid circular dependency
+  // 延迟导入以避免循环依赖
   const { useSettingsStore } = await import('@/lib/store/settings');
   const { asrProviderId, asrLanguage, asrProvidersConfig } = useSettingsStore.getState();
 
@@ -349,5 +349,5 @@ export async function getCurrentASRConfig(): Promise<ASRModelConfig> {
   };
 }
 
-// Re-export from constants for convenience
+// 为方便起见，从 constants 重新导出
 export { getAllASRProviders, getASRProvider, getASRSupportedLanguages } from './constants';

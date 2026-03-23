@@ -41,7 +41,7 @@ export function PBLRenderer({ content, mode: _mode, sceneId }: PBLRendererProps)
       if (!projectConfig) return;
       const newConfig = { ...projectConfig, selectedRole: roleName };
 
-      // Add Question Agent welcome message if chat is empty and active issue has questions
+      // 如果聊天为空且当前问题有生成的问题，添加问答智能体的欢迎消息
       const activeIssue = newConfig.issueboard.issues.find((i) => i.is_active);
       if (activeIssue?.generated_questions && newConfig.chat.messages.length === 0) {
         const welcomeMsg = t('pbl.chat.welcomeMessage')
@@ -67,7 +67,7 @@ export function PBLRenderer({ content, mode: _mode, sceneId }: PBLRendererProps)
 
   const handleReset = useCallback(() => {
     if (!projectConfig) return;
-    // Reset all issues and re-activate the first one
+    // 重置所有问题并重新激活第一个
     const resetIssues = projectConfig.issueboard.issues
       .map((i) => ({ ...i, is_done: false, is_active: false }))
       .sort((a, b) => a.index - b.index);
@@ -87,7 +87,7 @@ export function PBLRenderer({ content, mode: _mode, sceneId }: PBLRendererProps)
     });
   }, [projectConfig, updateConfig]);
 
-  // Check for legacy format (old PBL with url/html)
+  // 检查旧版格式（带有 url/html 的旧版 PBL）
   if (!projectConfig) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -96,7 +96,7 @@ export function PBLRenderer({ content, mode: _mode, sceneId }: PBLRendererProps)
     );
   }
 
-  // Check if project has been generated (has agents)
+  // 检查项目是否已生成（是否有智能体）
   if (projectConfig.agents.length === 0 && projectConfig.projectInfo.title === '') {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -105,7 +105,7 @@ export function PBLRenderer({ content, mode: _mode, sceneId }: PBLRendererProps)
     );
   }
 
-  // No role selected → show role selection
+  // 未选择角色 → 显示角色选择界面
   if (!selectedRole) {
     return (
       <PBLRoleSelection
@@ -116,7 +116,7 @@ export function PBLRenderer({ content, mode: _mode, sceneId }: PBLRendererProps)
     );
   }
 
-  // Role selected → show workspace
+  // 已选择角色 → 显示工作区
   return (
     <PBLWorkspace
       projectConfig={projectConfig}

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { OperateResizeHandlers, OperateBorderLines } from '@/lib/types/edit';
 
 export function useCommonOperate(width: number, height: number) {
-  // Element resize handlers
+  // 元素缩放手柄
   const resizeHandlers = useMemo(() => {
     return [
       { direction: OperateResizeHandlers.LEFT_TOP, style: {} },
@@ -37,7 +37,7 @@ export function useCommonOperate(width: number, height: number) {
     ];
   }, [width, height]);
 
-  // Text element resize handlers
+  // 文本元素缩放手柄
   const textElementResizeHandlers = useMemo(() => {
     return [
       {
@@ -64,7 +64,7 @@ export function useCommonOperate(width: number, height: number) {
     ];
   }, [width, height]);
 
-  // Element selection border lines
+  // 元素选择边框线
   const borderLines = useMemo(() => {
     return [
       { type: OperateBorderLines.T, style: { width: width + 'px' } },

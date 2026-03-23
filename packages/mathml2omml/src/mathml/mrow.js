@@ -1,6 +1,6 @@
 export function mrow(element, targetParent, previousSibling, nextSibling, ancestors) {
-  // Detect fence pattern: <mo fence="true">OPEN ... <mo fence="true">CLOSE
-  // Convert to OMML <m:d> delimiter (e.g. binomial, \left(\right))
+  // 检测围栏模式：<mo fence="true">OPEN ... <mo fence="true">CLOSE
+  // 转换为 OMML <m:d> 分隔符（例如二项式、\left(\right)）
   const children = element.children || []
   if (children.length >= 2) {
     const first = children[0]
@@ -20,13 +20,13 @@ export function mrow(element, targetParent, previousSibling, nextSibling, ancest
         ]
       }
       targetParent.children.push(dNode)
-      // Mark fence operators so the walker child loop skips them
+      // 标记围栏运算符，以便 walker 子循环跳过它们
       first.skipInWalker = true
       last.skipInWalker = true
-      // Return <m:e> as target — inner children go here
+      // 返回 <m:e> 作为目标 — 内部子元素放到这里
       return dNode.children[1]
     }
   }
-  // isNary redirect is now handled in walker's child loop
+  // isNary 重定向现在由 walker 的子循环处理
   return targetParent
 }

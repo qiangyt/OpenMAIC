@@ -1,16 +1,15 @@
 /**
- * Proxy-aware fetch for server-side use.
+ * 服务端代理感知的 fetch 工具。
  *
- * Automatically routes requests through HTTP/HTTPS proxy when
- * the standard environment variables are set:
+ * 当设置了标准环境变量时，自动通过 HTTP/HTTPS 代理路由请求：
  *   - https_proxy / HTTPS_PROXY
  *   - http_proxy / HTTP_PROXY
  *
- * Node.js's built-in fetch does NOT respect these env vars,
- * so we use undici's ProxyAgent when a proxy is configured.
+ * Node.js 内置的 fetch 不遵循这些环境变量，
+ * 因此我们在配置代理时使用 undici 的 ProxyAgent。
  *
- * Usage: import { proxyFetch } from '@/lib/server/proxy-fetch';
- *        const res = await proxyFetch('https://api.openai.com/v1/...', { ... });
+ * 用法：import { proxyFetch } from '@/lib/server/proxy-fetch';
+ *       const res = await proxyFetch('https://api.openai.com/v1/...', { ... });
  */
 
 import { ProxyAgent, fetch as undiciFetch, type RequestInit as UndiciRequestInit } from 'undici';
@@ -35,7 +34,7 @@ function getProxyAgent(): ProxyAgent | undefined {
   const proxyUrl = getProxyUrl();
   if (!proxyUrl) return undefined;
 
-  // Reuse agent if proxy URL hasn't changed
+  // 如果代理 URL 未改变，则复用 agent
   if (cachedAgent && cachedProxyUrl === proxyUrl) {
     return cachedAgent;
   }
@@ -46,8 +45,8 @@ function getProxyAgent(): ProxyAgent | undefined {
 }
 
 /**
- * Drop-in replacement for fetch() that respects proxy env vars.
- * Falls back to global fetch when no proxy is configured.
+ * fetch() 的直接替代品，遵循代理环境变量。
+ * 当未配置代理时回退到全局 fetch。
  */
 export async function proxyFetch(input: string | URL, init?: RequestInit): Promise<Response> {
   const agent = getProxyAgent();
@@ -59,12 +58,12 @@ export async function proxyFetch(input: string | URL, init?: RequestInit): Promi
   }
 
   log.info('Using proxy', cachedProxyUrl, 'for:', url.slice(0, 80));
-  // Use undici's fetch with the proxy dispatcher
+  // 使用 undici 的 fetch 配合代理分发器
   const res = await undiciFetch(input, {
     ...(init as UndiciRequestInit),
     dispatcher: agent,
   });
 
-  // undici's Response is compatible with the global Response
+  // undici 的 Response 与全局 Response 兼容
   return res as unknown as Response;
 }

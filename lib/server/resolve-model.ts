@@ -1,8 +1,8 @@
 /**
- * Shared model resolution utilities for API routes.
+ * API 路由的共享模型解析工具。
  *
- * Extracts the repeated parseModelString → resolveApiKey → resolveBaseUrl →
- * resolveProxy → getModel boilerplate into a single call.
+ * 将重复的 parseModelString → resolveApiKey → resolveBaseUrl →
+ * resolveProxy → getModel 样板代码提取为单次调用。
  */
 
 import type { NextRequest } from 'next/server';
@@ -11,14 +11,14 @@ import { resolveApiKey, resolveBaseUrl, resolveProxy } from '@/lib/server/provid
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 
 export interface ResolvedModel extends ModelWithInfo {
-  /** Original model string (e.g. "openai/gpt-4o-mini") */
+  /** 原始模型字符串（例如 "openai/gpt-4o-mini"） */
   modelString: string;
 }
 
 /**
- * Resolve a language model from explicit parameters.
+ * 从显式参数解析语言模型。
  *
- * Use this when model config comes from the request body.
+ * 当模型配置来自请求体时使用此函数。
  */
 export function resolveModel(params: {
   modelString?: string;
@@ -57,9 +57,9 @@ export function resolveModel(params: {
 }
 
 /**
- * Resolve a language model from standard request headers.
+ * 从标准请求头解析语言模型。
  *
- * Reads: x-model, x-api-key, x-base-url, x-provider-type, x-requires-api-key
+ * 读取：x-model, x-api-key, x-base-url, x-provider-type, x-requires-api-key
  */
 export function resolveModelFromHeaders(req: NextRequest): ResolvedModel {
   return resolveModel({

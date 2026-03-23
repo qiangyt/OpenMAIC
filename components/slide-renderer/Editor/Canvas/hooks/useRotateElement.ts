@@ -10,9 +10,9 @@ import { useHistorySnapshot } from '@/lib/hooks/use-history-snapshot';
 import { useCanvasOperations } from '@/lib/hooks/use-canvas-operations';
 
 /**
- * Calculate the angle (in radians) of the line from the origin to the given coordinates
- * @param x Coordinate x
- * @param y Coordinate y
+ * 计算从原点到给定坐标的线条角度（弧度）
+ * @param x 坐标 x
+ * @param y 坐标 y
  */
 const getAngleFromCoordinate = (x: number, y: number) => {
   const radian = Math.atan2(x, y);
@@ -21,12 +21,12 @@ const getAngleFromCoordinate = (x: number, y: number) => {
 };
 
 /**
- * Rotate element Hook
+ * 旋转元素 Hook
  *
- * @param elementListRef - Element list ref (stores the latest value)
- * @param setElementList - Element list setter (used to trigger re-render)
- * @param viewportRef - Viewport reference
- * @param canvasScale - Canvas scale ratio
+ * @param elementListRef - 元素列表 ref（存储最新值）
+ * @param setElementList - 元素列表 setter（用于触发重新渲染）
+ * @param viewportRef - 视口引用
+ * @param canvasScale - 画布缩放比例
  */
 export function useRotateElement(
   elementListRef: React.RefObject<PPTElement[]>,
@@ -38,7 +38,7 @@ export function useRotateElement(
 
   const { addHistorySnapshot } = useHistorySnapshot();
 
-  // Rotate element
+  // 旋转元素
   const rotateElement = useCallback(
     (
       e: React.MouseEvent | React.TouchEvent,
@@ -60,7 +60,7 @@ export function useRotateElement(
       const elWidth = element.width;
       const elHeight = element.height;
 
-      // Element center point (rotation center)
+      // 元素中心点（旋转中心）
       const centerX = elLeft + elWidth / 2;
       const centerY = elTop + elHeight / 2;
 
@@ -73,7 +73,7 @@ export function useRotateElement(
         const currentPageX = e instanceof MouseEvent ? e.pageX : e.changedTouches[0].pageX;
         const currentPageY = e instanceof MouseEvent ? e.pageY : e.changedTouches[0].pageY;
 
-        // Calculate the angle of the line from the current mouse position to the element center
+        // 计算从当前鼠标位置到元素中心的线条角度
         const mouseX = (currentPageX - viewportRect.left) / canvasScale;
         const mouseY = (currentPageY - viewportRect.top) / canvasScale;
         const x = mouseX - centerX;
@@ -81,7 +81,7 @@ export function useRotateElement(
 
         angle = getAngleFromCoordinate(x, y);
 
-        // Snap to multiples of 45 degrees when close
+        // 接近时吸附到45度的倍数
         const sorptionRange = 5;
         if (Math.abs(angle) <= sorptionRange) angle = 0;
         else if (angle > 0 && Math.abs(angle - 45) <= sorptionRange) angle -= angle - 45;
@@ -100,7 +100,7 @@ export function useRotateElement(
           return el;
         });
 
-        // Update both ref and state
+        // 同时更新 ref 和 state
         elementListRef.current = newElements;
         setElementList(newElements);
       };

@@ -5,9 +5,9 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('SSEStream');
 
 /**
- * Thin SSE parser — reads the /api/chat response stream and pushes
- * typed events into a StreamBuffer. All pacing, state management,
- * and UI updates are handled by the buffer's tick loop and callbacks.
+ * 轻量级 SSE 解析器 —— 读取 /api/chat 响应流并将
+ * 类型化事件推送到 StreamBuffer。所有节奏控制、状态管理
+ * 和 UI 更新均由缓冲区的 tick 循环和回调处理。
  */
 export async function processSSEStream(
   response: Response,
@@ -32,7 +32,7 @@ export async function processSSEStream(
       const chunk = decoder.decode(value, { stream: true });
       sseBuffer += chunk;
 
-      // Process complete SSE events (split on double newline)
+      // 处理完整的 SSE 事件（以双换行符分割）
       const events = sseBuffer.split('\n\n');
       sseBuffer = events.pop() || '';
 

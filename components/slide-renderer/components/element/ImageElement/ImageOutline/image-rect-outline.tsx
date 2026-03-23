@@ -11,7 +11,7 @@ export interface ImageRectOutlineProps {
 }
 
 /**
- * Rectangle outline for image element
+ * 图片元素的矩形边框
  */
 export function ImageRectOutline({ width, height, outline, radius = '0' }: ImageRectOutlineProps) {
   const { outlineWidth, outlineColor, strokeDashArray } = useElementOutline(outline);
